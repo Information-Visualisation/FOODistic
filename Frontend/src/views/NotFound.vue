@@ -1,0 +1,15 @@
+<template>
+<div class="info">
+    <h1>404 Not Found</h1>
+</div>
+</template>
+
+<style>
+@media (min-width: 1024px) {
+.info {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+}
+</style>
