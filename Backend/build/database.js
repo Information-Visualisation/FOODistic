@@ -36,9 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectIngredients = void 0;
+exports.select = void 0;
 var pg_1 = require("pg");
-function selectIngredients() {
+function select(query) {
     return __awaiter(this, void 0, void 0, function () {
         var client, res;
         return __generator(this, function (_a) {
@@ -54,7 +54,7 @@ function selectIngredients() {
                     return [4 /*yield*/, client.connect()];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, client.query('SELECT * from ingredients LIMIT 100')];
+                    return [4 /*yield*/, client.query(query)];
                 case 2:
                     res = _a.sent();
                     return [4 /*yield*/, client.end()];
@@ -65,4 +65,4 @@ function selectIngredients() {
         });
     });
 }
-exports.selectIngredients = selectIngredients;
+exports.select = select;

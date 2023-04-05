@@ -1,8 +1,8 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import { Logger } from "./logger";
-import Routes from "./routes/routes";
-import { selectIngredients } from "./database";
+// import Routes from "./routes/routes";
+import { select } from "./database";
 var cors = require('cors')
 
 class App {
@@ -30,18 +30,24 @@ class App {
 
   private routes(): void {
 
-    this.express.get("/", async (req, res, next) => {
-      res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
-      await res.send(JSON.stringify(await selectIngredients()));
-      this.logger.info("some webpage loaded");
+    this.express.get("/db", async (req, res, next) => {
+      let query: string = req.query.query as string;
+      console.log(query);
+      if (query !== undefined) {
+        res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+        await res.send(JSON.stringify(await select(query)));
+        this.logger.info("");
+      } else {
+        this.logger.error("query is undefined")
+      }
     });
 
-    // user route
-    this.express.use("/api", Routes);
+    // // user route
+    // this.express.use("/api", Routes);
 
     // handle undefined routes
     this.express.use("*", (req, res, next) => {
-      res.send("Make sure url is correct!!!");
+      res.send("URL is incorrect");
     });
   }
 }

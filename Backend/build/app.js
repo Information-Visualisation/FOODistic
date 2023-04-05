@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bodyParser = require("body-parser");
 var express = require("express");
 var logger_1 = require("./logger");
-var routes_1 = require("./routes/routes");
+// import Routes from "./routes/routes";
 var database_1 = require("./database");
 var cors = require('cors');
 var App = /** @class */ (function () {
@@ -58,28 +58,35 @@ var App = /** @class */ (function () {
     };
     App.prototype.routes = function () {
         var _this = this;
-        this.express.get("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, _b, _c, _d;
+        this.express.get("/db", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+            var query, _a, _b, _c, _d;
             return __generator(this, function (_e) {
                 switch (_e.label) {
                     case 0:
+                        query = req.query.query;
+                        console.log(query);
+                        if (!(query !== undefined)) return [3 /*break*/, 3];
                         res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
                         _b = (_a = res).send;
                         _d = (_c = JSON).stringify;
-                        return [4 /*yield*/, (0, database_1.selectIngredients)()];
+                        return [4 /*yield*/, (0, database_1.select)(query)];
                     case 1: return [4 /*yield*/, _b.apply(_a, [_d.apply(_c, [_e.sent()])])];
                     case 2:
                         _e.sent();
-                        this.logger.info("some webpage loaded");
-                        return [2 /*return*/];
+                        this.logger.info("");
+                        return [3 /*break*/, 4];
+                    case 3:
+                        this.logger.error("query is undefined");
+                        _e.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); });
-        // user route
-        this.express.use("/api", routes_1.default);
+        // // user route
+        // this.express.use("/api", Routes);
         // handle undefined routes
         this.express.use("*", function (req, res, next) {
-            res.send("Make sure url is correct!!!");
+            res.send("URL is incorrect");
         });
     };
     return App;

@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 
-export async function selectIngredients() {
+export async function select(query: string) {
     const client = new Client({
         user: 'postgres',
         host: '127.0.0.1',
@@ -11,9 +11,8 @@ export async function selectIngredients() {
     
     await client.connect();
 
-    const res = await client.query('SELECT * from ingredients LIMIT 100');
+    const res = await client.query(query);
 
     await client.end();
     return res;
-    
 }

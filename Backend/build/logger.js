@@ -5,13 +5,13 @@ var Logger = /** @class */ (function () {
     function Logger() {
     }
     Logger.prototype.info = function (logText) {
-        console.log(new Date() + "info:::::" + logText);
+        console.log(new Date() + " - info:::::" + logText);
     };
     Logger.prototype.debug = function (logText) {
-        console.log(new Date() + "debug:::::" + logText);
+        console.log(new Date() + " - debug:::::" + logText);
     };
     Logger.prototype.error = function (logText) {
-        console.log(new Date() + "error:::::" + logText);
+        console.log(new Date() + " - error:::::" + logText);
     };
     return Logger;
 }());

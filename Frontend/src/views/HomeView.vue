@@ -1,10 +1,9 @@
 <script lang="ts">
 import TheWelcome from '../components/TheWelcome.vue'
-import { FoodService } from '../services/food.service'
+import { DBService } from '../services/db.service'
 
-const foodService = new FoodService;
-const result = await foodService.getAllFoods();
-
+const dbService = new DBService;
+const result = await dbService.query("SELECT * FROM ingredients LIMIT 10");
 
 export default {
   data() {
