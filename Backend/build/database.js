@@ -48,7 +48,7 @@ function select(query) {
                         user: 'postgres',
                         host: '127.0.0.1',
                         database: 'postgres',
-                        password: '',
+                        password: '1Love4Postgres',
                         port: 5432
                     });
                     return [4 /*yield*/, client.connect()];
@@ -66,3 +66,4 @@ function select(query) {
     });
 }
 exports.select = select;
+//# sourceMappingURL=database.js.map

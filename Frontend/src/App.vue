@@ -2,6 +2,24 @@
 import { RouterLink, RouterView } from 'vue-router'
 // import HelloWorld from './components/HelloWorld.vue'
 import Logo from './components/Logo.vue'
+import FilterButton from './components/FilterButton.vue'
+</script>
+
+<script lang="ts">
+export default {
+  components: {
+    FilterButton
+  },
+  data() {
+    return {
+      filteritems: ['Apple',
+    'Pear',
+  'Peach', 'banana', 'pineapple', 'coconut']
+    }
+  },
+  created: function () {
+  },
+}
 </script>
 
 <template>
@@ -11,6 +29,14 @@ import Logo from './components/Logo.vue'
     <div class="container-fluid d-flex flex-row justify-content-center">
       <form class="d-flex" role="search">
         <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search">
+        <div class="btn-group">
+        <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Filter
+        </button>
+        <ul class="dropdown-menu">
+          <FilterButton v-for="filteritem in filteritems" :title=filteritem></FilterButton>
+        </ul>
+        </div>
         <button class="btn btn-outline-danger" type="submit">Search</button>
       </form>
     </div>
