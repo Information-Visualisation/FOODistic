@@ -3,17 +3,15 @@ import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
 
 const dbService = new DBService;
-const result = await dbService.query("SELECT id,naam FROM food LIMIT 10");
-
+const result = await dbService.query("SELECT id,naam FROM food LIMIT 25");
+console.log(result)
 export default {
   components: {
     FoodItem
   },
   data() {
     return {
-      fooditems: ['Apple',
-    'Pear',
-  'Peach', 'banana', 'pineapple', 'coconut']
+      fooditems: result
     }
   },
   created: function () {
@@ -33,7 +31,7 @@ export default {
     </nav>
     <div>
       <div class="container">
-      <FoodItem v-for="fooditem in fooditems" :title=fooditem></FoodItem>
+      <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
       </div>
     </div>
   </main>
