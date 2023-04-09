@@ -3,8 +3,7 @@ import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
 
 const dbService = new DBService;
-const result = await dbService.query("SELECT id,naam FROM food LIMIT 25");
-console.log(result)
+const result = await dbService.query("SELECT id,naam FROM food LIMIT 30");
 export default {
   components: {
     FoodItem

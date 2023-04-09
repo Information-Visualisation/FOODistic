@@ -6,15 +6,17 @@ import FilterButton from './components/FilterButton.vue'
 </script>
 
 <script lang="ts">
+import { DBService } from './services/db.service'
+const dbService = new DBService;
+const result = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
+console.log(result)
 export default {
   components: {
     FilterButton
   },
   data() {
     return {
-      filteritems: ['Apple',
-    'Pear',
-  'Peach', 'banana', 'pineapple', 'coconut']
+      filteritems: result
     }
   },
   created: function () {
@@ -34,7 +36,7 @@ export default {
         Filter
         </button>
         <ul class="dropdown-menu">
-          <FilterButton v-for="filteritem in filteritems" :title=filteritem></FilterButton>
+          <FilterButton v-for="filteritem in filteritems" :title=filteritem.allergy></FilterButton>
         </ul>
         </div>
         <button class="btn btn-outline-danger" type="submit">Search</button>
@@ -75,5 +77,10 @@ nav {
 
 #logo {
   position: absolute;
+}
+
+.dropdown-menu {
+    max-height: 280px;
+    overflow-y: auto;
 }
 </style>
