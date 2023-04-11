@@ -1,10 +1,5 @@
 <script lang="ts">
 import TheWelcome from '../components/TheWelcome.vue'
-import { DBService } from '../services/db.service'
-
-const dbService = new DBService;
-const result = await dbService.query("SELECT * FROM ingredients LIMIT 10");
-
 export default {
   data() {
     return {

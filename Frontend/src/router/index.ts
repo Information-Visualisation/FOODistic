@@ -31,7 +31,7 @@ const router = createRouter({
     {
       path: '/food/:name',  // change to id
       name: 'food',
-      component: () => import('../views/Food.vue')
+      component: () => import('../views/Food/Food.vue')
     },
     {
       path: '/:notFound',
