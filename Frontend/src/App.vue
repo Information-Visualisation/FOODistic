@@ -7,20 +7,28 @@ import FilterButton from './components/FilterButton.vue'
 
 <script lang="ts">
 import { DBService } from './services/db.service'
+import HomeView from './views/HomeView.vue'
 const dbService = new DBService;
 const result = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
-console.log(result)
+
 export default {
   components: {
     FilterButton
   },
   data() {
     return {
-      filteritems: result
+      filteritems: result,
+      search: ''
     }
   },
   created: function () {
   },
+  methods:{
+    searchSubmit(){
+      console.log(this.search)
+      this.$router.push({ name: 'search', params : { searchitem: this.search } })
+    }
+  }
 }
 </script>
 
@@ -30,7 +38,7 @@ export default {
     <a id="logo" class="navbar-brand"><Logo/></a>
     <div class="container-fluid d-flex flex-row justify-content-center">
       <form class="d-flex" role="search">
-        <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search">
+        <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search" v-model="search">
         <div class="btn-group">
         <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         Filter
@@ -39,7 +47,7 @@ export default {
           <FilterButton v-for="filteritem in filteritems" :title=filteritem.allergy></FilterButton>
         </ul>
         </div>
-        <button class="btn btn-outline-danger" type="submit">Search</button>
+        <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button>
       </form>
     </div>
   </div>
