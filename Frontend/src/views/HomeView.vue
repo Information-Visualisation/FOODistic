@@ -1,4 +1,5 @@
 <script lang="ts">
+import { stringifyExpression } from '@vue/compiler-core';
 import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
 import type { Rows, Row} from '../services/db.service';
@@ -12,21 +13,25 @@ export default {
   data() {
     return {
       isLoading: true,
-      result: null as unknown as Rows,
+      result_foodGroup: null as unknown as Rows,
+      foodGroupitems: null as unknown as Rows,
+      result_food: null as unknown as Rows,
       fooditems: null as unknown as Rows,
+      selectedFoodGroup: 'All',
     }
   },
   created: function () {
-    this.query().then(() => {
+    this.queryALL().then(() => {
       this.setResultQuery();
     });
   },
   methods:{
-    async query(){
+    async queryALL(){
+      this.result_foodGroup = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
       if (this.searchitem == undefined)
-        this.result = await dbService.query(`SELECT id,naam FROM food LIMIT 30`);
+        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 50`);
       else
-        this.result = await dbService.query(`SELECT id,naam FROM food WHERE ( food.naam LIKE '%`+this.searchitem.charAt(0).toUpperCase() + this.searchitem.slice(1)+`%' or food.naam LIKE '%`+this.searchitem.charAt(0).toLowerCase() + this.searchitem.slice(1)+`%')`);
+        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE ( food.naam LIKE '%`+this.searchitem.charAt(0).toUpperCase() + this.searchitem.slice(1)+`%' or food.naam LIKE '%`+this.searchitem.charAt(0).toLowerCase() + this.searchitem.slice(1)+`%')`);
       this.$nextTick(() => {
         this.loaded();
       })
@@ -35,10 +40,27 @@ export default {
       this.isLoading = false;
     },
     setResultQuery(){
-      this.fooditems = this.result;
+      this.fooditems = this.result_food;
+      this.foodGroupitems = this.result_foodGroup;
     },
-    goToFoodPage(nameFood: any){
-      this.$router.push({ name: 'food', params : { name: nameFood } })
+    goToPage(pagename: any, nameFood?: any){
+      this.$router.push({ name: pagename, params : { name: nameFood } })
+    },
+    setSelectedItem(foodgroup: any){
+      this.selectedFoodGroup = foodgroup;
+      this.isLoading = true;
+      this.queryFoodGroup().then(() => {
+        this.setResultQuery();
+      });
+    },
+    async queryFoodGroup(){
+      if (this.selectedFoodGroup == 'All')
+        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
+      else
+        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE ( food.food_group = '`+this.selectedFoodGroup+`')`);
+      this.$nextTick(() => {
+        this.loaded();
+      })
     }
   }
 }
@@ -47,21 +69,28 @@ export default {
 
 <template>
   <main>
-    <nav class="d-flex flex-column">
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
-      <RouterLink to="/foodgroup/fruits">Fruits</RouterLink>
-      <RouterLink to="/subfoodgroup/red-fruits">Red Fruits</RouterLink>
-      <RouterLink to="/food/apple">Apple</RouterLink>
-    </nav>
     <div>
       <div class="position-relative" v-if="isLoading">
           <p>is loading</p>
       </div>
       <div class="container" v-else="!isLoading">
-        <div v-if="fooditems.length != 0">
+        <div>
+          <h1>Food group:</h1>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{selectedFoodGroup}}</button>
+            <ul class="dropdown-menu">
+              <li class="dropdown-item" @click="setSelectedItem('All')">All foodgroups</li>
+              <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems" @click="setSelectedItem(foodGroupitem.food_group)">{{foodGroupitem.food_group}}</li>
+            </ul>
+          </div>
+        </div>
+        <div v-if="fooditems.length != 0 && searchitem != undefined">
           <h1>You searched for: {{ searchitem }}</h1>
-          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToFoodPage(fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
+          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToPage('food',fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
+        </div>
+        <div v-if="fooditems.length != 0 && searchitem == undefined">
+          <h1>Food:</h1>
+          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToPage('food',fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
         </div>
         <div v-else="fooditems.length == 0">
             <h1>No results found for {{searchitem}}!</h1>
@@ -74,5 +103,12 @@ export default {
 <style>
 .container {
  padding: 40px;
+}
+.dropdown-item:hover{
+    background-color:red;
+ }
+ .dropdown-menu {
+    max-height: 280px;
+    overflow-y: auto;
 }
 </style>

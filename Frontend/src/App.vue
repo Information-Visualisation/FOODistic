@@ -25,7 +25,6 @@ export default {
   },
   methods:{
     searchSubmit(){
-      console.log(this.search)
       this.$router.push({ name: 'search', params : { searchitem: this.search } })
     }
   }
@@ -37,6 +36,8 @@ export default {
   <div class="container-fluid">
     <a id="logo" class="navbar-brand"><Logo/></a>
     <div class="container-fluid d-flex flex-row justify-content-center">
+      <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'home'})"> Home</button>
+      <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'about'})"> About</button>
       <form class="d-flex" role="search">
         <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search" v-model="search">
         <div class="btn-group">
