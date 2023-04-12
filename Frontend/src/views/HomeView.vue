@@ -26,7 +26,7 @@ export default {
       if (this.searchitem == undefined)
         this.result = await dbService.query(`SELECT id,naam FROM food LIMIT 30`);
       else
-        this.result = await dbService.query(`SELECT id,naam FROM food WHERE ( food.naam = '`+this.searchitem+`')`);
+        this.result = await dbService.query(`SELECT id,naam FROM food WHERE ( food.naam LIKE '%`+this.searchitem.charAt(0).toUpperCase() + this.searchitem.slice(1)+`%' or food.naam LIKE '%`+this.searchitem.charAt(0).toLowerCase() + this.searchitem.slice(1)+`%')`);
       this.$nextTick(() => {
         this.loaded();
       })
@@ -36,7 +36,7 @@ export default {
     },
     setResult(){
       this.fooditems = this.result;
-      console.log(this.fooditems)
+      console.log(this.fooditems.length)
       console.log(this.searchitem)
     }
   }
@@ -58,7 +58,13 @@ export default {
           <p>is loading</p>
       </div>
       <div class="container" v-else="!isLoading">
-        <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
+        <div v-if="fooditems.length != 0">
+          <h1>You searched for: {{ searchitem }}</h1>
+          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
+        </div>
+        <div v-else="fooditems.length == 0">
+            <h1>No results found for {{searchitem}}!</h1>
+        </div>
       </div>
     </div>
   </main>
