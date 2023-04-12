@@ -18,7 +18,7 @@ export default {
   },
   created: function () {
     this.query().then(() => {
-      this.setResult();
+      this.setResultQuery();
     });
   },
   methods:{
@@ -34,10 +34,11 @@ export default {
     loaded() {
       this.isLoading = false;
     },
-    setResult(){
+    setResultQuery(){
       this.fooditems = this.result;
-      console.log(this.fooditems.length)
-      console.log(this.searchitem)
+    },
+    goToFoodPage(nameFood: any){
+      this.$router.push({ name: 'food', params : { name: nameFood } })
     }
   }
 }
@@ -60,7 +61,7 @@ export default {
       <div class="container" v-else="!isLoading">
         <div v-if="fooditems.length != 0">
           <h1>You searched for: {{ searchitem }}</h1>
-          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
+          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToFoodPage(fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
         </div>
         <div v-else="fooditems.length == 0">
             <h1>No results found for {{searchitem}}!</h1>
