@@ -1,8 +1,10 @@
 {
   "scripts": {
-    "build": "npx tsc ./src/*.ts --outDir ./build",
+    "build": "npx tsc ./src/ --outDir ./build",
     "predev": "npm run build",
-    "dev": "ts-node ./src/index.ts"
+    "dev": "ts-node ./src/index.ts",
+    "pretsc-windows": "tsc --build",
+    "tsc-windows": "ts-node ./src/index.ts"
   },
   "dependencies": {
     "@types/cors": "^2.8.13",

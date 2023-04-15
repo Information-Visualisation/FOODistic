@@ -11,13 +11,15 @@ type DistinctRows = {
 }
 
 export class DBService {
-  async query(query: string, log: boolean): Promise<Rows> {
-    return fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {}).then(function (response) {
-      return response.text();
+  async query(query: string) {
+    const res = await fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {
+    }).then(function (response) {
+      return response.json();
     }).then(function (data) {
-      if (log) { console.log(data); } // this will be a string
-      return JSON.parse(data);
+      //console.log(data.rows); // this will be a string
+      return data;
     });
+    return res.rows;
   }
 }
 
@@ -30,7 +32,7 @@ export function avg(length: number, values: number[]): number {
   return avg;
 }
 
-export function distinctNames(rows: Rows) : DistinctRows {
+export function distinctNames(rows: Rows): DistinctRows {
   const names: DistinctRows = {};
   rows.forEach((row: Row) => {
     if (names[row.name]) {

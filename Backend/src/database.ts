@@ -5,7 +5,7 @@ export async function select(query: string) {
         user: 'postgres',
         host: '127.0.0.1',
         database: 'postgres',
-        password: '',
+        password: '1Love4Postgres',
         port: 5432
     });
     

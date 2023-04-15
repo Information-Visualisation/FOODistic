@@ -1,9 +1,18 @@
 <script lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import FoodItem from '../components/FoodItem.vue'
+import { DBService } from '../services/db.service'
+
+const dbService = new DBService;
+const result = await dbService.query("SELECT id,naam FROM food LIMIT 25");
+console.log(result)
+
 export default {
+  components: {
+    FoodItem
+  },
   data() {
     return {
-      a: 0
+      fooditems: result
     }
   },
   created: function () {
@@ -22,7 +31,15 @@ export default {
       <RouterLink to="/food/apple">Apple</RouterLink>
     </nav>
     <div>
-      <p>{{ a }}</p>
+      <div class="container">
+      <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
+      </div>
     </div>
   </main>
 </template>
+
+<style>
+.container {
+ padding: 40px;
+}
+</style>

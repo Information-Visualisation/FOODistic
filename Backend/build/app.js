@@ -92,3 +92,4 @@ var App = /** @class */ (function () {
     return App;
 }());
 exports.default = new App().express;
+//# sourceMappingURL=app.js.map
