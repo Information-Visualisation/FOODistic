@@ -11,15 +11,13 @@ type DistinctRows = {
 }
 
 export class DBService {
-  async query(query: string) {
-    const res = await fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {
-    }).then(function (response) {
-      return response.json();
+  async query(query: string, log: boolean = false): Promise<Rows> {
+    return fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {}).then(function (response) {
+      return response.text();
     }).then(function (data) {
-      //console.log(data.rows); // this will be a string
-      return data;
+      if (log) { console.log(data); } // this will be a string
+      return JSON.parse(data);
     });
-    return res.rows;
   }
 }
 

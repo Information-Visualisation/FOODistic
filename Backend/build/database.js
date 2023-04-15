@@ -66,4 +66,3 @@ function select(query) {
     });
 }
 exports.select = select;
-//# sourceMappingURL=database.js.map

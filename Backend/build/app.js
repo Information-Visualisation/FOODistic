@@ -64,7 +64,6 @@ var App = /** @class */ (function () {
                 switch (_e.label) {
                     case 0:
                         query = req.query.query;
-                        console.log(query);
                         if (!(query !== undefined)) return [3 /*break*/, 3];
                         res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
                         _b = (_a = res).send;
@@ -73,7 +72,7 @@ var App = /** @class */ (function () {
                     case 1: return [4 /*yield*/, _b.apply(_a, [_d.apply(_c, [_e.sent()])])];
                     case 2:
                         _e.sent();
-                        this.logger.info("");
+                        this.logger.info(query);
                         return [3 /*break*/, 4];
                     case 3:
                         this.logger.error("query is undefined");
@@ -92,4 +91,3 @@ var App = /** @class */ (function () {
     return App;
 }());
 exports.default = new App().express;
-//# sourceMappingURL=app.js.map
