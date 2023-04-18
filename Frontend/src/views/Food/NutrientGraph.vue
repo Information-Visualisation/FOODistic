@@ -122,7 +122,7 @@ export default {
             <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available</div>
             <Bar :data="data" :options="options" />
         </div>
-        <p>TODO: FIX THE COLOR PALLETTE, DELETE STUPID "BLACK undefined"</p>
+        <p>TODO: FIX THE COLOR PALLETTE, DELETE STUPID "BLACK - undefined", add unit</p>
     </div>
 </template>
 

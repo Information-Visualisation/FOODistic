@@ -1,11 +1,12 @@
-export function GET_FOOD_FOR(name: string = "", offset: Number = 0): string {
+export function GET_FOOD_FOR(name: string = "", pageCount: number = 0): string {
+	const pageSize: number = 24;
 	return `SELECT * 
 	FROM food
 	WHERE (
 		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
 	) 
-	LIMIT 25
-	OFFSET `+offset;
+	LIMIT `+pageSize+`
+	OFFSET `+pageSize*pageCount;
 }
 
 export function MACRO_NUTRIENTS_FOR(id: string): string {
