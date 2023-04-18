@@ -4,7 +4,7 @@ import { DBService, avg, distinctNames } from '../../services/db.service'
 import type { Rows, Row, DistinctRows } from '../../services/db.service';
 import SpinnerComponent from '../SpinnerComponent.vue';
 import RecipeItem from '../../components/RecipeItem.vue';
-import { GET_RECIPES_FOR } from './queries';
+import { GET_RECIPES_FOR } from '../../services/queries';
 
 const dbService = new DBService;
 
@@ -67,6 +67,7 @@ export default {
         <div v-else="!isLoading" class="container overflow-auto scrollview">
             <RecipeItem v-for="recipe in recipes.rows" :title=recipe.recipename :techniques=recipe.techniques></RecipeItem>
         </div>
+        <p>TODO: show technique icons and fix layout, fix background, </p>
     </div>
 </template>
 

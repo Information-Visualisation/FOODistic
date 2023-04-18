@@ -1,10 +1,11 @@
-
-export function CREATE_INGREDIENTS_VIEW() {
-	return `CREATE OR REPLACE VIEW public.ingredients_filtered
-	AS
-	SELECT DISTINCT ingredients.id, ingredients.replaced, ingredients.processed
-	  FROM ingredients
-	 ORDER BY ingredients.id;`;
+export function GET_FOOD_FOR(name: string = "", offset: Number = 0): string {
+	return `SELECT * 
+	FROM food
+	WHERE (
+		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
+	) 
+	LIMIT 25
+	OFFSET `+offset;
 }
 
 export function MACRO_NUTRIENTS_FOR(id: string): string {

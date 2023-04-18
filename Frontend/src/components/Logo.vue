@@ -1,12 +1,11 @@
 <template>
-<div>
-    <span class="food">F</span>
-    <img id="apple" alt="apple" src="@/assets/apple-icon.png" width="17" />
-    <span class="food">OD</span>
-    <span class="rest">istics</span>
-</div>
+    <div>
+        <span class="food">F</span>
+        <img id="apple" alt="apple" src="@/assets/apple-icon.png" width="17" />
+        <span class="food">OD</span>
+        <span class="rest">istics</span>
+    </div>
 </template>
-
 
 <style scoped>
 .food {

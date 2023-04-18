@@ -12,37 +12,48 @@ export default {
   },
   data() {
     return {
-      filteritems: ['Apple',
-    'Pear',
-  'Peach', 'banana', 'pineapple', 'coconut']
+      filteritems: [
+        'Apple',
+        'Pear',
+        'Peach', 'banana', 'pineapple', 'coconut'
+      ],
+      search: ""
     }
   },
   created: function () {
   },
+  methods: {
+    search() {
+      this.$router.push("/");
+    }
+  }
 }
 </script>
 
 <template>
-<nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
-    <a id="logo" class="navbar-brand"><Logo/></a>
-    <div class="container-fluid d-flex flex-row justify-content-center">
-      <form class="d-flex" role="search">
-        <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search">
-        <div class="btn-group">
-        <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        Filter
-        </button>
-        <ul class="dropdown-menu">
-          <FilterButton v-for="filteritem in filteritems" :title=filteritem></FilterButton>
-        </ul>
-        </div>
-        <button class="btn btn-outline-danger" type="submit">Search</button>
-      </form>
+  <nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+      <a id="logo" class="navbar-brand">
+        <Logo />
+      </a>
+      <div class="container-fluid d-flex flex-row justify-content-center">
+        <form class="d-flex" role="search">
+          <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search" name="search" v-model="search">
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Filter
+            </button>
+            <ul class="dropdown-menu">
+              <FilterButton v-for="filteritem in filteritems" :title=filteritem></FilterButton>
+            </ul>
+          </div>
+          <button class="btn btn-outline-danger" @click="search()">Search</button>
+        </form>
+      </div>
     </div>
-  </div>
-</nav>
-<RouterView/>
+  </nav>
+  <RouterView />
 </template>
 
 <!-- <template>
@@ -70,7 +81,7 @@ export default {
 }
 
 nav {
-  background-color:antiquewhite;
+  background-color: antiquewhite;
 }
 
 #logo {
