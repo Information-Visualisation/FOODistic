@@ -40,6 +40,11 @@ const router = createRouter({
       component: () => import('../views/Food.vue')
     },
     {
+      path: '/test_page',
+      name: 'Test page',
+      component: () => import('../views/TestPage.vue')
+    },
+    {
       path: '/:notFound',
       name: 'not found',
       component: NotFound

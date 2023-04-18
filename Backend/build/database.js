@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.select = void 0;
 var pg_1 = require("pg");
+var globals_1 = require("./globals");
 function select(query) {
     return __awaiter(this, void 0, void 0, function () {
         var client, res;
@@ -45,11 +46,11 @@ function select(query) {
             switch (_a.label) {
                 case 0:
                     client = new pg_1.Client({
-                        user: 'postgres',
-                        host: '127.0.0.1',
-                        database: 'postgres',
-                        password: '1Love4Postgres',
-                        port: 5432
+                        user: globals_1.DBConstants.user,
+                        host: globals_1.DBConstants.host,
+                        database: globals_1.DBConstants.database,
+                        password: globals_1.DBConstants.password,
+                        port: globals_1.DBConstants.port
                     });
                     return [4 /*yield*/, client.connect()];
                 case 1:

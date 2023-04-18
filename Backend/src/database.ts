@@ -1,12 +1,13 @@
 import { Client } from 'pg';
+import { DBConstants } from './globals';
 
 export async function select(query: string) {
     const client = new Client({
-        user: 'postgres',
-        host: '127.0.0.1',
-        database: 'postgres',
-        password: '1Love4Postgres',
-        port: 5432
+        user: DBConstants.user,
+        host: DBConstants.host,
+        database: DBConstants.database,
+        password: DBConstants.password,
+        port: DBConstants.port
     });
     
     await client.connect();
