@@ -29,6 +29,7 @@ export class DBConnection {
 
     async select(query: string): Promise<Object> {
         const res = await this.client.query(query);
+        //console.log(res);
         return res;
     }
 }

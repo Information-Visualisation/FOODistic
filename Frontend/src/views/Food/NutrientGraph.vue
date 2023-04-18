@@ -4,7 +4,7 @@ import { DBService, avg, distinctNames } from '../../services/db.service'
 import type { Rows, Row, DistinctRows } from '../../services/db.service';
 import { Bar } from 'vue-chartjs';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MacroNutrientsQuery } from './queries';
+import { MACRO_NUTRIENTS_FOR } from './queries';
 import {
     Chart as ChartJS,
     Title,
@@ -20,7 +20,7 @@ const dbService = new DBService;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default {
-    name: 'Food',
+    name: 'NutrientGraph',
     components: {
         SpinnerComponent,
         Bar
@@ -70,7 +70,7 @@ export default {
     },
     methods: {
         async fetchData() {
-            const queryString: string = MacroNutrientsQuery(this.id);
+            const queryString: string = MACRO_NUTRIENTS_FOR(this.id);
             this.result = await dbService.query(queryString, false);
             this.$nextTick(() => {
                 this.loaded();

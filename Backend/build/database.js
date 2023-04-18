@@ -36,33 +36,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.select = void 0;
+exports.DBConnection = void 0;
 var pg_1 = require("pg");
-function select(query) {
-    return __awaiter(this, void 0, void 0, function () {
-        var client, res;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    client = new pg_1.Client({
-                        user: 'postgres',
-                        host: '127.0.0.1',
-                        database: 'postgres',
-                        password: '1Love4Postgres',
-                        port: 5432
-                    });
-                    return [4 /*yield*/, client.connect()];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, client.query(query)];
-                case 2:
-                    res = _a.sent();
-                    return [4 /*yield*/, client.end()];
-                case 3:
-                    _a.sent();
-                    return [2 /*return*/, res];
-            }
+var node_process_1 = require("node:process");
+var DBConnection = /** @class */ (function () {
+    function DBConnection(logger) {
+        this.logger = logger;
+        this.createConnection();
+    }
+    DBConnection.prototype.createConnection = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        this.client = new pg_1.Client({
+                            user: 'postgres',
+                            host: '127.0.0.1',
+                            database: 'postgres',
+                            password: '1Love4Postgres',
+                            port: 5432
+                        });
+                        return [4 /*yield*/, this.client.connect()];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_1 = _a.sent();
+                        this.logger.error("Problem with connecting to DB: Is it running, correct password?");
+                        (0, node_process_1.exit)();
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
         });
-    });
-}
-exports.select = select;
+    };
+    DBConnection.prototype.select = function (query) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.client.query(query)];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, res];
+                }
+            });
+        });
+    };
+    return DBConnection;
+}());
+exports.DBConnection = DBConnection;

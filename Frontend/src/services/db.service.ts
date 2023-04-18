@@ -11,7 +11,7 @@ type DistinctRows = {
 }
 
 export class DBService {
-  async query(query: string, log: boolean = false): Promise<Rows> {
+  async query(query: string, log: boolean = false): Promise<any> {
     return fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {}).then(function (response) {
       return response.text();
     }).then(function (data) {

@@ -49,6 +49,7 @@ var App = /** @class */ (function () {
         this.routes();
         this.users = [];
         this.logger = new logger_1.Logger();
+        this.db = new database_1.DBConnection(this.logger);
         this.express.use(cors());
     }
     // Configure Express middleware.
@@ -68,7 +69,7 @@ var App = /** @class */ (function () {
                         res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
                         _b = (_a = res).send;
                         _d = (_c = JSON).stringify;
-                        return [4 /*yield*/, (0, database_1.select)(query)];
+                        return [4 /*yield*/, this.db.select(query)];
                     case 1: return [4 /*yield*/, _b.apply(_a, [_d.apply(_c, [_e.sent()])])];
                     case 2:
                         _e.sent();
