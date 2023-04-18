@@ -1,21 +1,21 @@
 <script lang="ts">
 import FoodItem from '../components/FoodItem.vue'
+import SpinnerComponent from './SpinnerComponent.vue';
 import { DBService } from '../services/db.service'
-
-// const dbService = new DBService;
-// const result = await dbService.query("SELECT id,naam FROM food LIMIT 25");
-// console.log(result)
 
 export default {
   components: {
-    FoodItem
-  },
+    FoodItem,
+    SpinnerComponent
+},
   data() {
     return {
-      fooditems: result
+      fooditems: null
     }
   },
-  created: function () {
+  created: async function () {
+    const dbService = new DBService;
+    this.fooditems = await dbService.query("SELECT id,naam FROM food LIMIT 25");
   },
 }
 
@@ -32,7 +32,12 @@ export default {
     </nav>
     <div>
       <div class="container">
-      <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam></FoodItem>
+        <div v-if="fooditems===null">
+          <SpinnerComponent/>
+        </div>
+        <div v-else="fooditems!==null">
+          <FoodItem v-for="fooditem in fooditems.rows" :food-name=fooditem.naam :id=fooditem.id></FoodItem>
+        </div>
       </div>
     </div>
   </main>
@@ -40,6 +45,6 @@ export default {
 
 <style>
 .container {
- padding: 40px;
+  padding: 40px;
 }
 </style>
