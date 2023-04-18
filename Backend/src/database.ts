@@ -2,6 +2,7 @@ import { Client } from 'pg';
 import { Logger } from './logger';
 import { exit } from 'node:process';
 import { CREATE_INGREDIENTS_VIEW } from './queries';
+import { DBConstants } from './globals';
 
 export class DBConnection {
     public client: Client;
@@ -16,11 +17,11 @@ export class DBConnection {
     async createConnection() {
         try {
             this.client = new Client({
-                user: 'postgres',
-                host: '127.0.0.1',
-                database: 'postgres',
-                password: '1Love4Postgres',
-                port: 5432
+                user: DBConstants.user,
+                host: DBConstants.host,
+                database: DBConstants.database,
+                password: DBConstants.password,
+                port: DBConstants.port
             });
             await this.client.connect();
         } catch (error) {

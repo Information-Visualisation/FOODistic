@@ -39,10 +39,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DBConnection = void 0;
 var pg_1 = require("pg");
 var node_process_1 = require("node:process");
+var queries_1 = require("./queries");
+var globals_1 = require("./globals");
 var DBConnection = /** @class */ (function () {
     function DBConnection(logger) {
         this.logger = logger;
         this.createConnection();
+        this.createViews();
     }
     DBConnection.prototype.createConnection = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -52,11 +55,11 @@ var DBConnection = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         this.client = new pg_1.Client({
-                            user: 'postgres',
-                            host: '127.0.0.1',
-                            database: 'postgres',
-                            password: '1Love4Postgres',
-                            port: 5432
+                            user: globals_1.DBConstants.user,
+                            host: globals_1.DBConstants.host,
+                            database: globals_1.DBConstants.database,
+                            password: globals_1.DBConstants.password,
+                            port: globals_1.DBConstants.port
                         });
                         return [4 /*yield*/, this.client.connect()];
                     case 1:
@@ -72,15 +75,43 @@ var DBConnection = /** @class */ (function () {
             });
         });
     };
-    DBConnection.prototype.select = function (query) {
+    DBConnection.prototype.createViews = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var res;
+            var res, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.client.query(query)];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.client.query((0, queries_1.CREATE_INGREDIENTS_VIEW)())];
                     case 1:
                         res = _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_2 = _a.sent();
+                        this.logger.error("Problem with creating the views: " + error_2.Message);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    DBConnection.prototype.select = function (query) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res, error_3;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.client.query(query)];
+                    case 1:
+                        res = _a.sent();
+                        //this.logger.info(res.rows);
                         return [2 /*return*/, res];
+                    case 2:
+                        error_3 = _a.sent();
+                        this.logger.error("Problem with connecting query: " + error_3.Message);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -88,3 +119,4 @@ var DBConnection = /** @class */ (function () {
     return DBConnection;
 }());
 exports.DBConnection = DBConnection;
+//# sourceMappingURL=database.js.map
