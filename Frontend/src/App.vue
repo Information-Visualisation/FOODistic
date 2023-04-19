@@ -11,23 +11,25 @@ const dbService = new DBService;
 const result = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
 
 export default {
-  data() {
-    return {
-      filteritems: result,
-      search: '',
-      checkFilter: [],
-    }
-  },
-  created: function () {
-  },
-  methods:{
-    searchSubmit(){
-      this.$router.push({ name: 'search', params : { searchitem: this.search } })
+    data() {
+        return {
+            filteritems: result,
+            search: "",
+            checkFilter: [],
+        };
     },
-    changeFilter(){
-      console.log(this.checkFilter)
-    }
-  },
+    created: function () {
+    },
+    methods: {
+        searchSubmit() {
+            this.$router.push({ name: "search", params: { searchitem: this.search } });
+        },
+        changeFilter() {
+            console.log(this.checkFilter);
+            this.$router.push({name: "homeAllergy", params:{allergy: this.checkFilter}})
+            /* TO DO update view with new selected */
+        }
+    },
 }
 </script>
 
@@ -58,6 +60,7 @@ export default {
     </div>
   </div>
 </nav>
+
 <RouterView/>
 </template>
 

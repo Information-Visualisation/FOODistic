@@ -3,6 +3,7 @@ import { stringifyExpression } from '@vue/compiler-core';
 import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
 import type { Rows, Row} from '../services/db.service';
+import type AppVue from '@/App.vue';
 
 const dbService = new DBService;
 export default {
@@ -17,17 +18,21 @@ export default {
       result_food: null as unknown as Rows,
       fooditems: null as unknown as Rows,
       selectedFoodGroup: 'All',
+      allergy: "('",
     }
   },
   created: function () {
+    let result1 = this.changeParamString(this.$route.params.allergy)
+    this.changeAllergy(result1)
     this.queryALL().then(() => {
       this.setResultQuery();
-    });
+    })
+    ;
   },
   methods:{
     async queryALL(){
       this.result_foodGroup = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
-      this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 50`);
+      this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
      this.$nextTick(() => {
         this.loaded();
       })
@@ -51,12 +56,34 @@ export default {
     },
     async queryFoodGroup(){
       if (this.selectedFoodGroup == 'All')
-        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
+        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
       else
         this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE ( food.food_group = '`+this.selectedFoodGroup+`')`);
       this.$nextTick(() => {
         this.loaded();
       })
+    },
+    async changeAllergy(allergie: string){
+      let result = [] as string[]
+      let result2 = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + allergie)
+      
+      for(var val2 of result2){
+        result.push(val2.food)
+      }
+      this.allergy = this.changeParamString(result)
+    },
+    changeParamString(params: string | any[] | undefined){
+      let string = "('";
+      if(params != undefined){
+        for(let i = 0; i < params.length; i++){
+          if (i+1 != params.length)
+              string += params[i] +"', '"
+            else
+            string += params[i]
+        }
+      }
+      string += "')"
+      return string
     }
   }
 }
