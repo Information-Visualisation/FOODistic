@@ -58,13 +58,21 @@ export default {
       });
     },
     async queryFoodGroup(){
-      if (this.selectedFoodGroup == 'All')
-        if(this.allergy == "")
+      if (this.selectedFoodGroup == 'All'&& this.allergy == "('')")
           this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
-        else
+      else{
+        if (this.selectedFoodGroup == 'All')
           this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
-     else
-        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food.food_group = '`+this.selectedFoodGroup);
+        else{
+          console.log(this.allergy)
+          if(this.allergy == "('')"){
+            console.log('test')
+            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food_group = '`+this.selectedFoodGroup+`'`);
+          }else{
+            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` AND food_group = '`+this.selectedFoodGroup+`'`);
+          }
+        }  
+      }
       this.$nextTick(() => {
         this.loaded();
       })

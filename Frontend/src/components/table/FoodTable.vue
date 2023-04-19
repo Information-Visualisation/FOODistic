@@ -2,6 +2,7 @@
 import TableRowTemp from './TableRowTemp.vue';
 import TablerowHead from './TableRowHead.vue';
 import TableGraph from './TableGraphs.vue';
+let test_items = [["apple", 2, 3, 4],["apple", 4, 5, 6], ["apple", 7, 8, 9],["apple", 2, 3, 4]]
 </script>
 <template>
     <div id="table">
@@ -18,13 +19,13 @@ import TableGraph from './TableGraphs.vue';
             <div class="tab-pane fade show active" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table class="table">
                 <thead>
-                    <TableGraph :percents='[20,10,50,16]'/>
+                    <TableGraph :percents='[20,50,16]'/>
                 </thead>
                 <thead class="table-light">
-                    <TablerowHead :items='["Naam", "Name", "ID", "Dummy", "test"]'></TablerowHead>
+                    <TablerowHead :items='["Name", "ID", "Dummy", "test"]'></TablerowHead>
                 </thead>
                 <tbody>
-                    <TableRowTemp v-for="i in 4" :items='["apple", i+1, i+2, i+3, i+4]'/> <!-- change to foods and nutrition values-->
+                    <TableRowTemp v-for="i in test_items" :items='[i[0], i[1], i[2], i[3]]'/> <!-- change to foods and nutrition values-->
                 </tbody>
                 </table>
             </div>
