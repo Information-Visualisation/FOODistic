@@ -18,7 +18,7 @@ export default {
       result_food: null as unknown as Rows,
       fooditems: null as unknown as Rows,
       selectedFoodGroup: 'All',
-      allergy: "()",
+      allergy: "",
     }
   },
   created: function () {
@@ -32,7 +32,10 @@ export default {
   methods:{
     async queryALL(){
       this.result_foodGroup = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
-      this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
+      if(this.allergy == "")
+        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
+      else
+        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
      this.$nextTick(() => {
         this.loaded();
       })
@@ -56,8 +59,11 @@ export default {
     },
     async queryFoodGroup(){
       if (this.selectedFoodGroup == 'All')
-        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
-      else
+        if(this.allergy == "")
+          this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
+        else
+          this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
+     else
         this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food.food_group = '`+this.selectedFoodGroup);
       this.$nextTick(() => {
         this.loaded();
