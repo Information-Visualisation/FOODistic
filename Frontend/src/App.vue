@@ -2,7 +2,6 @@
 import { RouterLink, RouterView } from 'vue-router'
 // import HelloWorld from './components/HelloWorld.vue'
 import Logo from './components/Logo.vue'
-import FilterButton from './components/FilterButton.vue'
 </script>
 
 <script lang="ts">
@@ -12,13 +11,11 @@ const dbService = new DBService;
 const result = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
 
 export default {
-  components: {
-    FilterButton
-  },
   data() {
     return {
       filteritems: result,
-      search: ''
+      search: '',
+      checkFilter: [],
     }
   },
   created: function () {
@@ -26,8 +23,11 @@ export default {
   methods:{
     searchSubmit(){
       this.$router.push({ name: 'search', params : { searchitem: this.search } })
+    },
+    changeFilter(){
+      console.log(this.checkFilter)
     }
-  }
+  },
 }
 </script>
 
@@ -45,7 +45,12 @@ export default {
         Filter
         </button>
         <ul class="dropdown-menu">
-          <FilterButton v-for="filteritem in filteritems" :title=filteritem.allergy></FilterButton>
+          <li v-for="filteritem in filteritems"><div class="form-check">
+            <input type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" v-model="checkFilter" @change="changeFilter"/>
+            <label :for="filteritem.allergy">
+              {{ filteritem.allergy }}
+            </label>
+          </div></li>
         </ul>
         </div>
         <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button>

@@ -6,7 +6,6 @@ import type { Rows, Row} from '../services/db.service';
 
 const dbService = new DBService;
 export default {
-  props: ['searchitem'],
   components: {
     FoodItem,
   },
@@ -28,11 +27,8 @@ export default {
   methods:{
     async queryALL(){
       this.result_foodGroup = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
-      if (this.searchitem == undefined)
-        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 50`);
-      else
-        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE ( food.naam LIKE '%`+this.searchitem.charAt(0).toUpperCase() + this.searchitem.slice(1)+`%' or food.naam LIKE '%`+this.searchitem.charAt(0).toLowerCase() + this.searchitem.slice(1)+`%')`);
-      this.$nextTick(() => {
+      this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 50`);
+     this.$nextTick(() => {
         this.loaded();
       })
     },
@@ -84,16 +80,9 @@ export default {
             </ul>
           </div>
         </div>
-        <div v-if="fooditems.length != 0 && searchitem != undefined">
-          <h1>You searched for: {{ searchitem }}</h1>
-          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToPage('food',fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
-        </div>
-        <div v-if="fooditems.length != 0 && searchitem == undefined">
+        <div>
           <h1>Food:</h1>
           <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToPage('food',fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
-        </div>
-        <div v-else="fooditems.length == 0">
-            <h1>No results found for {{searchitem}}!</h1>
         </div>
       </div>
     </div>

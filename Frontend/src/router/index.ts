@@ -14,7 +14,7 @@ const router = createRouter({
       path: '/search/:searchitem',
       name: 'search',
       props: true,
-      component: HomeView,
+      component: () => import('../views/SearchView.vue'),
     },
     {
       path: '/about',
