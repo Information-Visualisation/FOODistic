@@ -2,7 +2,8 @@
 import TableRowTemp from './TableRowTemp.vue';
 import TablerowHead from './TableRowHead.vue';
 import TableGraph from './TableGraphs.vue';
-let test_items = [["apple", 2, 3, 4],["apple", 4, 5, 6], ["apple", 7, 8, 9],["apple", 2, 3, 4]]
+
+let test_items = [["apple", 2, 3, 4],["banana", 10, 1, 2], ["pear", 7, 8, 9],["strawberry", 6, 3, 1]]
 </script>
 <template>
     <div id="table">
@@ -25,7 +26,7 @@ let test_items = [["apple", 2, 3, 4],["apple", 4, 5, 6], ["apple", 7, 8, 9],["ap
                     <TablerowHead :columnNames="['Name', 'Salt', 'Glutes', 'Sugar']"/>
                 </thead>
                 <tbody>
-                    <TableRowTemp v-for="i in test_items" :items='[i[0], i[1], i[2], i[3]]'/> <!-- change to foods and nutrition values-->
+                    <TableRowTemp v-for="items in test_items" :items='items'/> <!-- change to foods and nutrition values-->
                 </tbody>
                 </table>
             </div>
