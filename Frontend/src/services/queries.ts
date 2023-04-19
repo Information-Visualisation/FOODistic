@@ -1,9 +1,20 @@
-export function GET_FOOD_FOR(name: string = "", pageCount: number = 0): string {
+export function GET_FOOD_FOR_NAME(name: string = "", pageCount: number = 0): string {
 	const pageSize: number = 24;
 	return `SELECT * 
 	FROM food
 	WHERE (
 		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
+	) 
+	LIMIT `+pageSize+`
+	OFFSET `+pageSize*pageCount;
+}
+
+export function GET_FOOD_FOR_ID(id: string = "", pageCount: number = 0): string {
+	const pageSize: number = 24;
+	return `SELECT * 
+	FROM food
+	WHERE (
+		id=`+id+`
 	) 
 	LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;

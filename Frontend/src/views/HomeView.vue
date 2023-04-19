@@ -2,7 +2,7 @@
 import FoodItem from '../components/FoodItem.vue'
 import SpinnerComponent from './SpinnerComponent.vue';
 import { DBService } from '../services/db.service'
-import { GET_FOOD_FOR } from '@/services/queries';
+import { GET_FOOD_FOR_NAME } from '@/services/queries';
 
 export default {
   components: {
@@ -27,7 +27,7 @@ export default {
     }
 
     const dbService = new DBService;
-    this.fooditems = await dbService.query(GET_FOOD_FOR(foodName, offset));
+    this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(foodName, offset));
   },
 }
 

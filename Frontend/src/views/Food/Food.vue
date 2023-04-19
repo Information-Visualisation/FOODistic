@@ -2,6 +2,10 @@
 import FoodImg from '@/components/FoodImg.vue';
 import NutrientGraph from './NutrientGraph.vue';
 import RecipesList from './RecipesList.vue';
+import { DBService } from '@/services/db.service';
+import { GET_FOOD_FOR_ID } from '@/services/queries';
+
+const dbService = new DBService;
 
 export default {
   components: {
@@ -12,6 +16,7 @@ export default {
   data() {
     return {
       id: "",
+      row: null,
     }
   },
   methods: {
@@ -20,6 +25,9 @@ export default {
       if (typeof id === 'string') {
         this.id = id;
       }
+    },
+    async fetchData() {
+      this.row = await dbService.query(GET_FOOD_FOR_ID(this.id));
     },
     getName(): string {
       return this.$route.params.name as string;
