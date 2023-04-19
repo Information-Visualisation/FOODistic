@@ -47,7 +47,7 @@ export default {
             let rows: Rows = this.recipes.rows as unknown as Rows;
             if (log) { this.logFetched(rows); }
 
-            
+
         },
         logFetched(rows: Rows) {
             for (let i = 0; i < rows.length; i++) {
@@ -60,20 +60,32 @@ export default {
 </script>
 
 <template>
-    <div style="height: 500px; width: 500px;">
-        <div v-if="isLoading" class="position-relative">
-            <SpinnerComponent class="position-absolute" style="top: 50px; left: 200px" />
+    <div style="min-height: 353px; width: 600px;">
+        <h3>Recipe List</h3>
+        <div v-if="isLoading" class="position-relative scrollview">
+            <SpinnerComponent class="position-absolute center-spinner" />
         </div>
-        <div v-else="!isLoading" class="container overflow-auto scrollview">
-            <RecipeItem v-for="recipe in recipes.rows" :title=recipe.recipename :techniques=recipe.techniques></RecipeItem>
+        <div v-else="!isLoading" class="container overflow-auto scrollview border rounded">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="recipe in recipes.rows">
+                    <RecipeItem :title=recipe.recipename :techniques=recipe.techniques></RecipeItem>
+                </li>
+            </ul>
         </div>
-        <p>TODO: show technique icons and fix layout, fix background, </p>
+        <div class="collapse" id="collapseExample">
+            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
+            user activates the relevant trigger.
+        </div>
     </div>
 </template>
 
 <style>
+.center-spinner {
+    top: 90px;
+    left: 230px
+}
+
 .scrollview {
-    height: 250px;
-    background-color: ghostwhite;
+    height: 289px;
 }
 </style>

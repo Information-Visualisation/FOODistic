@@ -46,21 +46,23 @@ export default {
             },
             options: {
                 responsive: true,
-                legend: {
-                    labels: {
-                        boxWidth: 0,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        display: false
                     },
-                    display: false
                 },
-                tooltips: {
-                    callbacks: {
-                        label: function (tooltipItem: any) {
-                            return tooltipItem.yLabel;
+                scales: {
+                    y: {
+                        ticks: {
+                            // Include a dollar sign in the ticks
+                            callback: function (value: number) {
+                                return value + ' mg/100g';
+                            }
                         }
                     }
                 }
             },
-            
         }
     },
     created() {
@@ -89,15 +91,15 @@ export default {
             } else {
                 let distincts: DistinctRows = distinctNames(rows);
                 const MACRO_NUTRIENTS: number = 6;
-    
+
                 let i = 0;
                 Object.keys(distincts).forEach((key: string) => {
                     const values: number[] = distincts[key];
                     const length: number = values.length;
-    
+
                     //alternative less biased values v
                     //let minAndMax: number[] = [Math.min(...values),Math.max(...values)];
-    
+
                     this.data.datasets[0].data[i++] = avg(length, values);
                 });
             }
@@ -113,24 +115,32 @@ export default {
 </script>
 
 <template>
-    <div style="height: 300px; width: 500px;">
+    <div style="width: 600px;">
+        <h3>Nutrient Graph</h3>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
             <Bar :data="data" :options="options" />
         </div>
         <div v-else="!isLoading" class="position-relative">
-            <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available</div>
+            <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
+            </div>
             <Bar :data="data" :options="options" />
         </div>
-        <p>TODO: FIX THE COLOR PALLETTE, DELETE STUPID "BLACK - undefined", add unit</p>
+        <div class="collapse" id="collapseExample">
+            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
+            user activates the relevant trigger.
+        </div>
     </div>
 </template>
 
 <style>
 .spinner {
-    top: 50px; left: 200px
+    top: 70px;
+    left: 266px
 }
+
 .noData {
-    top: 90px; left: 161px
+    top: 90px;
+    left: 161px
 }
 </style>

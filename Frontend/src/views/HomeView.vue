@@ -49,7 +49,7 @@ export default {
         </div>
         <div v-else="fooditems!==null">
           <div v-if="fooditems.rows.length==0">No results found</div>
-          <FoodItem v-for="fooditem in fooditems.rows" :food-name=fooditem.naam :id=fooditem.id></FoodItem>
+          <FoodItem v-for="fooditem in fooditems.rows" :name=fooditem.naam :id=fooditem.id></FoodItem>
         </div>
       </div>
     </div>

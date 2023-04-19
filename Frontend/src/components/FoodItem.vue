@@ -1,7 +1,12 @@
 <script lang="ts">
+import FoodImg from './FoodImg.vue';
+
 export default {
+  components: {
+    FoodImg
+  },
   props: {
-    foodName: {
+    name: {
       type: String,
       required: true
     },
@@ -14,18 +19,20 @@ export default {
 </script>
 
 <template>
-  <router-link class="card"
-      :to="{
-        name: 'food',
-        params: {
-          name: foodName,
-        },
-        query: {
-          id: id
-        }
-      }">
-      <h1>{{ foodName }}</h1>
-    </router-link>
+  <router-link class="card" :to="{
+    name: 'food',
+    params: {
+      name: name,
+    },
+    query: {
+      id: id
+    }
+  }">
+    <div class="position-relative">
+      <FoodImg class="position-absolute img" :id="id" :name="name" :height="50"></FoodImg>
+      <h1>{{ name }}</h1>
+    </div>
+  </router-link>
 </template>
 
 <style>
@@ -36,5 +43,9 @@ export default {
   text-align: center;
   font-family: arial;
   float: left;
+}
+
+.img {
+  left: 0px;
 }
 </style>

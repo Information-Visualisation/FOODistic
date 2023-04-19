@@ -37,32 +37,23 @@ export default {
 </script>
 
 <template>
-    <div class="card">
-        {{ title }}
-        <div v-if="techniquesList.length == 0">
-            <SpinnerComponent />
-        </div>
-        <div v-else="techniquesList.length!=0" class="center">
-            <div v-for="technique in techniquesList" class="flexbox">
-                <TechniqueIcon :active=technique.valueOf()></TechniqueIcon>
+    <div v-if="techniquesList.length == 0">
+        <SpinnerComponent class="mx-auto p-2" />
+    </div>
+    <div class="position-relative">
+        <div class="row">
+            <div class="col">
+                {{ title.replace(/\b\w/g, x => x.toUpperCase()) }}
+            </div>
+            <div class="col">
+                <div v-if="techniquesList.length != 0">
+                    <div v-for="technique in techniquesList" class="">
+                        <TechniqueIcon :active=technique.valueOf()></TechniqueIcon>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
-<style>
-.card {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    width: 100%;
-    margin: 10px;
-    text-align: center;
-    font-family: arial;
-    float: left;
-}
-.center {
-    margin: auto
-}
-.flexbox {
-    display: flex;
-}
-</style>
+<style></style>
