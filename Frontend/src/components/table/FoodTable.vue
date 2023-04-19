@@ -17,12 +17,12 @@ let test_items = [["apple", 2, 3, 4],["apple", 4, 5, 6], ["apple", 7, 8, 9],["ap
         <!-- content -->
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
-                <table class="table">
+                <table class="table table-hover">
                 <thead>
-                    <TableGraph :percents='[20,50,16]'/>
+                    <TableGraph :percentages="[70, 15, 15]"/>
                 </thead>
-                <thead class="table-light">
-                    <TablerowHead :items='["Name", "ID", "Dummy", "test"]'></TablerowHead>
+                <thead class="table-secondary">
+                    <TablerowHead :columnNames="['Name', 'Salt', 'Glutes', 'Sugar']"/>
                 </thead>
                 <tbody>
                     <TableRowTemp v-for="i in test_items" :items='[i[0], i[1], i[2], i[3]]'/> <!-- change to foods and nutrition values-->
