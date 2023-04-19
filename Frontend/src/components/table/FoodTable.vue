@@ -18,13 +18,13 @@ import TableGraph from './TableGraphs.vue';
             <div class="tab-pane fade show active" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table class="table">
                 <thead>
-                    <TableGraph/>
+                    <TableGraph :percents='[20,10,50,16]'/>
                 </thead>
                 <thead class="table-light">
-                    <TablerowHead></TablerowHead>
+                    <TablerowHead :items='["Naam", "Name", "ID", "Dummy", "test"]'></TablerowHead>
                 </thead>
                 <tbody>
-                    <TableRowTemp v-for="i in 4"/> <!-- change to foods and nutrition values-->
+                    <TableRowTemp v-for="i in 4" :items='["apple", i+1, i+2, i+3, i+4]'/> <!-- change to foods and nutrition values-->
                 </tbody>
                 </table>
             </div>

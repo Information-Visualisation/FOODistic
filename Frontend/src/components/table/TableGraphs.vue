@@ -1,23 +1,14 @@
+<script setup lang="ts">
+defineProps<{
+  percents: number[]
+}>()
+</script>
 <template>
     <tr>
     <th scope="col"></th> <!-- First one should be empty-->
-    <th scope="col">
+    <th scope="col" v-for="percent in percents">
         <div class="bar-wrapper">
-            <span class="bar-percentage">20%</span>
-            <div class="bar">
-            </div>
-        </div>
-    </th>
-    <th scope="col">
-        <div class="bar-wrapper">
-            <span class="bar-percentage">20%</span>
-            <div class="bar">
-            </div>
-        </div>
-    </th>
-    <th scope="col">
-        <div class="bar-wrapper">
-            <span class="bar-percentage">20%</span>
+            <span class="bar-percentage">{{ percent }}</span>
             <div class="bar">
             </div>
         </div>

@@ -1,8 +1,10 @@
+<script setup lang="ts">
+defineProps<{
+  items: string[]
+}>()
+</script>
 <template>
     <tr>
-    <th scope="col">#</th>
-    <th scope="col">First</th>
-    <th scope="col">Last</th>
-    <th scope="col">Handle</th>
+    <th scope="col" v-for="item in items">{{ item }}</th>
     </tr>
 </template>
