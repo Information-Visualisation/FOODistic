@@ -18,7 +18,7 @@ export default {
       result_food: null as unknown as Rows,
       fooditems: null as unknown as Rows,
       selectedFoodGroup: 'All',
-      allergy: "('",
+      allergy: "()",
     }
   },
   created: function () {
@@ -58,7 +58,7 @@ export default {
       if (this.selectedFoodGroup == 'All')
         this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
       else
-        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE ( food.food_group = '`+this.selectedFoodGroup+`')`);
+        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food.food_group = '`+this.selectedFoodGroup);
       this.$nextTick(() => {
         this.loaded();
       })
