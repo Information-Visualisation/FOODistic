@@ -2,8 +2,22 @@
 import TableRowTemp from './TableRowTemp.vue';
 import TablerowHead from './TableRowHead.vue';
 import TableGraph from './TableGraphs.vue';
+import TableRowNutrition from './TableRowNutrition.vue';
 
-let test_items = [["apple", 2, 3, 4],["banana", 10, 1, 2], ["pear", 7, 8, 9],["strawberry", 6, 3, 1]]
+let test_items = [["apple", 2, 3, 4],["banana", 10, 1, 2], ["pear", 7, 8, 9],["strawberry", 6, 3, 1]];
+function search() {
+    let max_value_colum = [] as number[];
+    let colums = test_items[0].length;
+    for (let i = 1; i < test_items[0].length; i++) {
+        max_value_colum.push(test_items[0][i] as number);
+    }
+    for (let i = 1; i < test_items.length; i++) {
+        for (let j = 1; j < colums; j++) {
+            max_value_colum[j - 1] = Math.max(test_items[i][j] as number, max_value_colum[j - 1]);
+        }
+    }
+    return max_value_colum;
+}
 </script>
 <template>
     <div id="table">
@@ -26,7 +40,8 @@ let test_items = [["apple", 2, 3, 4],["banana", 10, 1, 2], ["pear", 7, 8, 9],["s
                     <TablerowHead :columnNames="['Name', 'Salt', 'Glutes', 'Sugar']"/>
                 </thead>
                 <tbody>
-                    <TableRowTemp v-for="items in test_items" :items='items'/> <!-- change to foods and nutrition values-->
+                    <TableRowNutrition v-for="items in test_items" :items='items' :max_value="search()"/>
+                    <!--<TableRowTemp v-for="items in test_items" :items='items'/>--> <!-- change to foods and nutrition values-->
                 </tbody>
                 </table>
             </div>
