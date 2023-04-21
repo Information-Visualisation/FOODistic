@@ -13,13 +13,29 @@ export default {
     id: {
       type: String,
       required: true
+    },
+    comparing: {
+      type: Boolean,
+      default: false,
     }
   },
+  emits: ["compare"],
+  methods: {
+    compare(event: any) {
+      this.$emit('compare', null, this.id)
+    }
+  }
 }
 </script>
 
 <template>
-  <router-link class="card" :to="{
+  <button v-if="comparing" class="card btn btn-outline-success" @click="compare">
+    <div class="position-relative">
+      <FoodImg class="position-absolute img" :id="id" :name="name" :height="50"></FoodImg>
+      <h1>{{ name }}</h1>
+    </div>
+  </button>
+  <router-link v-if="!comparing" class="card btn btn-outline-success" :to="{
     name: 'food',
     params: {
       name: name,

@@ -1,17 +1,14 @@
 <script lang="ts">
-import FoodItem from '../components/FoodItem.vue'
-import SpinnerComponent from './SpinnerComponent.vue';
-import { DBService } from '../services/db.service'
-import { GET_FOOD_FOR_NAME } from '@/services/queries';
+import FoodPicker from '../components/FoodPicker.vue';
 
 export default {
   components: {
-    FoodItem,
-    SpinnerComponent
+    FoodPicker
   },
   data() {
     return {
-      fooditems: null
+      foodName: "",
+      offset: 0,
     }
   },
   created: async function () {
@@ -25,9 +22,6 @@ export default {
     if (typeof queryOffset === 'number') {
       offset = queryOffset;
     }
-
-    const dbService = new DBService;
-    this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(foodName, offset));
   },
 }
 
@@ -42,17 +36,7 @@ export default {
       <RouterLink to="/subfoodgroup/red-fruits">Red Fruits</RouterLink>
       <RouterLink to="/food/apple">Apple</RouterLink>
     </nav>
-    <div>
-      <div class="container">
-        <div v-if="fooditems === null">
-          <SpinnerComponent />
-        </div>
-        <div v-else="fooditems!==null">
-          <div v-if="fooditems.rows.length==0">No results found</div>
-          <FoodItem v-for="fooditem in fooditems.rows" :name=fooditem.naam :id=fooditem.id></FoodItem>
-        </div>
-      </div>
-    </div>
+    <FoodPicker :query="foodName" :offset="offset"></FoodPicker>
   </main>
 </template>
 

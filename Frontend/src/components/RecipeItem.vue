@@ -1,5 +1,5 @@
 <script lang="ts">
-import SpinnerComponent from '@/views/SpinnerComponent.vue';
+import SpinnerComponent from './SpinnerComponent.vue';
 import TechniqueIcon from './TechniqueIcon.vue';
 
 export default {

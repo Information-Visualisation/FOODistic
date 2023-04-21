@@ -20,6 +20,14 @@ export function GET_FOOD_FOR_ID(id: string = "", pageCount: number = 0): string 
 	OFFSET `+pageSize*pageCount;
 }
 
+export function GET_FOODCOUNT_FOR_NAME(name: string = ""): string {
+	return `SELECT COUNT(*) as c
+	FROM food
+	WHERE (
+		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
+	)`;
+}
+
 export function MACRO_NUTRIENTS_FOR(id: string): string {
 	return `SELECT 'Fiber' as name,orig_source_name,orig_content as value FROM food,nutrients
 WHERE ( 

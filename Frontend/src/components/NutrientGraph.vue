@@ -1,10 +1,10 @@
 <script lang="ts">
 
-import { DBService, avg, distinctNames } from '../../services/db.service'
-import type { Rows, Row, DistinctRows } from '../../services/db.service';
+import { DBService, avg, distinctNames } from '../services/db.service'
+import type { Rows, Row, DistinctRows } from '../services/db.service';
 import { Bar } from 'vue-chartjs';
-import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR } from '../../services/queries';
+import SpinnerComponent from './SpinnerComponent.vue';
+import { MACRO_NUTRIENTS_FOR } from '../services/queries';
 import {
     Chart as ChartJS,
     Title,
@@ -140,7 +140,7 @@ export default {
 }
 
 .noData {
-    top: 90px;
-    left: 161px
+    top: 106px;
+    left: 227px
 }
 </style>

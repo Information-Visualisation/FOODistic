@@ -1,10 +1,10 @@
 <script lang="ts">
 
-import { DBService, avg, distinctNames } from '../../services/db.service'
-import type { Rows, Row, DistinctRows } from '../../services/db.service';
-import SpinnerComponent from '../SpinnerComponent.vue';
-import RecipeItem from '../../components/RecipeItem.vue';
-import { GET_RECIPES_FOR } from '../../services/queries';
+import { DBService, avg, distinctNames } from '../services/db.service'
+import type { Rows, Row, DistinctRows } from '../services/db.service';
+import SpinnerComponent from './SpinnerComponent.vue';
+import RecipeItem from '../components/RecipeItem.vue';
+import { GET_RECIPES_FOR } from '../services/queries';
 
 const dbService = new DBService;
 
@@ -27,10 +27,7 @@ export default {
         }
     },
     created() {
-        this.fetchData().then(() => {
-            this.fillGraph()
-        });
-
+        this.fetchData();
     },
     methods: {
         async fetchData() {
@@ -43,18 +40,6 @@ export default {
         loaded() {
             this.isLoading = false;
         },
-        fillGraph(log: boolean = false) {
-            let rows: Rows = this.recipes.rows as unknown as Rows;
-            if (log) { this.logFetched(rows); }
-
-
-        },
-        logFetched(rows: Rows) {
-            for (let i = 0; i < rows.length; i++) {
-                let row: Row = rows[i];
-                console.log(row.name + ": " + row.value);
-            }
-        }
     }
 }
 </script>
@@ -66,6 +51,7 @@ export default {
             <SpinnerComponent class="position-absolute center-spinner" />
         </div>
         <div v-else="!isLoading" class="container overflow-auto scrollview border rounded">
+            <div v-if="recipes.rows.length<=0" class="position-absolute top-50 start-50 translate-middle alert alert-dark" role="alert">No recipes found</div>
             <ul class="list-group">
                 <li class="list-group-item" v-for="recipe in recipes.rows">
                     <RecipeItem :title=recipe.recipename :techniques=recipe.techniques></RecipeItem>
@@ -75,6 +61,7 @@ export default {
         <div class="collapse" id="collapseExample">
             Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
             user activates the relevant trigger.
+            TODO: Still only shows 100 recipes!
             <ul>
                 <li>explain list</li>
                 <li>explain icons, here or on about page</li>
