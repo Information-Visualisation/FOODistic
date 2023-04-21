@@ -75,6 +75,10 @@ export default {
         <div class="collapse" id="collapseExample">
             Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
             user activates the relevant trigger.
+            <ul>
+                <li>explain list</li>
+                <li>explain icons, here or on about page</li>
+            </ul>
         </div>
     </div>
 </template>
