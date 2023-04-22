@@ -5,7 +5,7 @@ import TableGraph from './TableGraphs.vue';
 import TableRowNutrition from './TableRowNutrition.vue';
 
 let test_items = [["apple", 2, 3, 4],["banana", 10, 1, 2], ["pear", 7, 8, 9],["strawberry", 6, 3, 1]];
-function search() {
+function getMaxColums() {
     let max_value_colum = [] as number[];
     let colums = test_items[0].length;
     for (let i = 1; i < test_items[0].length; i++) {
@@ -40,7 +40,7 @@ function search() {
                     <TablerowHead :columnNames="['Name', 'Salt', 'Glutes', 'Sugar']"/>
                 </thead>
                 <tbody>
-                    <TableRowNutrition v-for="items in test_items" :items='items' :max_value="search()"/>
+                    <TableRowNutrition v-for="items in test_items" :items='items' :max_value="getMaxColums()"/>
                     <!--<TableRowTemp v-for="items in test_items" :items='items'/>--> <!-- change to foods and nutrition values-->
                 </tbody>
                 </table>

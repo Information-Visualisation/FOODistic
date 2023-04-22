@@ -18,7 +18,9 @@ export default {
       result_food: null as unknown as Rows,
       fooditems: null as unknown as Rows,
       selectedFoodGroup: 'All',
+      selectedSubFoodGroup: 'All',
       allergy: "",
+      foodSubGroupitems: null as unknown as Rows,
     }
   },
   created: function () {
@@ -52,8 +54,16 @@ export default {
     },
     setSelectedItem(foodgroup: any){
       this.selectedFoodGroup = foodgroup;
+      this.selectedSubFoodGroup = 'All';
       this.isLoading = true;
       this.queryFoodGroup().then(() => {
+        this.setResultQuery();
+      });
+    },
+    setSelecteSubFooddItem(foodsubgroup: any){
+      this.selectedSubFoodGroup = foodsubgroup;
+      this.isLoading = true;
+      this.querySubFoodGroup().then(() => {
         this.setResultQuery();
       });
     },
@@ -66,10 +76,29 @@ export default {
         else{
           console.log(this.allergy)
           if(this.allergy == "('')"){
-            console.log('test')
             this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food_group = '`+this.selectedFoodGroup+`'`);
           }else{
             this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` AND food_group = '`+this.selectedFoodGroup+`'`);
+          }
+          this.foodSubGroupitems = await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '`+this.selectedFoodGroup+`' AND food_subgroup is NOT NULL`);
+          console.log(this.foodSubGroupitems)
+        }  
+      }
+      this.$nextTick(() => {
+        this.loaded();
+      })
+    },
+    async querySubFoodGroup(){
+      if (this.selectedFoodGroup == 'All'&& this.selectedSubFoodGroup == 'All'&& this.allergy == "('')")
+          this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
+      else{
+        if (this.selectedFoodGroup == 'All' && this.selectedSubFoodGroup == 'All')
+          this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
+        else{
+          if(this.allergy == "('')"){
+            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food_group = '`+this.selectedFoodGroup+`' AND food_subgroup = '`+this.selectedSubFoodGroup+`'`);
+          }else{
+            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` AND food_group = '`+this.selectedFoodGroup+`' AND food_subgroup = '`+this.selectedSubFoodGroup+`'`);
           }
         }  
       }
@@ -119,6 +148,16 @@ export default {
               <li class="dropdown-item" @click="setSelectedItem('All')">All foodgroups</li>
               <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems" @click="setSelectedItem(foodGroupitem.food_group)">{{foodGroupitem.food_group}}</li>
             </ul>
+          </div>
+          <div v-if="selectedFoodGroup != 'All'">
+            <h2>Food subgroup:</h2>
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{selectedSubFoodGroup}}</button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" @click="setSelectedItem('All')">All foodsubgroups</li>
+                <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems" @click="setSelecteSubFooddItem(foodSubGroupitem.food_subgroup)">{{foodSubGroupitem.food_subgroup}}</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div>
