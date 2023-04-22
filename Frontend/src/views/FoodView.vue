@@ -111,7 +111,7 @@ export default {
                     <Food></Food>
                 </div>
                 <Transition>
-                    <div class="vl" v-if="comparing"></div>
+                    <div class="vr" v-if="comparing"></div>
                 </Transition>
                 <Transition>
                     <div class="col" v-if="comparing">

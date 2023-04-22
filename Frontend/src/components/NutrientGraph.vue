@@ -103,18 +103,12 @@ export default {
                 });
             }
         },
-        logFetched(rows: Rows) {
-            for (let i = 0; i < rows.length; i++) {
-                let row: Row = rows[i];
-                console.log(row.name + ": " + row.value);
-            }
-        }
     }
 }
 </script>
 
 <template>
-    <div style="width: 680px;">
+    <div style="width: 640px;">
         <h3>Nutrient Graph</h3>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
