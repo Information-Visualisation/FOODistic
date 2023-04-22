@@ -131,7 +131,7 @@ export default {
             <Radar class="radar" :data="data" :options="options" />
         </div>
         <div v-else="!isLoading" class="position-relative">
-            <div v-if="this.result1.rows.rowCount == 0" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
+            <div v-if="this.result1 == 0" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
             </div>
             <Radar class="radar" :data="data" :options="options" />
         </div>
