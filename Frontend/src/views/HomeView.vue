@@ -1,168 +1,186 @@
 <script lang="ts">
-import { stringifyExpression } from '@vue/compiler-core';
 import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
-import type { Rows, Row} from '../services/db.service';
-import type AppVue from '@/App.vue';
+import FoodPicker from '../components/FoodPicker.vue';
+import SpinnerComponent from '@/components/SpinnerComponent.vue';
 
 const dbService = new DBService;
 export default {
   components: {
     FoodItem,
+    FoodPicker,
+    SpinnerComponent
   },
   data() {
     return {
       isLoading: true,
-      result_foodGroup: null as unknown as Rows,
-      foodGroupitems: null as unknown as Rows,
-      result_food: null as unknown as Rows,
-      fooditems: null as unknown as Rows,
-      selectedFoodGroup: 'All',
-      selectedSubFoodGroup: 'All',
-      allergy: "",
-      foodSubGroupitems: null as unknown as Rows,
+      fooditems: null,
+      foodGroupitems: null,
+      foodSubGroupitems: null,
+      filteritems: null,
+
+      foodName: this.$route.query.search !== undefined ? this.$route.query.search as string : "",
+      allergies: this.$route.query.allergies !== undefined ? this.makeArray() : [],
+      foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All",
+      subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All",
+      offset: this.$route.query.offset !== undefined ? parseInt(this.$route.query.offset as string) : 0,
+
     }
   },
   created: function () {
-    let result1 = this.changeParamString(this.$route.params.allergy)
-    this.changeAllergy(result1)
-    this.queryALL().then(() => {
-      this.setResultQuery();
-    })
-    ;
+    // let result1 = this.changeParamString(this.$route.params.allergy)
+    // this.changeAllergy(result1)
+    this.fetchData();
   },
-  methods:{
-    async queryALL(){
-      this.result_foodGroup = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
-      if(this.allergy == "")
-        this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
-      else
-        this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
-     this.$nextTick(() => {
-        this.loaded();
-      })
+  methods: {
+    async fetchData() {
+      this.foodGroupitems = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
+      this.foodGroupitems = this.foodGroupitems.rows;
+      this.fetchAllergies();
+      this.fetchSubFoodGroups();
+      this.loaded();
+    },
+    async fetchSubFoodGroups() {
+      if (this.foodGroup != 'All' && this.foodGroup != '') {
+        this.foodSubGroupitems = await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '` + this.foodGroup + `' AND food_subgroup is NOT NULL`);
+        this.foodSubGroupitems = this.foodSubGroupitems.rows;
+      }
+    },
+    makeArray() {
+      if (typeof this.$route.query.allergies === 'string') {
+        return new Array(this.$route.query.allergies as string);
+      }
+      return this.$route.query.allergies as Array<string>;
     },
     loaded() {
       this.isLoading = false;
     },
-    setResultQuery(){
-      this.fooditems = this.result_food;
-      this.foodGroupitems = this.result_foodGroup;
+    async setFoodgroup(foodgroup: any) {
+      this.isLoading = false;
+      this.foodGroup = foodgroup;
+      this.subFoodGroup = 'All';
+      this.fetchSubFoodGroups();
+      this.route()
+      this.loaded();
     },
-    goToPage(pagename: any, nameFood?: any){
-      this.$router.push({ name: pagename, params : { name: nameFood } })
+    setSubFoodGroup(foodsubgroup: any) {
+      this.isLoading = false;
+      this.subFoodGroup = foodsubgroup;
+      this.route();
+      this.loaded();
     },
-    setSelectedItem(foodgroup: any){
-      this.selectedFoodGroup = foodgroup;
-      this.selectedSubFoodGroup = 'All';
-      this.isLoading = true;
-      this.queryFoodGroup().then(() => {
-        this.setResultQuery();
-      });
+    route() {
+      let options = { name: 'home', query: {} };
+      if (this.foodName != '')
+        options.query.search = this.foodName;
+      if (this.allergies.length != 0)
+        options.query.allergies = this.allergies;
+      if (this.foodGroup != 'All')
+        options.query.foodgroup = this.foodGroup;
+      if (this.subFoodGroup != 'All')
+        options.query.subfoodgroup = this.subFoodGroup;
+      if (this.offset)
+        options.query.offset = this.offset;
+
+      this.$router.push(options);
     },
-    setSelecteSubFooddItem(foodsubgroup: any){
-      this.selectedSubFoodGroup = foodsubgroup;
-      this.isLoading = true;
-      this.querySubFoodGroup().then(() => {
-        this.setResultQuery();
-      });
+    // async changeAllergy(allergy: string) {
+    //   let result = [] as string[];
+    //   let result2 = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + allergy);
+    //   result2 = result2.rows;
+
+    //   for (var val2 of result2) {
+    //     result.push(val2.food);
+    //   }
+    //   this.allergy = this.changeParamString(result);
+    // },
+    // changeParamString(params: string | any[] | undefined) {
+    //   let string = "('";
+    //   if (params != undefined) {
+    //     for (let i = 0; i < params.length; i++) {
+    //       if (i + 1 != params.length)
+    //         string += params[i] + "', '";
+    //       else
+    //         string += params[i];
+    //     }
+    //   }
+    //   string += "')"
+    //   return string
+    // },
+    async fetchAllergies() {
+      this.filteritems = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
+      this.filteritems = this.filteritems.rows;
     },
-    async queryFoodGroup(){
-      if (this.selectedFoodGroup == 'All'&& this.allergy == "('')")
-          this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
-      else{
-        if (this.selectedFoodGroup == 'All')
-          this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
-        else{
-          console.log(this.allergy)
-          if(this.allergy == "('')"){
-            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food_group = '`+this.selectedFoodGroup+`'`);
-          }else{
-            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` AND food_group = '`+this.selectedFoodGroup+`'`);
-          }
-          this.foodSubGroupitems = await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '`+this.selectedFoodGroup+`' AND food_subgroup is NOT NULL`);
-          console.log(this.foodSubGroupitems)
-        }  
-      }
-      this.$nextTick(() => {
-        this.loaded();
-      })
-    },
-    async querySubFoodGroup(){
-      if (this.selectedFoodGroup == 'All'&& this.selectedSubFoodGroup == 'All'&& this.allergy == "('')")
-          this.result_food = await dbService.query(`SELECT id,naam FROM food LIMIT 40`);
-      else{
-        if (this.selectedFoodGroup == 'All' && this.selectedSubFoodGroup == 'All')
-          this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` LIMIT 40`);
-        else{
-          if(this.allergy == "('')"){
-            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE food_group = '`+this.selectedFoodGroup+`' AND food_subgroup = '`+this.selectedSubFoodGroup+`'`);
-          }else{
-            this.result_food = await dbService.query(`SELECT id,naam FROM food WHERE naam not in `+ this.allergy +` AND food_group = '`+this.selectedFoodGroup+`' AND food_subgroup = '`+this.selectedSubFoodGroup+`'`);
-          }
-        }  
-      }
-      this.$nextTick(() => {
-        this.loaded();
-      })
-    },
-    async changeAllergy(allergie: string){
-      let result = [] as string[]
-      let result2 = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + allergie)
-      
-      for(var val2 of result2){
-        result.push(val2.food)
-      }
-      this.allergy = this.changeParamString(result)
-    },
-    changeParamString(params: string | any[] | undefined){
-      let string = "('";
-      if(params != undefined){
-        for(let i = 0; i < params.length; i++){
-          if (i+1 != params.length)
-              string += params[i] +"', '"
-            else
-            string += params[i]
-        }
-      }
-      string += "')"
-      return string
-    }
   }
 }
-
 </script>
 
 <template>
   <main>
     <div>
       <div class="position-relative" v-if="isLoading">
-          <p>is loading</p>
+        <SpinnerComponent></SpinnerComponent>
       </div>
-      <div class="container" v-else="!isLoading">
-        <div>
-          <h1>Food group:</h1>
-          <div class="btn-group">
-            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{selectedFoodGroup}}</button>
-            <ul class="dropdown-menu">
-              <li class="dropdown-item" @click="setSelectedItem('All')">All foodgroups</li>
-              <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems" @click="setSelectedItem(foodGroupitem.food_group)">{{foodGroupitem.food_group}}</li>
-            </ul>
-          </div>
-          <div v-if="selectedFoodGroup != 'All'">
-            <h2>Food subgroup:</h2>
+
+      <div class="container" v-if="!isLoading">
+        <div class="d-flex justify-content-center" role="search">
+          <!-- <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search"
+            name="search" v-model="search"> -->
+
+          <div>
+            <!-- <h4>Food Group:</h4> -->
             <div class="btn-group">
-              <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{selectedSubFoodGroup}}</button>
+              <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">{{ foodGroup }}</button>
               <ul class="dropdown-menu">
-                <li class="dropdown-item" @click="setSelectedItem('All')">All foodsubgroups</li>
-                <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems" @click="setSelecteSubFooddItem(foodSubGroupitem.food_subgroup)">{{foodSubGroupitem.food_subgroup}}</li>
+                <li class="dropdown-item" @click="setFoodgroup('All')">All</li>
+                <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems"
+                  @click="setFoodgroup(foodGroupitem.food_group)">{{ foodGroupitem.food_group }}</li>
               </ul>
             </div>
+            <div v-if="foodGroup != 'All'">
+              <!-- <h4>Food Subgroup:</h4> -->
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
+                  aria-expanded="false">{{ subFoodGroup }}</button>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-item" @click="setSubFoodGroup('All')">All</li>
+                  <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems"
+                    @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">{{ foodSubGroupitem.food_subgroup }}
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
+          <div class="row">
+            <div class="col">
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  Filter
+                </button>
+                <ul class="dropdown-menu">
+                  <li v-for="filteritem in filteritems">
+                    <div class="form-check">
+                      <input type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" name="alergies"
+                        v-model="allergies" @change="route" :checked="allergies.indexOf(filteritem.allergy) != -1" />
+                      <label :for="filteritem.allergy">
+                        {{ filteritem.allergy }}
+                      </label>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <input v-model="foodName" class="form-control me-2 height width" type="search" name="foodName"
+            placeholder="Search" aria-label="Search" @keyup.enter="route" @blur="route">
+          <div @click="route" class="btn btn-outline-success height">Search</div>
+          <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
         </div>
-        <div>
+        <div class="d-flex justify-content-center">
           <h1>Food:</h1>
-          <FoodItem v-for="fooditem in fooditems" :title=fooditem.naam @click="goToPage('food',fooditem.naam)"> <!-- change to goToFoodPage(fooditem.id) --></FoodItem>
+          <FoodPicker :foodName="foodName" :group="foodGroup" :subgroup="subFoodGroup" :offset="offset"></FoodPicker>
         </div>
       </div>
     </div>
@@ -171,13 +189,23 @@ export default {
 
 <style>
 .container {
- padding: 40px;
+  padding: 40px;
 }
-.dropdown-item:hover{
-    background-color:red;
- }
- .dropdown-menu {
-    max-height: 280px;
-    overflow-y: auto;
+
+.height {
+  height: 40px;
+}
+
+.width {
+  width: 50%;
+}
+
+.dropdown-item:hover {
+  background-color: red;
+}
+
+.dropdown-menu {
+  max-height: 280px;
+  overflow-y: auto;
 }
 </style>

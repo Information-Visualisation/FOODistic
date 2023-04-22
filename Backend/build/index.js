@@ -14,4 +14,3 @@ server.on("listening", function () {
     logger.info("Listening on ".concat(bind));
 });
 module.exports = app_1.default;
-//# sourceMappingURL=index.js.map

@@ -2,13 +2,14 @@ import * as bodyParser from "body-parser";
 import * as express from "express";
 import { Logger } from "./logger";
 // import Routes from "./routes/routes";
-import { select } from "./database";
+import { DBConnection } from "./database";
 var cors = require('cors')
 
 class App {
 
   public express: express.Application;
   public logger: Logger;
+  public db: DBConnection;
 
   // array to hold users
   public users: any[];
@@ -19,6 +20,7 @@ class App {
     this.routes();
     this.users = [];
     this.logger = new Logger();
+    this.db = new DBConnection(this.logger);
     this.express.use(cors())
   }
 
@@ -32,13 +34,12 @@ class App {
 
     this.express.get("/db", async (req, res, next) => {
       let query: string = req.query.query as string;
-      console.log(query);
       if (query !== undefined) {
         res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
-        await res.send(JSON.stringify(await select(query)));
-        this.logger.info("");
+        await res.send(JSON.stringify(await this.db.select(query)));
+        this.logger.info(query);
       } else {
-        this.logger.error("query is undefined")
+        this.logger.error("query is undefined");
       }
     });
 

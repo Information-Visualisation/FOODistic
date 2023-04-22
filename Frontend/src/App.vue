@@ -1,67 +1,30 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-// import HelloWorld from './components/HelloWorld.vue'
 import Logo from './components/Logo.vue'
 </script>
 
 <script lang="ts">
 import { DBService } from './services/db.service'
-import HomeView from './views/HomeView.vue'
 const dbService = new DBService;
-const result = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
 
 export default {
-    data() {
-        return {
-            filteritems: result,
-            search: "",
-            checkFilter: [],
-        };
-    },
-    created: function () {
-    },
-    methods: {
-        searchSubmit() {
-            this.$router.push({ name: "search", params: { searchitem: this.search, allergy: this.checkFilter } });
-        },
-        changeFilter() {
-            console.log(this.checkFilter);
-            this.$router.push({name: "homeAllergy", params:{allergy: this.checkFilter}})
-            /* TO DO update view with new selected */
-        }
-    },
 }
 </script>
 
 <template>
-<nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
-    <a id="logo" class="navbar-brand"><Logo/></a>
-    <div class="container-fluid d-flex flex-row justify-content-center">
-      <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'home'})"> Home</button>
-      <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'about'})"> About</button>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search" v-model="search">
-        <div class="btn-group">
-        <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        Filter
-        </button>
-        <ul class="dropdown-menu">
-          <li v-for="filteritem in filteritems"><div class="form-check">
-            <input type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" v-model="checkFilter" @change="changeFilter"/>
-            <label :for="filteritem.allergy">
-              {{ filteritem.allergy }}
-            </label>
-          </div></li>
-        </ul>
-        </div>
-        <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button>
-      </form>
+  <nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+      <a id="logo" class="navbar-brand">
+        <Logo />
+      </a>
+      <div class="container-fluid d-flex flex-row justify-content-center">
+        <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'home' })"> Home</button>
+        <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'about' })"> About</button>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<RouterView/>
+  <RouterView />
 </template>
 
 <!-- <template>
@@ -89,7 +52,7 @@ export default {
 }
 
 nav {
-  background-color:antiquewhite;
+  background-color: antiquewhite;
 }
 
 #logo {
@@ -97,7 +60,6 @@ nav {
 }
 
 .dropdown-menu {
-    max-height: 280px;
-    overflow-y: auto;
-}
-</style>
+  max-height: 280px;
+  overflow-y: auto;
+}</style>

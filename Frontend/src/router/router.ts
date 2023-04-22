@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import SearchView from '../views/SearchView.vue'
-import NotFound from '../views/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,26 +6,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
-    },
-    {
-      path: '/:allergy*',
-      name: 'homeAllergy',
-      props: true,
-      component: HomeView
-    },
-    {
-      path: '/search/:searchitem/:allergy*',
-      name: 'search',
-      props: true,
-      component: SearchView,
+      component: () => import('../views/HomeView.vue')
     },
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue')
     },
     {
@@ -44,7 +26,7 @@ const router = createRouter({
     {
       path: '/food/:name',  // change to id
       name: 'food',
-      component: () => import('../views/Food.vue')
+      component: () => import('../views/FoodView.vue')
     },
     {
       path: '/test_page',
@@ -54,7 +36,7 @@ const router = createRouter({
     {
       path: '/:notFound',
       name: 'not found',
-      component: NotFound
+      component: () => import('../views/NotFound.vue')
     },
   ]
 })

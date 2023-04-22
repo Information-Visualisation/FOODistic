@@ -5,6 +5,9 @@ var Logger = /** @class */ (function () {
     function Logger() {
     }
     Logger.prototype.info = function (logText) {
+        if (logText.length > 100) {
+            logText = logText.substring(0, 70) + "...";
+        }
         console.log(new Date() + " - info:::::" + logText);
     };
     Logger.prototype.debug = function (logText) {
@@ -17,4 +20,3 @@ var Logger = /** @class */ (function () {
 }());
 exports.Logger = Logger;
 module.exports = { Logger: Logger };
-//# sourceMappingURL=logger.js.map
