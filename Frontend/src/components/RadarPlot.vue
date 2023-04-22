@@ -1,6 +1,6 @@
 <script lang="ts">
 import { DBService, avg, distinctNames } from '@/services/db.service';
-import { MACRO_NUTRIENTS_FOR } from '@/services/queries';
+import { GET_FOOD_FOR_ID, MACRO_NUTRIENTS_FOR } from '@/services/queries';
 import {
     Chart as ChartJS,
     RadialLinearScale,
@@ -35,16 +35,18 @@ export default {
             type: String,
             required: true
         },
-        otherid: {
+        otherId: {
             type: String,
             required: true
-        }
+        },
     },
     data() {
         return {
             isLoading: true,
-            food1rows: null,
-            food2rows: null,
+            foodData: null,
+            otherFoodData: null,
+            rows: null,
+            otherRows: null,
             data: {
                 labels: [
                     'Ash',
@@ -56,7 +58,7 @@ export default {
                 ],
                 datasets: [
                     {
-                        label: 'Dill',
+                        label: '',
                         data: [0, 0, 0, 0, 0, 0],
                         //TODO: This is hardcoded in the example
                         backgroundColor: 'rgba(179,181,198,0.2)',
@@ -67,7 +69,7 @@ export default {
                         pointHoverBorderColor: 'rgba(179,181,198,1)',
                     },
                     {
-                        label: 'Burdock',
+                        label: '',
                         data: [0, 0, 0, 0, 0, 0],
                         //TODO: This is hardcoded in the example
                         backgroundColor: 'rgba(255,99,132,0.2)',
@@ -88,35 +90,45 @@ export default {
     created() {
         this.fetchData().then(() => {
             this.fillGraph()
+            this.loaded();
         });
 
     },
     methods: {
         async fetchData() {
-            console.log(await dbService.query(MACRO_NUTRIENTS_FOR(this.id), false));
-            this.food2rows = await dbService.query(MACRO_NUTRIENTS_FOR(this.otherid), false);
-            this.loaded();
+            this.foodData = await dbService.query(GET_FOOD_FOR_ID(this.id));
+            this.otherFoodData = await dbService.query(GET_FOOD_FOR_ID(this.otherId));
+
+            this.rows = await dbService.query(MACRO_NUTRIENTS_FOR(this.id), false);
+            this.otherRows = await dbService.query(MACRO_NUTRIENTS_FOR(this.otherId), false);
         },
         loaded() {
             this.isLoading = false;
         },
         fillGraph(log: boolean = false) {
-            let rows1 = this.food1rows.rows;
-            let rows2 = this.food2rows.rows;
+            let rows1 = this.rows!.rows;
+            let rows2 = this.otherRows!.rows;
 
+            this.data.datasets[0].label = this.foodData.rows[0].naam;
+            this.data.datasets[1].label = this.otherFoodData.rows[0].naam;
 
             let distincts1 = distinctNames(rows1);
             let distincts2 = distinctNames(rows2);
             const MACRO_NUTRIENTS: number = 6;
 
             let i = 0;
+
             Object.keys(distincts1).forEach((key: string) => {
                 const values1: number[] = distincts1[key];
-                const values2: number[] = distincts2[key];
                 const length1: number = values1.length;
-                const length2: number = values2.length;
-
                 this.data.datasets[0].data[i++] = avg(length1, values1);
+            });
+
+            i=0;
+
+            Object.keys(distincts2).forEach((key: string) => {
+                const values2: number[] = distincts2[key];
+                const length2: number = values2.length;
                 this.data.datasets[1].data[i++] = avg(length2, values2);
             });
         },
@@ -125,20 +137,22 @@ export default {
 </script>
 
 <template>
-     <h3>Radar Plot</h3>
-        <div v-if="isLoading" class="position-relative">
-            <SpinnerComponent class="position-absolute spinner" />
-            <Radar class="radar" :data="data" :options="options" />
+    <h3>Radar Plot</h3>
+    <div v-if="isLoading" class="position-relative">
+        <SpinnerComponent class="position-absolute" />
+        <Radar class="radar" :data="data" :options="options" />
+    </div>
+    <div v-else="!isLoading" class="position-relative">
+        <div v-if="rows.length == 0 || otherRows.length == 0" class="position-absolute alert alert-dark noData"
+            role="alert">No
+            nutrient data available for one food
         </div>
-        <div v-else="!isLoading" class="position-relative">
-            <div v-if="this.result1 == 0" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
-            </div>
-            <Radar class="radar" :data="data" :options="options" />
-        </div>
-        <div class="collapse" id="collapseExample">
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
-            user activates the relevant trigger.
-        </div>
+        <Radar class="radar" :data="data" :options="options" />
+    </div>
+    <div class="collapse" id="collapseExample">
+        Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
+        user activates the relevant trigger.
+    </div>
 </template>
 
 <style>

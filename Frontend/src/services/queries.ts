@@ -16,15 +16,12 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergy: string = "", foodG
 	//TODO: food.naam not in `+ allergy +`
 }
 
-export function GET_FOOD_FOR_ID(id: string = "", pageCount: number = 0): string {
-	const pageSize: number = 24;
+export function GET_FOOD_FOR_ID(id: string = ""): string {
 	return `SELECT * 
 	FROM food
 	WHERE (
 		id=`+id+`
-	) 
-	LIMIT `+pageSize+`
-	OFFSET `+pageSize*pageCount;
+	)`;
 }
 
 export function GET_FOODCOUNT_FOR_NAME(name: string = ""): string {

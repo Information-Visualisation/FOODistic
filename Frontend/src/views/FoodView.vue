@@ -111,7 +111,7 @@ export default {
                     <Food></Food>
                 </div>
                 <Transition>
-                    <div class="vr" v-if="comparing"></div>
+                    <div class="vl" v-if="comparing"></div>
                 </Transition>
                 <Transition>
                     <div class="col" v-if="comparing">
@@ -141,8 +141,9 @@ export default {
                 </Transition>
             </div>
         </div>
-        <div class="row">
-            <RadarPlot :id="($route.query.id as string)" :otherid="id"></RadarPlot>
+        <div class="hl"></div>
+        <div v-if="picked" class="row card wide">
+            <RadarPlot :id="($route.query.id as string)" :otherId="id"></RadarPlot>
         </div>
         <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
             <button v-if="!comparing" class="btn btn-primary mb-3" @click="toggleComparing">Compare ▶</button>
@@ -185,6 +186,19 @@ export default {
     opacity: 0;
 }
 
+.vl {
+    border-left: 3px dotted lightgray;
+    height: 100%;
+    position: absolute;
+    left: 50%;
+    margin-left: -3px;
+    top: 0;
+}
+
+.hl {
+    border-top: 3px dotted lightgray;
+}
+
 .search {
     width: 75%;
     padding-left: 45px;
@@ -193,5 +207,9 @@ export default {
 
 .foodpickerDown {
     padding-top: 30px;
+}
+
+.wide {
+    width: 680px
 }
 </style>

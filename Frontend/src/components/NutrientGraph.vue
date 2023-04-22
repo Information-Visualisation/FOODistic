@@ -114,7 +114,7 @@ export default {
 </script>
 
 <template>
-    <div style="width: 600px;">
+    <div style="width: 680px;">
         <h3>Nutrient Graph</h3>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />

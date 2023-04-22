@@ -55,11 +55,11 @@ export default {
       </li>
       <li class="breadcrumb-item">
         <a v-if="foodGroup == ''">Loading</a>
-        <RouterLink v-if="foodGroup != ''" :to="'/foodgroup/' + foodGroup">{{ foodGroup }}</RouterLink>
+        <RouterLink v-if="foodGroup != ''" :to="{name: 'home', query: { foodgroup: foodGroup }}">{{ foodGroup }}</RouterLink>
       </li>
       <li class="breadcrumb-item">
         <a v-if="subFoodGroup == ''">Loading</a>
-        <RouterLink v-if="subFoodGroup != ''" :to="'/subfoodgroup/' + subFoodGroup">{{ subFoodGroup }}</RouterLink>
+        <RouterLink v-if="subFoodGroup != ''" :to="{name: 'home', query: { foodgroup: foodGroup, subfoodgroup: subFoodGroup }}">{{ subFoodGroup }}</RouterLink>
       </li>
       <li class="breadcrumb-item active" aria-current="page">{{ name }}</li>
     </ol>

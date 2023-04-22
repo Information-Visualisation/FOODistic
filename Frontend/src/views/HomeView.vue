@@ -178,8 +178,7 @@ export default {
           <div @click="route" class="btn btn-outline-success height">Search</div>
           <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
         </div>
-        <div class="d-flex justify-content-center">
-          <h1>Food:</h1>
+        <div class="">
           <FoodPicker :foodName="foodName" :group="foodGroup" :subgroup="subFoodGroup" :offset="offset"></FoodPicker>
         </div>
       </div>

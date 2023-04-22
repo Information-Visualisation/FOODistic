@@ -45,7 +45,7 @@ export default {
 </script>
 
 <template>
-    <div style="min-height: 353px; width: 600px;">
+    <div style="min-height: 353px; width: 680px;">
         <h3>Recipe List</h3>
         <div v-if="isLoading" class="position-relative scrollview">
             <SpinnerComponent class="position-absolute center-spinner" />
