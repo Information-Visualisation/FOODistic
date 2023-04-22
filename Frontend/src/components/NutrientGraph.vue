@@ -69,7 +69,6 @@ export default {
         this.fetchData().then(() => {
             this.fillGraph()
         });
-
     },
     methods: {
         async fetchData() {

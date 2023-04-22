@@ -2,12 +2,14 @@
 import SpinnerComponent from '../components/SpinnerComponent.vue';
 import Food from './Food.vue';
 import FoodPicker from '../components/FoodPicker.vue';
+import RadarPlot from '../components/RadarPlot.vue';
 
 export default {
     components: {
         SpinnerComponent,
         Food,
         FoodPicker,
+        RadarPlot
     },
     data() {
         return {
@@ -115,8 +117,8 @@ export default {
                     <div class="col" v-if="comparing">
                         <div v-if="!picked">
                             <form class="d-flex justify-content-start search" role="search">
-                                <input v-model="compareSearch" class="form-control me-2" type="search" name="compareSearch" placeholder="Search"
-                                    aria-label="Search">
+                                <input v-model="compareSearch" class="form-control me-2" type="search" name="compareSearch"
+                                    placeholder="Search" aria-label="Search">
                                 <RouterLink :to="{
                                         name: 'food',
                                         params: {
@@ -139,7 +141,10 @@ export default {
                 </Transition>
             </div>
         </div>
-       <div class="position-absolute top-0 end-0 m-3">  <!-- TODO: explain the 3 buttons -->
+        <div class="row">
+            <RadarPlot :id="($route.query.id as string)" :otherid="id"></RadarPlot>
+        </div>
+        <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
             <button v-if="!comparing" class="btn btn-primary mb-3" @click="toggleComparing">Compare ▶</button>
             <button v-if="comparing" type="button" class="btn btn-primary mb-3" aria-label="Collapse"
                 @click="toggleComparing">
