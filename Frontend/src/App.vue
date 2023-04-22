@@ -22,7 +22,7 @@ export default {
     },
     methods: {
         searchSubmit() {
-            this.$router.push({ name: "search", params: { searchitem: this.search } });
+            this.$router.push({ name: "search", params: { searchitem: this.search, allergy: this.checkFilter } });
         },
         changeFilter() {
             console.log(this.checkFilter);

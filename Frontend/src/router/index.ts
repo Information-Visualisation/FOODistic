@@ -18,7 +18,7 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/search/:searchitem',
+      path: '/search/:searchitem/:allergy*',
       name: 'search',
       props: true,
       component: SearchView,
