@@ -1,8 +1,6 @@
-//('Potato Allergy','Oral')
-//('Potato', 'Sweet Potato')
 export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0): string {
-	if (foodGroup == "All") foodGroup = "";
-	if (subFoodGroup == "All") subFoodGroup = "";
+	if (foodGroup == "All Foodgroups") foodGroup = "";
+	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
 
 	const pageSize: number = 24;
 	return `SELECT * 

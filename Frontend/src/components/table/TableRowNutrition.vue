@@ -1,35 +1,40 @@
 <script lang="ts">
+import FoodImg from '../FoodImg.vue';
+
 export default {
     props: {
-        items: Array<string | number>,
-        max_value: Array<number>
+        name: String,
+        id: Number,
+        items: Object,
+        max_value: Array<Number>
+    },
+    created() {
+        console.log(this.items);
     },
     methods: {
-        calcBarWitdh(percentage: number) {
-            let x = this.items?.indexOf(percentage) as number;
-            let width:number = this.max_value![x-1]/100 + percentage ; //150 is the max height
-            return width + 'px';
-        },
-        name() {
-            return this.items?.[0];
-        },
-        columns() {
-            return this.items?.slice(1);
-        }
-    }
+        // calcBarWitdh(percentage: number) {
+        //     let x = this.items?.indexOf(percentage) as number;
+        //     let width:number = this.max_value![x-1]/100 + percentage ; //150 is the max height
+        //     return width + 'px';
+        // },
+    },
+    components: { FoodImg }
 }
+//class="bar-wrapper"
+//class="bar-percentage"
 </script>
 
 <template>
     <tr>
-    <th @click="$router.push({ name: 'food', params : { name: name() } })">{{name()}}</th>
-    <th scope="col" v-for="x in columns()">
-        <div class="bar-wrapper">
-            <p class="bar-percentage">{{ x }}</p>
-            <div class="bar" :style="{width: calcBarWitdh(x as number)}">
+        <th @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })">
+            <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
+        </th>
+        <td scope="col" v-for="x in items">
+            <div>
+                <p>{{ (Math.round(x as number * 100) / 100).toFixed(2) }}</p>
+                <!-- <div class="bar" :style="{width: calcBarWitdh(x as number)}"> </div> -->
             </div>
-        </div>
-    </th>
+        </td>
     </tr>
 </template>
 
@@ -56,5 +61,4 @@ export default {
     background-color: brown;
     height: var(--bar-chart-height);
 }
-
 </style>

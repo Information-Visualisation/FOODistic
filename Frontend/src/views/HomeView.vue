@@ -3,13 +3,15 @@ import FoodItem from '../components/FoodItem.vue'
 import { DBService } from '../services/db.service'
 import FoodPicker from '../components/FoodPicker.vue';
 import SpinnerComponent from '@/components/SpinnerComponent.vue';
+import FoodTable from '@/components/table/FoodTable.vue';
 
 const dbService = new DBService;
 export default {
   components: {
     FoodItem,
     FoodPicker,
-    SpinnerComponent
+    SpinnerComponent,
+    FoodTable,
   },
   data() {
     return {
@@ -21,8 +23,8 @@ export default {
 
       foodName: this.$route.query.search !== undefined ? this.$route.query.search as string : "",
       allergies: this.$route.query.allergies !== undefined ? this.makeArray() : [],
-      foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All",
-      subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All",
+      foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All Foodgroups",
+      subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All Foodsubgroups",
       offset: this.$route.query.offset !== undefined ? parseInt(this.$route.query.offset as string) : 0,
 
     }
@@ -41,7 +43,7 @@ export default {
       this.loaded();
     },
     async fetchSubFoodGroups() {
-      if (this.foodGroup != 'All' && this.foodGroup != '') {
+      if (this.foodGroup != 'All Foodgroups' && this.foodGroup != '') {
         this.foodSubGroupitems = await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '` + this.foodGroup + `' AND food_subgroup is NOT NULL`);
         this.foodSubGroupitems = this.foodSubGroupitems.rows;
       }
@@ -58,7 +60,7 @@ export default {
     async setFoodgroup(foodgroup: any) {
       this.isLoading = false;
       this.foodGroup = foodgroup;
-      this.subFoodGroup = 'All';
+      this.subFoodGroup = 'All Foodsubgroups';
       this.fetchSubFoodGroups();
       this.route()
       this.loaded();
@@ -75,38 +77,15 @@ export default {
         options.query.search = this.foodName;
       if (this.allergies.length != 0)
         options.query.allergies = this.allergies;
-      if (this.foodGroup != 'All')
+      if (this.foodGroup != 'All Foodgroups')
         options.query.foodgroup = this.foodGroup;
-      if (this.subFoodGroup != 'All')
+      if (this.subFoodGroup != 'All Foodsubgroups')
         options.query.subfoodgroup = this.subFoodGroup;
       if (this.offset)
         options.query.offset = this.offset;
 
       this.$router.push(options);
     },
-    // async changeAllergy(allergy: string) {
-    //   let result = [] as string[];
-    //   let result2 = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + allergy);
-    //   result2 = result2.rows;
-
-    //   for (var val2 of result2) {
-    //     result.push(val2.food);
-    //   }
-    //   this.allergy = this.changeParamString(result);
-    // },
-    // changeParamString(params: string | any[] | undefined) {
-    //   let string = "('";
-    //   if (params != undefined) {
-    //     for (let i = 0; i < params.length; i++) {
-    //       if (i + 1 != params.length)
-    //         string += params[i] + "', '";
-    //       else
-    //         string += params[i];
-    //     }
-    //   }
-    //   string += "')"
-    //   return string
-    // },
     async fetchAllergies() {
       this.filteritems = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
       this.filteritems = this.filteritems.rows;
@@ -133,18 +112,18 @@ export default {
               <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
                 aria-expanded="false">{{ foodGroup }}</button>
               <ul class="dropdown-menu">
-                <li class="dropdown-item" @click="setFoodgroup('All')">All</li>
+                <li class="dropdown-item" @click="setFoodgroup('All Foodgroups')">All Foodgroups</li>
                 <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems"
                   @click="setFoodgroup(foodGroupitem.food_group)">{{ foodGroupitem.food_group }}</li>
               </ul>
             </div>
-            <div v-if="foodGroup != 'All'">
+            <div v-if="foodGroup != 'All Foodgroups'">
               <!-- <h4>Food Subgroup:</h4> -->
               <div class="btn-group">
                 <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
                   aria-expanded="false">{{ subFoodGroup }}</button>
                 <ul class="dropdown-menu">
-                  <li class="dropdown-item" @click="setSubFoodGroup('All')">All</li>
+                  <li class="dropdown-item" @click="setSubFoodGroup('All Foodsubgroups')">All Foodsubgroups</li>
                   <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems"
                     @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">{{ foodSubGroupitem.food_subgroup }}
                   </li>
@@ -179,7 +158,7 @@ export default {
           <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
         </div>
         <div class="">
-          <FoodPicker :foodName="foodName" :group="foodGroup" :subgroup="subFoodGroup" :offset="offset" :allergy="allergies"></FoodPicker>
+          <FoodTable :data="{name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies}"></FoodTable>
         </div>
       </div>
     </div>

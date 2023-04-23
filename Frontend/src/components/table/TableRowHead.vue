@@ -35,7 +35,7 @@ export default {
 <template>
     <tr>
     <th scope="col" v-for="(name, index) in columnNames">
-        <button class="btn" type="button" :onclick="function() {setSort(index)}">
+        <button class="sort btn" type="button" :onclick="function() {setSort(index)}">
             {{name + ' ' + getSortArrow(index)}}
         </button>
     </th>
@@ -44,7 +44,7 @@ export default {
 
 <style>
 
-.btn {
+.sort {
     font-weight: bold;
     padding: 0px;
 }

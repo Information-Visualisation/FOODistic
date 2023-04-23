@@ -130,8 +130,7 @@ export default {
                                         }
                                     }" class="btn btn-outline-success" type="submit">Search</RouterLink>
                             </form>
-                            <FoodPicker class="foodpickerDown" :foodName="compareSearch" :comparing="true"
-                                @compare="compare">
+                            <FoodPicker class="foodpickerDown" :name="compareSearch" :comparing="true" @compare="compare">
                             </FoodPicker>
                         </div>
                         <div v-if="picked">

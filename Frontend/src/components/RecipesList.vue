@@ -17,6 +17,7 @@ import {
     LinearScale
 } from 'chart.js'
 import { getTechniqueCounts } from '@/services/cookingtechniques';
+import { primary, secondary } from '@/services/colors';
 
 const dbService = new DBService;
 
@@ -31,7 +32,7 @@ export default {
     },
     props: {
         id: {
-            type: String,
+            type: Array<String>,
             required: true
         }
     },
@@ -47,10 +48,21 @@ export default {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
                 datasets: [{
                     labels: ' ',
-                    backgroundColor: ["#171819", "#C5AD92", "#7D6D62", "#8bf60b", "#edd5b4", "#d57144"],
+                    backgroundColor: primary,
                     pointRadius: 10,
                     pointStyle: this.image,
-                    data: []
+                    data: [],
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0
+                },
+                {
+                    labels: ' ',
+                    backgroundColor: secondary,
+                    pointRadius: 10,
+                    pointStyle: this.image,
+                    data: [],
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0
                 }]
             },
             options: {
@@ -72,12 +84,24 @@ export default {
                             //footer: this.footer,
                         }
                     },
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                    }
                 }
             },
         }
     },
     created() {
         this.fetchData();
+        let temp = Array(58);
+        temp.fill(10);
+
+        //this.data.datasets[1].data = temp;
     },
     methods: {
         async fetchData() {

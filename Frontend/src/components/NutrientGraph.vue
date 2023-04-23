@@ -41,9 +41,9 @@ export default {
                 labels: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
                 datasets: [{
                     labels: ' ',
-                    backgroundColor: ["#171819", "#C5AD92", "#7D6D62", "#8bf60b", "#edd5b4", "#d57144"],
                     data: [{}, {}, {}, {}, {}, {}]
                 }]
+
             },
             options: {
                 responsive: true,
@@ -100,10 +100,10 @@ export default {
 
                     const m = mean(values);
                     const s = std(values);
-                    const upper = m+s;
-                    const downer = m-s;
+                    const upper = m + s;
+                    const downer = m - s;
 
-                    this.data.datasets[0].data[i++] = {y: m, yMin: downer, yMax: upper};
+                    this.data.datasets[0].data[i++] = { y: m, yMin: downer, yMax: upper };
                 });
             }
         },
