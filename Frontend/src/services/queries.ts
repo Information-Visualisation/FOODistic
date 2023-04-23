@@ -1,4 +1,6 @@
-export function GET_FOOD_FOR_NAME(name: string = "", allergy: string = "", foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0): string {
+//('Potato Allergy','Oral')
+//('Potato', 'Sweet Potato')
+export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0): string {
 	if (foodGroup == "All") foodGroup = "";
 	if (subFoodGroup == "All") subFoodGroup = "";
 
@@ -9,11 +11,23 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergy: string = "", foodG
 		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
 		`+(foodGroup==""?"":(`AND food.food_group = '`+foodGroup+`'`))+`
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
+		`+orAllergies(allergies)+`
 	) 
 	LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
+}
 
-	//TODO: food.naam not in `+ allergy +`
+function orAllergies(allergies: string[]) {
+	if (allergies.length!=0) {
+		let queryString: string = `AND NOT (lower(food.naam) LIKE '%`+allergies[0].toLocaleLowerCase()+`%'`;
+		for (let i = 1; i < allergies.length; i++) {
+			queryString += `OR lower(food.naam) LIKE '%`+allergies[i].toLocaleLowerCase()+`%'`;
+		}
+		queryString += ')';
+		return queryString;
+	} else {
+		return '';
+	}
 }
 
 export function GET_FOOD_FOR_ID(id: string = ""): string {

@@ -179,7 +179,7 @@ export default {
           <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
         </div>
         <div class="">
-          <FoodPicker :foodName="foodName" :group="foodGroup" :subgroup="subFoodGroup" :offset="offset"></FoodPicker>
+          <FoodPicker :foodName="foodName" :group="foodGroup" :subgroup="subFoodGroup" :offset="offset" :allergy="allergies"></FoodPicker>
         </div>
       </div>
     </div>

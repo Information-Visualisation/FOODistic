@@ -6,6 +6,7 @@ import { GET_FOOD_FOR_NAME, GET_FOODCOUNT_FOR_NAME } from '@/services/queries';
 import FoodGroup from '@/views/FoodGroup.vue';
 
 
+const dbService = new DBService;
 export default {
     components: {
         FoodItem,
@@ -27,13 +28,13 @@ export default {
         }
     },
     async created() {
+        this.getFoodFromAllergies()
         this.query();
     },
     emits: ["compare"],
     methods: {
         async query() {
-            const dbService = new DBService;
-            const query = GET_FOOD_FOR_NAME(this.foodName, this.allergy, this.group, this.subgroup, this.offset);
+            const query = GET_FOOD_FOR_NAME(this.foodName, await this.getFoodFromAllergies(), this.group, this.subgroup, this.offset);
             this.fooditems = await dbService.query(query);
             this.fooditems = this.fooditems.rows;
             this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.foodName));
@@ -41,6 +42,30 @@ export default {
         },
         compare(event: any, id: String) {
             this.$emit('compare', null, id);
+        },
+        async getFoodFromAllergies(){
+            let resultAllergy = this.changeArrayToString(this.allergy);
+            let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
+            allergyFoodResultQuery = allergyFoodResultQuery.rows;
+            let allergyFood = []  as string[];
+            for (var food of allergyFoodResultQuery) {
+                allergyFood.push(food.food);
+            }
+            console.log(allergyFood)
+            return allergyFood
+        },
+        changeArrayToString(convert: any){
+            let allergyInString = "('";
+            if (convert != "") {
+              for (let i = 0; i < convert.length; i++) {
+                if (i + 1 != convert.length)
+                    allergyInString += convert[i] + "', '";
+                else
+                    allergyInString += convert[i];
+              }
+            }
+            allergyInString += "')";
+            return allergyInString;
         }
     },
     watch: {
