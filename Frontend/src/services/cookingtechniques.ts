@@ -26,6 +26,5 @@ export function getTechniqueCounts(rows: any) {
       }
     }
   }
-  console.log(techniqueCounts);
   return techniqueCounts;
 }

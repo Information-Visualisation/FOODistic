@@ -1,7 +1,7 @@
 <script lang="ts">
 
-import { DBService, avg, distinctNames } from '../services/db.service'
-import type { Rows, Row, DistinctRows } from '../services/db.service';
+import { DBService } from '../services/db.service'
+import type { Rows } from '../services/db.service';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
@@ -38,7 +38,10 @@ export default {
     data() {
         return {
             isLoading: true,
-            recipes: null as unknown as Rows,
+            isFiltering: false,
+            recipes: null,
+            filters: [] as Array<string>,
+            filteredRecipes: null,
             image: new Image(20, 20),
             data: {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
@@ -81,6 +84,7 @@ export default {
             const queryString: string = GET_RECIPES_FOR(this.id);
             this.recipes = await dbService.query(queryString, false);
             this.recipes = this.recipes.rows;
+            this.filteredRecipes = this.recipes;
             this.fillGraph();
             this.$nextTick(() => {
                 this.loaded();
@@ -90,16 +94,37 @@ export default {
             this.isLoading = false;
         },
         fillGraph() {
-            this.data.datasets[0].data = getTechniqueCounts(this.recipes);
+            this.isFiltering = true;
+            this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
+            console.log(getTechniqueCounts(this.filteredRecipes));
+            this.$nextTick(() => {
+                this.isFiltering = false;
+            })
         },
-        // footer(tooltipItems: any) {
-        //     let result = ''
-        //     tooltipItems.forEach((tooltipItem: any) => {
-        //         //result += '<TechniqueIcon :technique="'+this.data.labels[tooltipItem.parsed.x]+'"></TechniqueIcon>'
-        //         result += '<img src="https://i.etsystatic.com/18461744/r/il/8cc961/1660161853/il_794xN.1660161853_sohi.jpg" />'
-        //     });
-        //     return result;
-        // }
+        checkedRecipe(event: any, recipeName: string, checked: boolean) {
+            if (checked) {
+                this.filters.push(recipeName);
+            } else {
+                this.filters = this.filters.filter(name => name !== recipeName);
+            }
+            this.updateFilters(this.filters.length == 0);
+        },
+        updateFilters(all: boolean) {
+            if (all) {
+                this.filteredRecipes = this.recipes;
+            } else {
+                this.filteredRecipes = this.recipes.filter((recipe: any) => {
+                    for (let i = 0; i < this.filters.length; i++) {
+                        if (recipe.recipename === this.filters[i]) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
+            this.fillGraph()
+        }
     }
 }
 </script>
@@ -116,7 +141,7 @@ export default {
                 <div v-if="recipes.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
                     techniques found
                 </div>
-                <Bar :data="data" :options="options" />
+                <Bar v-if="!isFiltering" :data="data" :options="options" />
             </div>
             <div class="collapse" id="collapseExample">
                 Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
@@ -130,9 +155,9 @@ export default {
             <div v-if="recipes.length <= 0" class="position-absolute top-50 start-50 translate-middle alert alert-dark"
                 role="alert">No recipes found</div>
             <ul class="list-group">
-                <li class="list-group-item" v-for="recipe in recipes">
-                    <RecipeItem :title=recipe.recipename :techniques=recipe.techniques></RecipeItem>
-                </li>
+                <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
+                    @checked="checkedRecipe">
+                </RecipeItem>
             </ul>
         </div>
         <div class="collapse" id="collapseExample">

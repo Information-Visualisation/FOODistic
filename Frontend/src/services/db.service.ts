@@ -21,15 +21,6 @@ export class DBService {
   }
 }
 
-export function avg(length: number, values: number[]): number {
-  let sum: number = 0;
-  for (let i = 0; i < length; i++) {
-    sum += values[i];
-  }
-  let avg: number = (sum / length) || 0;
-  return avg;
-}
-
 export function distinctNames(rows: Rows): DistinctRows {
   const names: DistinctRows = {};
   rows.forEach((row: Row) => {

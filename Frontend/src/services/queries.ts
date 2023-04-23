@@ -107,7 +107,7 @@ export function GET_RECIPES_FOR(id: string): string {
 		pp_recipes.id = raw_recipes.id 
 	)
 	ORDER BY recipename
-	LIMIT 100`;
+	--LIMIT 100`;
 }
 
 export function GET_INGREDIENTS_FOR(id: string): string {

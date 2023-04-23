@@ -1,9 +1,9 @@
 <script lang="ts">
-
-import { DBService, avg, distinctNames } from '../services/db.service'
+import { DBService, distinctNames } from '../services/db.service';
+import { avg, mean, std } from '../services/statistics';
 import type { Rows, Row, DistinctRows } from '../services/db.service';
-import { Bar } from 'vue-chartjs';
 import SpinnerComponent from './SpinnerComponent.vue';
+import BarWithErrorBarChart from './../services/errorbar.chart';
 import { MACRO_NUTRIENTS_FOR } from '../services/queries';
 import {
     Chart as ChartJS,
@@ -13,7 +13,8 @@ import {
     BarElement,
     CategoryScale,
     LinearScale
-} from 'chart.js'
+} from 'chart.js/auto'
+import { Chart } from 'vue-chartjs'
 
 const dbService = new DBService;
 
@@ -23,7 +24,7 @@ export default {
     name: 'NutrientGraph',
     components: {
         SpinnerComponent,
-        Bar
+        BarWithErrorBarChart
     },
     props: {
         id: {
@@ -41,7 +42,7 @@ export default {
                 datasets: [{
                     labels: ' ',
                     backgroundColor: ["#171819", "#C5AD92", "#7D6D62", "#8bf60b", "#edd5b4", "#d57144"],
-                    data: [0, 0, 0, 0, 0, 0]
+                    data: [{}, {}, {}, {}, {}, {}]
                 }]
             },
             options: {
@@ -83,7 +84,6 @@ export default {
         },
         fillGraph(log: boolean = false) {
             let rows: Rows = this.result.rows as unknown as Rows;
-            if (log) { this.logFetched(rows); }
 
             if (rows.length <= 0) {
                 this.noData = true;
@@ -94,12 +94,16 @@ export default {
                 let i = 0;
                 Object.keys(distincts).forEach((key: string) => {
                     const values: number[] = distincts[key];
-                    const length: number = values.length;
 
                     //alternative less biased values v
                     //let minAndMax: number[] = [Math.min(...values),Math.max(...values)];
 
-                    this.data.datasets[0].data[i++] = avg(length, values);
+                    const m = mean(values);
+                    const s = std(values);
+                    const upper = m+s;
+                    const downer = m-s;
+
+                    this.data.datasets[0].data[i++] = {y: m, yMin: downer, yMax: upper};
                 });
             }
         },
@@ -112,12 +116,12 @@ export default {
         <h3>Nutrient Graph</h3>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
-            <Bar :data="data" :options="options" />
+            <BarWithErrorBarChart :data="data" :options="options" />
         </div>
         <div v-else="!isLoading" class="position-relative">
             <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
             </div>
-            <Bar :data="data" :options="options" />
+            <BarWithErrorBarChart :data="data" :options="options" />
         </div>
         <div class="collapse" id="collapseExample">
             Some placeholder content for the collapse component. This panel is hidden by default but revealed when the

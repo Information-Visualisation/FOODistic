@@ -1,5 +1,6 @@
 <script lang="ts">
-import { DBService, avg, distinctNames } from '@/services/db.service';
+import { DBService, distinctNames } from '@/services/db.service';
+import { mean } from '@/services/statistics';
 import { GET_FOOD_FOR_ID, MACRO_NUTRIENTS_FOR } from '@/services/queries';
 import {
     Chart as ChartJS,
@@ -100,36 +101,33 @@ export default {
             this.otherFoodData = await dbService.query(GET_FOOD_FOR_ID(this.otherId));
 
             this.rows = await dbService.query(MACRO_NUTRIENTS_FOR(this.id), false);
+            this.rows = this.rows!.rows;
             this.otherRows = await dbService.query(MACRO_NUTRIENTS_FOR(this.otherId), false);
+            this.otherRows = this.otherRows!.rows;
         },
         loaded() {
             this.isLoading = false;
         },
         fillGraph(log: boolean = false) {
-            let rows1 = this.rows!.rows;
-            let rows2 = this.otherRows!.rows;
+            this.data.datasets[0].label = this.foodData!.rows[0].naam;
+            this.data.datasets[1].label = this.otherFoodData!.rows[0].naam;
 
-            this.data.datasets[0].label = this.foodData.rows[0].naam;
-            this.data.datasets[1].label = this.otherFoodData.rows[0].naam;
-
-            let distincts1 = distinctNames(rows1);
-            let distincts2 = distinctNames(rows2);
+            let distincts1 = distinctNames(this.rows!);
+            let distincts2 = distinctNames(this.otherRows!);
             const MACRO_NUTRIENTS: number = 6;
 
             let i = 0;
 
             Object.keys(distincts1).forEach((key: string) => {
                 const values1: number[] = distincts1[key];
-                const length1: number = values1.length;
-                this.data.datasets[0].data[i++] = avg(length1, values1);
+                this.data.datasets[0].data[i++] = mean(values1);
             });
 
             i=0;
 
             Object.keys(distincts2).forEach((key: string) => {
                 const values2: number[] = distincts2[key];
-                const length2: number = values2.length;
-                this.data.datasets[1].data[i++] = avg(length2, values2);
+                this.data.datasets[1].data[i++] = mean(values2);
             });
         },
     }
