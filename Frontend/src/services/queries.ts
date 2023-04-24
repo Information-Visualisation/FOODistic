@@ -122,3 +122,25 @@ export function GET_INGREDIENTS_FOR(id: string): string {
 		pp_recipes.ingredient_ids ~ CONCAT('(?<=\D)',CONCAT(ingredients_filtered.id, '(?=\D)'))
 	)`;
 }
+
+export function GET_ALLERGY_FOR(foodName: string): string {
+	return "SELECT allergy FROM allergies WHERE food="+ foodName;
+}
+
+export function GET_ALLERGIES_FOR(foods: Object[]): string {
+	let query = "SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT null AND (";
+	for (let i = 0; i < foods.length - 1; ++i) {
+		query += "food = '" + foods[i]?.naam + "' OR ";
+	}
+	query += "food = '" + foods.pop()?.naam + "');";
+	return query;
+}
+
+export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
+	let query = "SELECT food, allergy FROM allergies WHERE allergy IS NOT null AND (";
+	for (let i = 0; i < foods.length - 1; ++i) {
+		query += "food = '" + foods[i]?.naam + "' OR ";
+	}
+	query += "food = '" + foods.pop()?.naam + "');";
+	return query;
+}

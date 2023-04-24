@@ -120,7 +120,7 @@ export default {
         fillGraph() {
             this.isFiltering = true;
             this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
-            console.log(getTechniqueCounts(this.filteredRecipes));
+            // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
