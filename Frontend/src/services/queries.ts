@@ -15,6 +15,19 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 	OFFSET `+pageSize*pageCount;
 }
 
+export function GET_FOODCOUNT_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = ""): string {
+	if (foodGroup == "All Foodgroups") foodGroup = "";
+	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
+	return `SELECT COUNT(*) as c
+	FROM food
+	WHERE (
+		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
+		`+(foodGroup==""?"":(`AND food.food_group = '`+foodGroup+`'`))+`
+		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
+		`+orAllergies(allergies)+`
+	)`;
+}
+
 function orAllergies(allergies: string[]) {
 	if (allergies.length!=0) {
 		let queryString: string = `AND NOT (lower(food.naam) LIKE '%`+allergies[0].toLocaleLowerCase()+`%'`;
@@ -33,14 +46,6 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 	FROM food
 	WHERE (
 		id=`+id+`
-	)`;
-}
-
-export function GET_FOODCOUNT_FOR_NAME(name: string = ""): string {
-	return `SELECT COUNT(*) as c
-	FROM food
-	WHERE (
-		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
 	)`;
 }
 

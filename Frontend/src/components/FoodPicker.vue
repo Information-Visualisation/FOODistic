@@ -21,6 +21,7 @@ export default {
     },
     data() {
         return {
+            isLoading: true,
             fooditems: null,
             totalCount: 0,
             pageSize: 24,
@@ -33,11 +34,14 @@ export default {
     emits: ["compare", "returnFooditems"],
     methods: {
         async query() {
-            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, await this.getFoodFromAllergies(), this.group, this.subgroup, this.offset));
+            this.isLoading = true;
+            const allergies = await this.getFoodFromAllergies();
+            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset));
             this.fooditems = this.fooditems.rows;
-            this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name));
+            this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
             this.totalCount = parseInt(this.totalCount.rows[0].c);
             this.returnFooditems();
+            this.isLoading = false;
         },
         async getFoodFromAllergies(){
             let resultAllergy = this.changeArrayToString(this.allergies);
@@ -66,7 +70,7 @@ export default {
             this.$emit('compare', null, id);
         },
         returnFooditems() {
-            this.$emit('returnFooditems', null, this.fooditems);
+            this.$emit('returnFooditems', null, this.fooditems, this.totalCount);
         }
     },
     watch: {
@@ -91,22 +95,14 @@ export default {
 <template>
     <div class="container vstack">
 
-        <div v-if="fooditems === null" class="justify-content-center">
+        <div v-if="fooditems === null || isLoading" class="justify-content-center">
             <SpinnerComponent />
         </div>
-        <div v-if="fooditems !== null">
+        <div v-if="fooditems !== null && !isLoading">
             <div v-if="fooditems.length == 0">No results found</div>
             <FoodItem v-for="fooditem in fooditems" :name=fooditem.naam :id="fooditem.id.toString()"
                 :comparing="comparing" @compare="compare"></FoodItem>
         </div>
-
-        <nav v-if="totalCount>=1" aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-                <li v-for="(n,index) in 5" class="page-item"><a class="page-link" href="#">{{ index+1 }}</a></li>
-                TODO: perhaps make pagination
-            </ul>
-        </nav>
-
 
     </div>
 </template>

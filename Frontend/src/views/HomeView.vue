@@ -5,6 +5,9 @@ import FoodPicker from '../components/FoodPicker.vue';
 import SpinnerComponent from '@/components/SpinnerComponent.vue';
 import FoodTable from '@/components/table/FoodTable.vue';
 
+const MAX_PAGINATION: number = 10;
+const PAGE_SIZE: number = 24;
+
 const dbService = new DBService;
 export default {
   components: {
@@ -20,6 +23,10 @@ export default {
       foodGroupitems: null,
       foodSubGroupitems: null,
       filteritems: null,
+
+      lowerPages: [] as Array<Number>,
+      hardOffset: 0,
+      upperPages: [] as Array<Number>,
 
       foodName: this.$route.query.search !== undefined ? this.$route.query.search as string : "",
       allergies: this.$route.query.allergies !== undefined ? this.makeArray() : [],
@@ -40,6 +47,7 @@ export default {
       this.foodGroupitems = this.foodGroupitems.rows;
       this.fetchAllergies();
       this.fetchSubFoodGroups();
+      this.hardOffset = this.offset;
       this.loaded();
     },
     async fetchSubFoodGroups() {
@@ -89,6 +97,44 @@ export default {
     async fetchAllergies() {
       this.filteritems = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
       this.filteritems = this.filteritems.rows;
+    },
+    setPage(i: number) {
+      this.offset = i;
+      this.route();
+    },
+    receiveRowCount(event: any, totalCount: number) {
+      const pageCount = Math.ceil(totalCount / PAGE_SIZE);
+      if (this.offset >= pageCount) {
+        this.setPage(pageCount-1);
+      }
+      this.upperPages = this.countUp(this.offset, pageCount);
+      this.lowerPages = this.countDown(this.offset);
+      this.hardOffset = this.offset;
+    },
+    countUp(startValue: number, max: number): Array<number> {
+      var array = [];
+      for (var i = 1; i <= MAX_PAGINATION; i++) {
+        var value = startValue + i;
+        if (value < max) {
+          array.push(value);
+        } else {
+          break;
+        }
+      }
+      return array;
+    },
+    countDown(startValue: number) {
+      var array = [];
+      for (var i = 1; i <= MAX_PAGINATION; i++) {
+        var value = startValue - i;
+        if (value >= 0) {
+          array.push(value);
+        } else {
+          break;
+        }
+      }
+      array.reverse();
+      return array;
     },
   }
 }
@@ -158,7 +204,23 @@ export default {
           <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
         </div>
         <div class="">
-          <FoodTable :data="{name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies}"></FoodTable>
+          <FoodTable
+            :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
+            @returnTotalCount="receiveRowCount">
+          </FoodTable>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              <li v-for="n in lowerPages" class="page-item" @click="setPage(n as number)">
+                <a class="page-link" href="#">{{ n as number + 1 }}</a>
+              </li>
+              <li class="list-group-item active">
+                <a class="page-link" href="#">{{ hardOffset + 1 }}</a>
+              </li>
+              <li v-for="n in upperPages" class="page-item" @click="setPage(n as number)">
+                <a class="page-link" href="#">{{ n as number + 1}}</a>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </div>

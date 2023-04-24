@@ -41,6 +41,7 @@ export default {
             console.log(newV);
         }
     },
+    emits: ["returnTotalCount"],
     methods: {
         getMaxColums() {
             let max_value_colum = [] as number[];
@@ -55,10 +56,12 @@ export default {
             }
             return max_value_colum;
         },
-        receiveFooditems(event: any, fooditems: any) {
-            console.log(fooditems);
-            this.foodItems = fooditems;
-            this.createNutritions();
+        receiveFooditems(event: any, foodItems: any, totalCount: number) {
+            if (foodItems !== undefined) {
+                this.foodItems = foodItems;
+                this.$emit('returnTotalCount', null, totalCount);
+                this.createNutritions();
+            }
         },
         async createNutritions() {
             this.foodNutritions = new Object();
@@ -113,13 +116,15 @@ export default {
                         <TableGraph :percentages="[70, 15, 15]" />
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead :columnNames="['Name', 'Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins']" />
+                        <TableRowHead
+                            :columnNames="['Name', 'Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins']" />
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions" :id="foodItems[i].id" :name="name" :items="nutritions" />
+                        <TableRowNutrition v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions"
+                            :id="foodItems[i].id" :name="name" :items="nutritions" />
                         <!--<TableRowTemp v-for="items in test_items" :items='items'/>-->
                         <!-- change to foods and nutrition values-->
                     </tbody>
