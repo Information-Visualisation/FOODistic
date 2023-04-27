@@ -48,14 +48,15 @@ export default {
     emits: ["returnTotalCount"],
     methods: {
         getMaxColums() {
-            let max_value_colum = [] as number[];
-            let colums = this.test_items[0].length;
-            for (let i = 1; i < this.test_items[0].length; i++) {
-                max_value_colum.push(this.test_items[0][i] as number);
-            }
-            for (let i = 1; i < this.test_items.length; i++) {
-                for (let j = 1; j < colums; j++) {
-                    max_value_colum[j - 1] = Math.max(this.test_items[i][j] as number, max_value_colum[j - 1]);
+            const column = 6;
+            let max_value_colum = Array<number>(column);
+            max_value_colum.fill(0);
+            for( var food in this.foodNutritions){
+                for(let i = 0; i < column; i++){
+                    var value = this.foodNutritions[food][i];
+                    if(value != undefined){
+                        max_value_colum[i] = Math.max(value, max_value_colum[i]);
+                    }
                 }
             }
             return max_value_colum;
@@ -105,9 +106,28 @@ export default {
         getAllergiesOfFood(foodName: string) {
             return this.allergiesPerFood?.filter(function(item) {return item.food==foodName;});
         },
-        getPercentages(numColumns: number) {
+        getAllergyPercentages(numColumns: number) {
             let percentage = (100 / numColumns).toFixed(2);
             return Array<string>(numColumns).fill(percentage);
+        },
+        getNutrientPercentages(){
+            const column = 6;
+            var total = 0;
+            let percentage = Array<any>(column);
+            percentage.fill(0);
+            for( var food in this.foodNutritions){
+                for(let i = 0; i < column; i++){
+                    var value = this.foodNutritions[food][i];
+                    if(value != undefined){
+                        percentage[i] += value;
+                        total += value;
+                    }
+                }
+            }
+            for(let i = 0; i < column; i++){
+                percentage[i] = ((percentage[i]/total)*100).toFixed(2);;
+            }
+            return percentage;
         }
     }
 }
@@ -137,7 +157,7 @@ export default {
             <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="[20, 10, 5, 15, 30, 20]" />
+                        <TableGraph :percentages="getNutrientPercentages()" />
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead
@@ -148,7 +168,7 @@ export default {
                             <SpinnerComponent></SpinnerComponent>
                         </div>
                         <TableRowNutrition v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions"
-                            :id="foodItems[i].id" :name="name" :items="nutritions" />
+                            :id="foodItems[i].id" :name="name" :items="nutritions" :max_value="getMaxColums()"/>
                         <!--<TableRowTemp v-for="items in test_items" :items='items'/>-->
                         <!-- change to foods and nutrition values-->
                     </tbody>
@@ -157,7 +177,7 @@ export default {
             <div class="tab-pane fade" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getPercentages(allergies.length)" />
+                        <TableGraph :percentages="getAllergyPercentages(allergies.length)" />
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead

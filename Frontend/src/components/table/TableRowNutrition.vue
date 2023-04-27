@@ -10,13 +10,15 @@ export default {
     },
     created() {
         console.log(this.items);
+        console.log("max value: " + this.max_value)
     },
     methods: {
-        // calcBarWitdh(column: number, value: number) {
-        //     console.log(this.max_value);
-        //     let width:number = this.max_value![column]/100 + value;
-        //     return width + 'px';
-        // },
+         calcBarWitdh(column: number, value: number) {
+            if(value == undefined)
+                return '0px';
+            let width:number = (value/this.max_value![column])*75;
+            return width + 'px';
+         },
     },
     components: { FoodImg }
 }
@@ -29,7 +31,7 @@ export default {
         </th>
         <td scope="col" v-for="(value, name, index) in items">
             <div class="sub-bar-wrapper">
-                <!-- <div class="sub-bar" :style="{width: calcBarWitdh(index, value)}"> </div> -->
+                <div class="sub-bar" :style="{width: calcBarWitdh(items!.indexOf(value), value)}"> </div>
                 <p class="sub-bar-percentage">{{ (Math.round(value as number * 100) / 100).toFixed(2) }}</p>
             </div>
         </td>
@@ -51,7 +53,7 @@ export default {
 }
 
 .sub-bar-percentage {
-    margin: 0px 0px 0px 5px;
+    margin: 0px 5px 0px 5px;
 }
 
 .sub-bar {
