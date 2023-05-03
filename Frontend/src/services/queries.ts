@@ -117,6 +117,27 @@ export function GET_RECIPES_FOR(id: string): string {
 	--LIMIT 100`;
 }
 
+export function GET_RECIPE(id: string): string{
+	return `SELECT DISTINCT
+		pp_recipes.id as recipeid,
+		raw_recipes.name as recipename,
+		pp_recipes.techniques as techniques
+	FROM food,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
+}
+
+export function GET_RECIPE_NUTRIENTS(id: string): string{
+	return `SELECT DISTINCT
+		pp_recipes.id as recipeid,
+		raw_recipes.nutrition as nutritions
+	FROM food,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
+}
+
 export function GET_INGREDIENTS_FOR(id: string): string {
 	return `SELECT raw_recipes.name,pp_recipes.ingredient_ids,ingredients_filtered.processed
 	FROM raw_recipes, pp_recipes, ingredients_filtered

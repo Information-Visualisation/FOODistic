@@ -5,7 +5,7 @@ import type { Rows } from '../services/db.service';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
-import { Bar } from 'vue-chartjs';
+import { Bar, Bubble } from 'vue-chartjs';
 
 import {
     Chart as ChartJS,
@@ -29,6 +29,7 @@ export default {
         SpinnerComponent,
         RecipeItem,
         Bar,
+        Bubble,
     },
     props: {
         id: {
@@ -119,6 +120,7 @@ export default {
         },
         fillGraph() {
             this.isFiltering = true;
+            //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
             this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
             // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
@@ -180,7 +182,7 @@ export default {
                 role="alert">No recipes found</div>
             <ul class="list-group">
                 <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
-                    @mouseenter="checkedRecipe(recipe.recipename, true)" @mouseleave="checkedRecipe(recipe.recipename, false)"> <!-- checked aanpassen naar hover + click go to recipes -->
+                    @mouseenter="checkedRecipe(recipe.recipename, true)" @mouseleave="checkedRecipe(recipe.recipename, false)" @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid }})"> <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>
