@@ -125,7 +125,7 @@ export default {
                 this.isFiltering = false;
             })
         },
-        checkedRecipe(event: any, recipeName: string, checked: boolean) {
+        checkedRecipe(recipeName: string, checked: boolean) {
             if (checked) {
                 this.filters.push(recipeName);
             } else {
@@ -180,7 +180,7 @@ export default {
                 role="alert">No recipes found</div>
             <ul class="list-group">
                 <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
-                    @checked="checkedRecipe">
+                    @mouseenter="checkedRecipe(recipe.recipename, true)" @mouseleave="checkedRecipe(recipe.recipename, false)"> <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>

@@ -49,6 +49,10 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 	)`;
 }
 
+export function ALL_NUTRIENTS_FOR(food: number[]){
+	
+}
+
 export function MACRO_NUTRIENTS_FOR(id: string): string {
 	return `SELECT 'Fiber' as name,orig_source_name,orig_content as value FROM food,nutrients
 WHERE ( 
