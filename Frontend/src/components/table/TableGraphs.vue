@@ -25,14 +25,9 @@ export default {
     </tr>
 </template>
 
-<style>
-:root {
-    --bar-chart-width: 50px;
-}
-
-
+<style scoped>
 .bar-wrapper {
-    width: var(--bar-chart-width);
+    width: 50px;
     display: flex;
     flex-direction: column;
     justify-content: end;

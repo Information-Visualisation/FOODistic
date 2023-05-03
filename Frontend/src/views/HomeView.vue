@@ -142,110 +142,104 @@ export default {
 
 <template>
   <main>
-    <div>
-      <div class="position-relative" v-if="isLoading">
-        <SpinnerComponent></SpinnerComponent>
-      </div>
+      <SpinnerComponent v-if="isLoading"></SpinnerComponent>
 
-      <div class="container" v-if="!isLoading">
-        <div class="d-flex justify-content-center" role="search">
+    <div class="container d-flex flex-column align-items-stretch" v-else>
+      <div role="search" class="d-flex flex-column align-self-center" style="width: 80%">
+        <div class="d-flex justify-content-center">
+          <input v-model="foodName" class="form-control me-2" type="search" name="foodName"
+            placeholder="Search" aria-label="Search" @keyup.enter="route" @blur="route">
+          <div @click="route" class="btn btn-success">Search</div>
+        </div>
+        <div class="d-flex justify-content-between" style="margin-top: 5px">
           <!-- <input class="form-control me-2 focus-ring-danger" type="search" placeholder="Search" aria-label="Search"
             name="search" v-model="search"> -->
-
           <div>
-            <!-- <h4>Food Group:</h4> -->
-            <div class="btn-group">
-              <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
-                aria-expanded="false">{{ foodGroup }}</button>
+            <!-- Food group dropdown menu -->
+            <div class="select-button btn-group">
+              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ foodGroup }}
+              </button>
               <ul class="dropdown-menu">
                 <li class="dropdown-item" @click="setFoodgroup('All Foodgroups')">All Foodgroups</li>
-                <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems"
-                  @click="setFoodgroup(foodGroupitem.food_group)">{{ foodGroupitem.food_group }}</li>
+                <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems" @click="setFoodgroup(foodGroupitem.food_group)">
+                  {{ foodGroupitem.food_group }}
+                </li>
               </ul>
             </div>
-            <div v-if="foodGroup != 'All Foodgroups'">
-              <!-- <h4>Food Subgroup:</h4> -->
-              <div class="btn-group">
-                <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
-                  aria-expanded="false">{{ subFoodGroup }}</button>
-                <ul class="dropdown-menu">
-                  <li class="dropdown-item" @click="setSubFoodGroup('All Foodsubgroups')">All Foodsubgroups</li>
-                  <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems"
-                    @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">{{ foodSubGroupitem.food_subgroup }}
-                  </li>
-                </ul>
-              </div>
+            <span v-if="foodGroup != 'All Foodgroups'">></span>
+            <!-- Subfoodgroup dropdown menu -->
+            <div v-if="foodGroup != 'All Foodgroups'" class="select-button btn-group">
+              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ subFoodGroup }}
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" @click="setSubFoodGroup('All Foodsubgroups')">All Foodsubgroups</li>
+                <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems" @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">
+                  {{ foodSubGroupitem.food_subgroup }}
+                </li>
+              </ul>
             </div>
           </div>
-          <div class="row">
-            <div class="col">
-              <div class="btn-group">
-                <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  Filter
-                </button>
-                <ul class="dropdown-menu">
-                  <li v-for="filteritem in filteritems">
-                    <div class="form-check">
-                      <input type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" name="alergies"
-                        v-model="allergies" @change="route" :checked="allergies.indexOf(filteritem.allergy) != -1" />
-                      <label :for="filteritem.allergy">
-                        {{ filteritem.allergy }}
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <input v-model="foodName" class="form-control me-2 height width" type="search" name="foodName"
-            placeholder="Search" aria-label="Search" @keyup.enter="route" @blur="route">
-          <div @click="route" class="btn btn-outline-success height">Search</div>
-          <!-- <button class="btn btn-outline-danger" type="submit" @click="searchSubmit">Search</button> -->
-        </div>
-        <div class="">
-          <FoodTable
-            :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
-            @returnTotalCount="receiveRowCount">
-          </FoodTable>
-          <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-              <li v-for="n in lowerPages" class="page-item" @click="setPage(n as number)">
-                <a class="page-link" href="#">{{ n as number + 1 }}</a>
-              </li>
-              <li class="list-group-item active">
-                <a class="page-link" href="#">{{ hardOffset + 1 }}</a>
-              </li>
-              <li v-for="n in upperPages" class="page-item" @click="setPage(n as number)">
-                <a class="page-link" href="#">{{ n as number + 1}}</a>
+          <!-- Allergy Filter button -->
+          <div class="select-button btn-group">
+            <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+              Exclude Allergies
+            </button>
+            <ul class="dropdown-menu">
+              <li class="dropdown-item" v-for="filteritem in filteritems">
+                <div class="form-check">
+                  <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" name="alergies"
+                    v-model="allergies" @change="route" :checked="allergies.indexOf(filteritem.allergy) != -1" />
+                  <label class="form-check-label" :for="filteritem.allergy">
+                    {{ filteritem.allergy }}
+                  </label>
+                </div>
               </li>
             </ul>
-          </nav>
+          </div>
         </div>
+      </div>
+      <div class="">
+        <FoodTable
+          :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
+          @returnTotalCount="receiveRowCount">
+        </FoodTable>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            <li v-for="n in lowerPages" class="page-item" @click="setPage(n as number)">
+              <a class="page-link" href="#">{{ n as number + 1 }}</a>
+            </li>
+            <li class="list-group-item active">
+              <a class="page-link" href="#">{{ hardOffset + 1 }}</a>
+            </li>
+            <li v-for="n in upperPages" class="page-item" @click="setPage(n as number)">
+              <a class="page-link" href="#">{{ n as number + 1}}</a>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </main>
 </template>
 
-<style>
+<style lang="scss">
+@import "@/../scss/custom.scss";
 .container {
   padding: 40px;
 }
 
-.height {
-  height: 40px;
-}
-
-.width {
-  width: 50%;
-}
-
 .dropdown-item:hover {
-  background-color: red;
+  background-color: $app-light;
 }
 
 .dropdown-menu {
   max-height: 280px;
   overflow-y: auto;
+  color: $app-red;
+}
+
+.dropdown-item-checkbox {
+  margin-right: 10px;
 }
 </style>

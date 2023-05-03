@@ -199,18 +199,17 @@ export default {
     </div>
 </template>
 
-<style>
+<style scoped lang="scss">
+@import "@/../scss/custom.scss";
 #table {
-    /* background-color: rgb(208, 208, 208); */
-    margin: 5%;
+    margin-top: 50px;
 
 }
 
 .tab-pane {
     border-style: solid;
-    border-width: 0px 1px 0px 1px;
     /* top right bottom left */
-    border-color: #dee2e6;
-    /* tried var(--bs-nav-tabs-link-active-border-color) but didn't work */
+    border-width: 0px 1px 0px 1px;
+    border-color: $gray-300;
 }
 </style>

@@ -145,8 +145,8 @@ export default {
             <RadarPlot :id="($route.query.id as string)" :otherId="id"></RadarPlot>
         </div>
         <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
-            <button v-if="!comparing" class="btn btn-primary mb-3" @click="toggleComparing">Compare ▶</button>
-            <button v-if="comparing" type="button" class="btn btn-primary mb-3" aria-label="Collapse"
+            <button v-if="!comparing" class="btn btn-success mb-3" @click="toggleComparing">Compare ▶</button>
+            <button v-if="comparing" type="button" class="btn btn-success mb-3" aria-label="Collapse"
                 @click="toggleComparing">
                 ◀ Collapse
             </button>
@@ -162,7 +162,7 @@ export default {
                         id: id,
                         compareSearch: this.compareSearch
                     },
-                }).href" v-if="picked" type="button" class="btn btn-primary mb-3" aria-label="Close">
+                }).href" v-if="picked" type="button" class="btn btn-success mb-3" aria-label="Close">
                 Main ▶
             </a>
             <br>

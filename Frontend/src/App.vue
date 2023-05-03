@@ -12,15 +12,15 @@ export default {
 </script>
 
 <template>
-  <nav class="navbar bg-body-tertiary">
+  <nav id="main-nav" class="navbar bg-body-tertiary">
     <div class="container-fluid">
-      <a id="logo" class="navbar-brand">
+      <a id="logo" class="navbar-brand" @click="$router.push({ name: 'home' })">
         <Logo />
       </a>
-      <div class="container-fluid d-flex flex-row justify-content-center">
-        <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'home' })"> Home</button>
-        <button type="button" class="btn btn-outline-danger" @click="$router.push({ name: 'about' })"> About</button>
-      </div>
+      <!-- <div class="container-fluid d-flex flex-row justify-content-center">
+        <button type="button" class="btn btn-success" @click="$router.push({ name: 'home' })"> Home</button>
+        <button type="button" class="btn btn-success" @click="$router.push({ name: 'about' })"> About</button>
+      </div> -->
     </div>
   </nav>
 
@@ -45,18 +45,16 @@ export default {
   <RouterView />
 </template> -->
 
-<style scoped>
-.form-control:focus {
-  border-color: brown;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
-}
+<style scoped lang="scss">
+@import "../scss/custom.scss";
 
-nav {
-  background-color: antiquewhite;
+#main-nav {
+  background-color: $app-light;
 }
 
 #logo {
-  position: absolute;
+  cursor: pointer;
+  // position: absolute;
 }
 
 .dropdown-menu {

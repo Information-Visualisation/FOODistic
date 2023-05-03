@@ -13,16 +13,6 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue')
     },
-    // {
-    //   path: '/foodgroup/:name',  // change to id
-    //   name: 'foodgroup',
-    //   component: () => import('../views/FoodGroup.vue')
-    // },
-    // {
-    //   path: '/subfoodgroup/:name',  // change to id
-    //   name: 'subfoodgroup',
-    //   component: () => import('../views/SubFoodGroup.vue')
-    // },
     {
       path: '/food/:name',  // change to id
       name: 'food',

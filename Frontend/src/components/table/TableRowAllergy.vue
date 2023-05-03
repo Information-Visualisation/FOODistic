@@ -45,8 +45,8 @@ export default {
 
 <style>
 .allergy-wrapper {
-    display: flex;
-    justify-content: center;
+    /* display: flex;
+    justify-content: center; */
 }
 
 </style>
