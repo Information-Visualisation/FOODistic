@@ -49,9 +49,6 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 	)`;
 }
 
-export function ALL_NUTRIENTS_FOR(food: number[]){
-	
-}
 
 export function MACRO_NUTRIENTS_FOR(id: string): string {
 	return `SELECT 'Fiber' as name,orig_source_name,orig_content as value FROM food,nutrients
@@ -117,12 +114,25 @@ export function GET_RECIPES_FOR(id: string): string {
 	--LIMIT 100`;
 }
 
-export function GET_RECIPE(id: string): string{
+export function GET_RECIPE(id: string, ingredients: string): string{
 	return `SELECT DISTINCT
+		food.naam as foodname,
+		food.id as foodid,
 		pp_recipes.id as recipeid,
 		raw_recipes.name as recipename,
 		pp_recipes.techniques as techniques
-	FROM food,pp_recipes,raw_recipes
+	FROM food,ingredients_filtered,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+		AND ingredients_filtered.processed in  `+ ingredients +`
+		AND (lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')))
+	);`
+}
+
+export function GET_RECIPE_INGREDIENTS(id: string): string{
+	return `SELECT DISTINCT
+	raw_recipes.ingredients as ingredient
+	FROM pp_recipes,raw_recipes
 	WHERE (
 		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
 	);`
@@ -168,4 +178,8 @@ export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
 	}
 	query += "food = '" + foods.pop()?.naam + "');";
 	return query;
+}
+
+export function GET_ALLERGIES_RECIPE(foods: string){
+	return "SELECT allergies.allergy FROM allergies WHERE allergies.food in "+ foods;
 }
