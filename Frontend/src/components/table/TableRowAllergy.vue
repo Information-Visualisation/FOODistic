@@ -5,7 +5,7 @@ export default {
     props: {
         name: String,
         id: Number,
-        allergyColumns: Array<string>,
+        allergyNames: Array<string>,
         allergies: Array<Object>
     },
     created() {
@@ -34,7 +34,7 @@ export default {
         <th @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })">
             <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
         </th>
-        <td scope="col" v-for="(allergy, index) in allergyColumns">
+        <td scope="col" v-for="(allergy, index) in allergyNames">
             <div class="allergy-wrapper">
                 <img v-if="hasAllergy(allergy)" :src="getImageUrl(allergy)" style="width: 50px"/>
                 <div v-else></div>
