@@ -89,7 +89,7 @@ export default {
         options.query.foodgroup = this.foodGroup;
       if (this.subFoodGroup != 'All Foodsubgroups')
         options.query.subfoodgroup = this.subFoodGroup;
-      if (this.offset)
+      if (this.offset >= 0)
         options.query.offset = this.offset;
 
       this.$router.push(options);

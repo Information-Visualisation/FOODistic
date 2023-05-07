@@ -17,8 +17,6 @@ export class DBService {
     }).then(function (data) {
       if (log) { console.log(data); } // this will be a string
       return JSON.parse(data);
-    }).catch(function (error) {
-      console.log(error);
     });
   }
 }
