@@ -99,7 +99,7 @@ export function GET_ALLERGIES_FOR(foods: Object[]): string {
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
 	}
-	query += "food = '" + foods.pop()?.naam + "');";
+	query += "food = '" + foods.pop()?.naam + "') ORDERY BY allergy;";
 	return query;
 }
 
@@ -108,6 +108,15 @@ export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
 	}
-	query += "food = '" + foods.pop()?.naam + "');";
+	query += "food = '" + foods.pop()?.naam + "') ORDER BY allergy;";
+	return query;
+}
+
+export function COUNT_ALLERGIES_FOR(foods: Object[]): string {
+	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage FROM allergies WHERE allergy IS NOT NULL AND (";
+	for (let i = 0; i < foods.length - 1; ++i) {
+		query += "food = '" + foods[i]?.naam + "' OR ";
+	}
+	query += "food = '" + foods.pop()?.naam + "') GROUP BY allergy ORDER BY allergy;";
 	return query;
 }

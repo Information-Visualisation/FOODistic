@@ -17,7 +17,7 @@ export default {
     <th scope="col"></th> <!-- First one should be empty-->
     <th scope="col" v-for="percentage in percentages">
         <div class="bar-wrapper">
-            <p class="bar-percentage">{{ percentage }}%</p>
+            <p class="bar-percentage">{{ Math.round(percentage * 100) / 100 }}%</p>
             <div class="bar" :style="{height: calcBarHeight(percentage)}">
             </div>
         </div>

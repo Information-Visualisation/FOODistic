@@ -7,7 +7,7 @@ import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
 import RecipesList from '@/components/RecipesList.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_FOR, GET_ALLERGIES_PER_FOOD_FOR } from '@/services/queries';
+import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
 import { DBService, distinctNames, type DistinctRows } from '@/services/db.service';
 import { mean } from '@/services/statistics';
 
@@ -34,8 +34,8 @@ export default {
             foodItems: [],
             foodNutritions: {} as Object,
             tabIndex: 0,
-            allergies: [] as string[],
-            allergiesPerFood: [] as Object[],
+            allergiesPerFood: [] as Object[],   // allergy {name: string, allergy: string}
+            allergyPercentages: [] as Object[], // allergy {name: string, percentage: number}
         }
     },
     created() {
@@ -46,6 +46,22 @@ export default {
         }
     },
     emits: ["returnTotalCount"],
+    computed: {
+        getAllergyNames() : string[] {
+            let allergies = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                allergies.push(this.allergyPercentages[i].allergy);
+            }
+            return allergies;
+        },
+        getAllergyPercentages() : number[] {
+            let percentages = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                percentages.push(this.allergyPercentages[i].percentage);
+            }
+            return percentages;
+        }
+    },
     methods: {
         getMaxColums() {
             const column = 6;
@@ -99,22 +115,14 @@ export default {
         },
         async fetchAllergyInfo() {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
-            // console.log(GET_ALLERGIES_FOR(this.foodItems));
-            let allergies = (await dbService.query(GET_ALLERGIES_FOR(this.foodItems))).rows;
-            this.allergies = [];
-            for (let i = 0; i < allergies.length; ++i) {
-                this.allergies.push(allergies[i].allergy);
-            }
+            this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
+            console.log(this.allergyPercentages);
         },
         setTabIndex(index: number) {
             this.tabIndex=index;
         },
         getAllergiesOfFood(foodName: string) {
             return this.allergiesPerFood?.filter(function(item) {return item.food==foodName;});
-        },
-        getAllergyPercentages(numColumns: number) {
-            let percentage = (100 / numColumns).toFixed(2);
-            return Array<string>(numColumns).fill(percentage);
         },
         getNutrientPercentages(){
             const column = 6;
@@ -160,6 +168,7 @@ export default {
                 <FoodPicker v-if="data !== undefined" :name="data?.name" :group="data?.group" :subgroup="data?.subgroup"
                     :offset="data?.offset" :allergies="data?.allergies" @returnFooditems="receiveFooditems"></FoodPicker>
             </div>
+            <!-- Nutrients -->
             <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
@@ -180,21 +189,22 @@ export default {
                     </tbody>
                 </table>
             </div>
+            <!-- Allergies -->
             <div class="tab-pane fade" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages(allergies.length)" />
+                        <TableGraph :percentages="getAllergyPercentages" />
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead
-                            :columnNames="['Name'].concat(allergies)" />
+                            :columnNames="['Name'].concat(getAllergyNames)" />
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowAllergy v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions"
-                            :id="foodItems[i].id" :name="name" :allergyColumns="allergies" :allergies="getAllergiesOfFood(name)" />
+                        <TableRowAllergy v-if="foodItems.length != 0" v-for="(food, i) in foodItems"
+                            :id="foodItems[i].id" :name="food.naam" :allergyNames="getAllergyNames" :allergies="getAllergiesOfFood(food.naam)" />
                     </tbody>
                 </table>
             </div>

@@ -13,7 +13,7 @@ export default {
     },
     props: {
         name: {type: String, default: ""},
-        allergies: {type: String, default: ""},
+        allergies: {type: Array<String>, default: ""},
         group: {type: String, default: ""},
         subgroup: {type: String, default: ""},
         offset: {type: Number, default: 0},
@@ -48,7 +48,7 @@ export default {
             let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
             allergyFoodResultQuery = allergyFoodResultQuery.rows;
             let allergyFood = []  as string[];
-            for (var food of allergyFoodResultQuery) {
+            for (var food in allergyFoodResultQuery) {
                 allergyFood.push(food.food);
             }
             return allergyFood
