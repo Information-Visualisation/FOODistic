@@ -6,6 +6,46 @@ export function CREATE_INGREDIENTS_VIEW() {
 			ORDER BY ingredients.id;`;
 }
 
+export function CREATE_NUTRIENTS_FILTERED() {
+	return `CREATE TABLE nutrients_filtered AS 
+	SELECT food.id, food.naam, 'Fiber' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+	WHERE ( 
+		lower(orig_source_name) LIKE '%fiber%' AND
+		food.id = nutrients.food_id
+		)
+	UNION ALL
+		SELECT food.id, food.naam, 'Fat' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+		WHERE ( 
+			lower(orig_source_name) LIKE '%fat%' AND
+			lower(orig_source_name) NOT LIKE '%fatty acid%' AND
+			food.id = nutrients.food_id
+		)
+	UNION ALL
+		SELECT food.id, food.naam, 'Fatty Acid' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+		WHERE ( 
+			lower(orig_source_name) LIKE '%fatty acid%' AND
+			food.id = nutrients.food_id
+		)
+	UNION ALL
+		SELECT food.id, food.naam, 'Proteins' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+		WHERE ( 
+			lower(orig_source_name) LIKE '%protein%' AND
+			food.id = nutrients.food_id
+		)
+	UNION ALL
+		SELECT food.id, food.naam, 'Carbohydrate' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+		WHERE ( 
+			lower(orig_source_name) LIKE '%carb%' AND
+			food.id = nutrients.food_id
+		)
+	UNION ALL
+		SELECT food.id, food.naam, 'Ash' as nutrient,orig_source_name,orig_content as value FROM food,nutrients
+		WHERE ( 
+			lower(orig_source_name) LIKE '%ash%' AND
+			food.id = nutrients.food_id
+		)`;
+}
+
 export function CREATE_FOOD_INGREDIENT_LINKER() {
 	return `CREATE TABLE food_ingredient_linker AS
 			SELECT 

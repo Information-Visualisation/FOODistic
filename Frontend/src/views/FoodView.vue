@@ -49,9 +49,9 @@ export default {
             }
         },
         deletePicked() {
+            this.startComparing();
             this.picked = false;
             this.id = '';
-            this.startComparing();
         },
         makeMain() {
             this.$router.push({
