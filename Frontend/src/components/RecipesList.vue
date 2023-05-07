@@ -127,6 +127,9 @@ export default {
                 this.isFiltering = false;
             })
         },
+        getBaseLog(x: number, y: number) {
+            return Math.log(y) / Math.log(x);
+        },
         getNutrients(index: Number, indexNutrient: Number){
             let nutrient = 0;
             for(let i = 0; i < this.recipes.length; i++){
@@ -134,12 +137,12 @@ export default {
                     nutrient += this.recipes[i].nutritions[indexNutrient];
                 }
             }
-            let resultMath = Math.log(nutrient);
+            let resultMath = this.getBaseLog(1.5,nutrient);
             if(resultMath.toString() == "-Infinity"){
                 return 0;
             }
             else{
-                return Math.log(nutrient);
+                return resultMath;
             }
         },
         checkedRecipe(recipeName: string, checked: boolean) {
