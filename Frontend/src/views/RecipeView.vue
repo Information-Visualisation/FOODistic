@@ -34,7 +34,7 @@ export default {
         async fetchData() {
             let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id))
             let test = this.changeArrayToString(ingredients.rows[0].ingredient)
-            console.log(test)
+            //console.log(test)
             let result2 = await dbService.query(GET_RECIPE(this.id, test));
             this.recipe = result2.rows;
             this.techniqueStrings = getFilteredTechniques(this.recipe[0].techniques);

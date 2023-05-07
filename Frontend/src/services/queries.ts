@@ -102,7 +102,8 @@ export function GET_RECIPES_FOR(id: string): string {
 		raw_recipes.name as recipename,
 		food.id as foodid, 
 		food.naam as foodname,
-		pp_recipes.techniques as techniques
+		pp_recipes.techniques as techniques,
+		raw_recipes.nutrition as nutritions
 	FROM food,ingredients_filtered,pp_recipes,raw_recipes
 	WHERE (
 		food.id = `+ id +` AND
@@ -128,6 +129,7 @@ export function GET_RECIPE(id: string, ingredients: string): string{
 		AND (lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')))
 	);`
 }
+
 
 export function GET_RECIPE_INGREDIENTS(id: string): string{
 	return `SELECT DISTINCT

@@ -45,16 +45,16 @@ export default {
             filters: [] as Array<string>,
             filteredRecipes: null,
             image: new Image(20, 20),
+            nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
+            selectedNutrient: 'Total fat',
             data: {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
                 datasets: [{
                     labels: ' ',
-                    backgroundColor: primary,
-                    pointRadius: 10,
-                    pointStyle: this.image,
-                    data: [],
-                    barPercentage: 1.0,
-                    categoryPercentage: 1.0
+                    fill: false,
+                    borderColor: "rgb(255, 99, 132)",
+                    backgroundColor:"rgba(255, 99, 132, 0.5)",
+                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},  {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
                 },
                 {
                     labels: ' ',
@@ -68,6 +68,10 @@ export default {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                fill: {
+                opacity: 0.8
+            },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -85,14 +89,6 @@ export default {
                             //footer: this.footer,
                         }
                     },
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                    },
-                    y: {
-                        stacked: true,
-                    }
                 }
             },
         }
@@ -110,7 +106,7 @@ export default {
             this.recipes = await dbService.query(queryString, false);
             this.recipes = this.recipes.rows;
             this.filteredRecipes = this.recipes;
-            this.fillGraph();
+            this.selectNutrient(this.selectedNutrient);
             this.$nextTick(() => {
                 this.loaded();
             })
@@ -118,14 +114,27 @@ export default {
         loaded() {
             this.isLoading = false;
         },
-        fillGraph() {
+        fillGraph(indexNutrient: Number) {
             this.isFiltering = true;
             //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
-            this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
+            let techniqueCount: Array<number> = getTechniqueCounts(this.filteredRecipes);
+            for(let i = 0; i < techniqueCount.length; i++){
+                this.data.datasets[0].data[i] = {x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient)};
+            }
+
             // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
+        },
+        getNutrients(index: Number, indexNutrient: Number){
+            let nutrient = 0;
+            for(let i = 0; i < this.recipes.length; i++){
+                if(this.recipes[i].techniques[index] == 1){
+                    nutrient += this.recipes[i].nutritions[indexNutrient];
+                }
+            }
+            return nutrient/1000;
         },
         checkedRecipe(recipeName: string, checked: boolean) {
             if (checked) {
@@ -149,7 +158,11 @@ export default {
                 });
             }
 
-            this.fillGraph()
+            this.selectNutrient(this.selectedNutrient);
+        },
+        selectNutrient(nutrient: string){
+            this.selectedNutrient = nutrient;
+            this.fillGraph(this.nutrients.indexOf(nutrient)+1);
         }
     }
 }
@@ -158,6 +171,16 @@ export default {
 <template>
     <div style="min-height: 353px; width: 640px;">
         <h3>Recipe List</h3>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ selectedNutrient }}
+            </button>
+            <ul class="dropdown-menu">
+                  <li v-for="nutrient in nutrients">
+                        <p class="dropdown-item" @click="selectNutrient(nutrient)">{{ nutrient}}</p>
+                  </li>
+            </ul>
+        </div>
         <div>
             <div v-if="isLoading" class="position-relative">
                 <SpinnerComponent class="position-absolute spinner" />
@@ -167,7 +190,7 @@ export default {
                 <div v-if="recipes.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
                     techniques found
                 </div>
-                <Bar v-if="!isFiltering" :data="data" :options="options" />
+                <Bubble v-if="!isFiltering" :data="data" :options="options" />
             </div>
             <div class="collapse" id="collapseExample">
                 Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
