@@ -134,7 +134,13 @@ export default {
                     nutrient += this.recipes[i].nutritions[indexNutrient];
                 }
             }
-            return nutrient/1000;
+            let resultMath = Math.log(nutrient);
+            if(resultMath.toString() == "-Infinity"){
+                return 0;
+            }
+            else{
+                return Math.log(nutrient);
+            }
         },
         checkedRecipe(recipeName: string, checked: boolean) {
             if (checked) {

@@ -106,7 +106,6 @@ export default {
 </script>
 <template>
      <div v-if="isLoading" class="position-relative">
-        <h1>Test </h1>
     </div>
     <div v-else="!isLoading" class="position-relative">
         <h1>{{ recipe[0].recipename }}</h1>
