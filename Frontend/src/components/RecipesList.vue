@@ -4,6 +4,7 @@ import { DBService } from '../services/db.service'
 import type { Rows } from '../services/db.service';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
+import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
 import { Bar, Bubble } from 'vue-chartjs';
 
@@ -26,6 +27,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export default {
     name: 'NutrientGraph',
     components: {
+        NutrientGraphRecipe,
         SpinnerComponent,
         RecipeItem,
         Bar,
@@ -132,25 +134,17 @@ export default {
         },
         getNutrients(index: Number, indexNutrient: Number){
             let nutrient = 0;
-            if(this.filteredRecipes.length == 1 && this.filteredRecipes[0].techniques[index] == 1){
-                return this.getBaseLog(1.5,this.filteredRecipes[0].nutritions[indexNutrient]);
-            }else{
-                if(this.filteredRecipes.length == 1){
-                    return 0;
-                }else{
-                    for(let i = 0; i < this.filteredRecipes.length; i++){
-                        if(this.filteredRecipes[i].techniques[index] == 1){
-                            nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
-                        }
-                    }
-                    let resultMath = this.getBaseLog(1.5,nutrient);
-                    if(resultMath.toString() == "-Infinity"){
-                        return 0;
-                    }
-                    else{
-                            return resultMath;
-                    }
+            for(let i = 0; i < this.filteredRecipes.length; i++){
+                if(this.filteredRecipes[i].techniques[index] == 1){
+                    nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
                 }
+            }
+            let resultMath = this.getBaseLog(1.5,nutrient);
+            if(resultMath.toString() == "-Infinity"){
+                return 0;
+            }
+            else{
+                return resultMath;
             }
             
         },
@@ -189,7 +183,7 @@ export default {
 <template>
     <div style="min-height: 353px; width: 640px;">
         <h3>Recipe List</h3>
-        <div class="btn-group">
+        <div v-if="!isLoading && filteredRecipes.length != 1" class="btn-group">
             <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
               {{ selectedNutrient }}
             </button>
@@ -208,7 +202,12 @@ export default {
                 <div v-if="recipes.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
                     techniques found
                 </div>
-                <Bubble v-if="!isFiltering" :data="data" :options="options" />
+                <div v-if="filteredRecipes.length == 1">
+                    <NutrientGraphRecipe :id="filteredRecipes[0].recipeid"></NutrientGraphRecipe>
+                </div>
+                <div v-if="filteredRecipes.length != 1">
+                    <Bubble v-if="!isFiltering" :data="data" :options="options" />
+                </div>
             </div>
             <div class="collapse" id="collapseExample">
                 Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
