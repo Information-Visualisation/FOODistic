@@ -132,18 +132,27 @@ export default {
         },
         getNutrients(index: Number, indexNutrient: Number){
             let nutrient = 0;
-            for(let i = 0; i < this.recipes.length; i++){
-                if(this.recipes[i].techniques[index] == 1){
-                    nutrient += this.recipes[i].nutritions[indexNutrient];
+            if(this.filteredRecipes.length == 1 && this.filteredRecipes[0].techniques[index] == 1){
+                return this.getBaseLog(1.5,this.filteredRecipes[0].nutritions[indexNutrient]);
+            }else{
+                if(this.filteredRecipes.length == 1){
+                    return 0;
+                }else{
+                    for(let i = 0; i < this.filteredRecipes.length; i++){
+                        if(this.filteredRecipes[i].techniques[index] == 1){
+                            nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
+                        }
+                    }
+                    let resultMath = this.getBaseLog(1.5,nutrient);
+                    if(resultMath.toString() == "-Infinity"){
+                        return 0;
+                    }
+                    else{
+                            return resultMath;
+                    }
                 }
             }
-            let resultMath = this.getBaseLog(1.5,nutrient);
-            if(resultMath.toString() == "-Infinity"){
-                return 0;
-            }
-            else{
-                return resultMath;
-            }
+            
         },
         checkedRecipe(recipeName: string, checked: boolean) {
             if (checked) {
