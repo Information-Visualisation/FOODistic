@@ -95,6 +95,19 @@ UNION ALL
 ORDER BY name`;
 };
 
+export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
+	// TAKES VERY LONG
+	// TODO: Make a smaller nutrients table
+	if (ids.length > 2) {
+		let idList: string = ids[0]
+		for (let i = 1; i < ids.length; i++) {
+			idList += ` OR food.id = `+ ids[i];
+		}
+		return MACRO_NUTRIENTS_FOR(idList);
+	} else
+		throw new Error();
+}
+
 export function GET_RECIPES_FOR(id: string): string {
 	return `SELECT DISTINCT
 		pp_recipes.id as recipeid,
