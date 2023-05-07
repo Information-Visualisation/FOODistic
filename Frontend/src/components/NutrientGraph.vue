@@ -1,7 +1,7 @@
 <script lang="ts">
 import { DBService, distinctNames } from '../services/db.service';
 import { avg, mean, std } from '../services/statistics';
-import type { Rows, Row, DistinctRows } from '../services/db.service';
+import type { Rows, Row, DistinctRows } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import BarWithErrorBarChart from './../services/errorbar.chart';
 import { MACRO_NUTRIENTS_FOR } from '../services/queries';
@@ -14,7 +14,6 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js/auto'
-import { Chart } from 'vue-chartjs'
 
 const dbService = new DBService;
 

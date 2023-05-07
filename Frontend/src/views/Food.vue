@@ -3,6 +3,7 @@ import FoodImg from '@/components/FoodImg.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
 import { DBService } from '@/services/db.service';
+import type { FoodRow } from '@/services/dbClasses';
 import { GET_FOOD_FOR_ID } from '@/services/queries';
 
 const dbService = new DBService;
@@ -23,7 +24,7 @@ export default {
     return {
       id: this.$route.query.id as string,
       name: '',
-      row: null,
+      row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
     }
@@ -34,8 +35,7 @@ export default {
   },
   methods: {
     async fetchData(id: string) {
-      this.row = await dbService.query(GET_FOOD_FOR_ID(id));
-      this.row = this.row.rows[0];
+      this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
       this.name = this.row.naam;
       this.setFoodGroups();
     },

@@ -1,0 +1,59 @@
+export type { Rows, Row, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow }
+
+type Rows = {
+    [x: string]: any;
+    rows: [Row]
+};
+
+type Row = {
+    name: string,
+    value: string,
+};
+
+type DistinctRows = {
+    [key: string]: number[]
+};
+
+type FoodRow = {
+    category: string,
+    created_at: string,
+    creator_id: number,
+    description: string,
+    export_to_afcdb: boolean, 
+    export_to_foodb: boolean,
+    food_group: string,
+    food_subgroup: string,
+    food_type: string,
+    id: number,
+    itis_id: string,
+    legacy_id: number,
+    naam: string,
+    naam_scientific: string,
+    ncbi_taxonomy_id: number,
+    picture_conten_type: string,
+    picture_file_name: string,
+    picture_file_size: number,
+    picture_updated_at: string,
+    public_id: string,
+    updated_at: string,
+    updater_id: number,
+    wikipedia_id: string,
+};
+
+type FoodAllergyRow = {
+    allergy: string,
+    food: string,
+};
+
+type AllergyPercentageRow = {
+    allergy: string,
+    percentage: number,
+}
+
+type RecipesRow = {
+    foodid: number,
+    foodname: string,
+    recipeid: number,
+    recipename: string,
+    techniques: string,
+};

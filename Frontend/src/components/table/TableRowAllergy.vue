@@ -1,12 +1,13 @@
 <script lang="ts">
 import FoodImg from '../FoodImg.vue';
+import type { FoodAllergyRow } from '@/services/dbClasses';
 
 export default {
     props: {
         name: String,
         id: Number,
         allergyNames: Array<string>,
-        allergies: Array<Object>
+        allergies: Array<FoodAllergyRow>
     },
     created() {
     },
@@ -15,9 +16,6 @@ export default {
         hasAllergy(allergy: string) {
             return this.allergies?.filter(function(item) {return item.allergy==allergy}).length != 0;
         },
-        // getImgUrl(allergy: string) {
-        //     return require(`@assets/allergies/${allergy}.png`);
-        // },
         getImageUrl(allergy: string) {
             if (allergy.includes('Lactose')) {
                 return new URL(`../../assets/allergies/Lactose intolerance.png`, import.meta.url).href
@@ -44,9 +42,9 @@ export default {
 </template>
 
 <style>
-.allergy-wrapper {
-    /* display: flex;
-    justify-content: center; */
-}
+/* .allergy-wrapper {
+    display: flex;
+    justify-content: center;
+} */
 
 </style>

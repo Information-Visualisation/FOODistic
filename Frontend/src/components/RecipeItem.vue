@@ -36,11 +36,15 @@ export default {
       }
     },
     differentChecked() {
+      // @ts-ignore --> ignore error that is not an error
       const isCurrent: boolean =  this.$refs.filtered!.ariaCurrent == 'true';
+      // @ts-ignore --> ignore error that is not an error
       this.$refs.filtered!.ariaCurrent = isCurrent ? 'false' : 'true';
       if (isCurrent) {
+        // @ts-ignore --> ignore error that is not an error
         this.$refs.filtered!.classList.remove('active');
       } else {
+        // @ts-ignore --> ignore error that is not an error
         this.$refs.filtered!.classList.add('active');
       }
       this.getsChecked(!isCurrent);

@@ -1,3 +1,5 @@
+import type { FoodRow } from './dbClasses';
+
 export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0): string {
 	if (foodGroup == "All Foodgroups") foodGroup = "";
 	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
@@ -127,7 +129,7 @@ export function GET_ALLERGY_FOR(foodName: string): string {
 	return "SELECT allergy FROM allergies WHERE food="+ foodName;
 }
 
-export function GET_ALLERGIES_FOR(foods: Object[]): string {
+export function GET_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT null AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
@@ -136,7 +138,7 @@ export function GET_ALLERGIES_FOR(foods: Object[]): string {
 	return query;
 }
 
-export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
+export function GET_ALLERGIES_PER_FOOD_FOR(foods: FoodRow[]): string {
 	let query = "SELECT food, allergy FROM allergies WHERE allergy IS NOT null AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
@@ -145,7 +147,7 @@ export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
 	return query;
 }
 
-export function COUNT_ALLERGIES_FOR(foods: Object[]): string {
+export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage FROM allergies WHERE allergy IS NOT NULL AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";

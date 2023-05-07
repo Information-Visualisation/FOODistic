@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import { DBService } from '../services/db.service'
-import type { Rows } from '../services/db.service';
+import type { RecipesRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
@@ -32,7 +32,7 @@ export default {
     },
     props: {
         id: {
-            type: Array<String>,
+            type: String,
             required: true
         }
     },
@@ -40,10 +40,10 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: null,
+            recipes: [] as RecipesRow[],
             filters: [] as Array<string>,
-            filteredRecipes: null,
-            image: new Image(20, 20),
+            filteredRecipes: [] as RecipesRow[],
+            image: new Image(20, 20) as HTMLImageElement,
             data: {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
                 datasets: [{
@@ -51,7 +51,7 @@ export default {
                     backgroundColor: primary,
                     pointRadius: 10,
                     pointStyle: this.image,
-                    data: [],
+                    data: [] as number[],
                     barPercentage: 1.0,
                     categoryPercentage: 1.0
                 },
@@ -76,6 +76,7 @@ export default {
                         usePointStyle: true,
                         callbacks: {
                             labelPointStyle: (context: any) => {
+                                // @ts-ignore --> ignore error that is not an error
                                 this.image.src = '/src/assets/cookingtechniques/' + context.label + '.png'
                                 return {
                                     pointStyle: this.image
@@ -106,8 +107,7 @@ export default {
     methods: {
         async fetchData() {
             const queryString: string = GET_RECIPES_FOR(this.id);
-            this.recipes = await dbService.query(queryString, false);
-            this.recipes = this.recipes.rows;
+            this.recipes = (await dbService.query(queryString, false)).rows;
             this.filteredRecipes = this.recipes;
             this.fillGraph();
             this.$nextTick(() => {
@@ -120,7 +120,6 @@ export default {
         fillGraph() {
             this.isFiltering = true;
             this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
-            // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
