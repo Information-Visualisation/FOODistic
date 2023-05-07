@@ -7,7 +7,7 @@ export default {
         name: String,
         id: Number,
         allergyNames: Array<string>,
-        allergies: Array<FoodAllergyRow>
+        allergies: Array<FoodAllergyRow>,
     },
     created() {
     },

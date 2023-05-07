@@ -17,7 +17,6 @@ import {
     LinearScale
 } from 'chart.js'
 import { getTechniqueCounts } from '@/services/cookingtechniques';
-import { primary, secondary } from '@/services/colors';
 
 const dbService = new DBService;
 
@@ -48,7 +47,7 @@ export default {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
                 datasets: [{
                     labels: ' ',
-                    backgroundColor: primary,
+                    // backgroundColor: $primary,
                     pointRadius: 10,
                     pointStyle: this.image,
                     data: [] as number[],
@@ -57,7 +56,7 @@ export default {
                 },
                 {
                     labels: ' ',
-                    backgroundColor: secondary,
+                    // backgroundColor: secondary,
                     pointRadius: 10,
                     pointStyle: this.image,
                     data: [],

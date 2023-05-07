@@ -24,6 +24,17 @@ $pagination-hover-color: $app-dark;
 $nav-link-color: $primary;
 $nav-link-hover-color: $primary;
 
+// custom food colors
+$ash: black;
+$carbohydrate: orange;
+$fat: yellow;
+$fatty-acid: green;
+$fiber: brown;
+$proteins: aqua;
+
+
+// custom allergy colors
+
 // Bootstrap and its default variables
 @import '../node_modules/bootstrap/scss/bootstrap';
 // BootstrapVue and its default variables

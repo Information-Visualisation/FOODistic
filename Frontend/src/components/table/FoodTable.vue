@@ -164,7 +164,7 @@ export default {
             <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getNutrientPercentages()" />
+                        <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead
@@ -175,7 +175,7 @@ export default {
                             <SpinnerComponent></SpinnerComponent>
                         </div>
                         <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(nutritions, key, i) in foodNutritions"
-                            :id="foodItems[i].id" :name="Object.keys(foodNutritions)[i]" :items="nutritions" :max_value="getMaxColums()"/>
+                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="Object.keys(foodNutritions)[i]" :items="nutritions" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>
             </div>
@@ -183,11 +183,10 @@ export default {
             <div class="tab-pane fade" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages" />
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead
-                            :columnNames="['Name'].concat(getAllergyNames)" />
+                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
