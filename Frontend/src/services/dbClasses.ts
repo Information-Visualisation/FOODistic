@@ -55,5 +55,6 @@ type RecipesRow = {
     foodname: string,
     recipeid: number,
     recipename: string,
-    techniques: string,
+    techniques: Array<boolean>,
+    nutritions: Array<number>
 };

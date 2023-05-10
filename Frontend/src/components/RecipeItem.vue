@@ -10,7 +10,7 @@ export default {
       required: true
     },
     techniques: {
-      type: String,
+      type: Array<boolean>,
       required: true
     }
   },

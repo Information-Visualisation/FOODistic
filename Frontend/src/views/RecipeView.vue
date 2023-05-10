@@ -1,10 +1,12 @@
 <script lang="ts">
-import { DBService, distinctNames, type DistinctRows } from '@/services/db.service';
+import { DBService, distinctNames } from '@/services/db.service';
+import type { DistinctRows } from '@/services/dbClasses';
 import { GET_ALLERGIES_RECIPE, GET_RECIPE, GET_RECIPE_INGREDIENTS } from '@/services/queries';
 import NutrientGraphRecipe from "../components/NutrientGraphRecipe.vue";
 import FoodItem from "../components/FoodItem.vue";
 import TechniqueIcon from "../components/TechniqueIcon.vue";
 import { getFilteredTechniques } from '@/services/cookingtechniques';
+import type { RecipesRow } from '@/services/dbClasses';
 
 const dbService = new DBService;
 
@@ -21,8 +23,8 @@ export default {
         return {
             isLoading: true,
             id: this.$route.query.id as string,
-            recipe: {},
-            allergies: {},
+            recipe: {} as {[key: number]: RecipesRow},
+            allergies: {} as { [key: number]: {allergy: string}},
             techniqueStrings: [''],
         }
     },
@@ -32,14 +34,11 @@ export default {
     emits: ["compare"],
     methods:{
         async fetchData() {
-            let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id))
-            let test = this.changeArrayToString(ingredients.rows[0].ingredient)
-            //console.log(test)
-            let result2 = await dbService.query(GET_RECIPE(this.id, test));
-            this.recipe = result2.rows;
+            let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id));
+            let test = this.changeArrayToString(ingredients.rows[0].ingredient);
+            this.recipe = (await dbService.query(GET_RECIPE(this.id, test))).rows;
             this.techniqueStrings = getFilteredTechniques(this.recipe[0].techniques);
-            let result3 = await dbService.query(GET_ALLERGIES_RECIPE(this.getFoods()));
-            this.allergies = result3.rows;
+            this.allergies = (await dbService.query(GET_ALLERGIES_RECIPE(this.getFoods()))).rows;
             this.$nextTick(() => {
                 console.log(this.recipe);
                 this.loaded();
@@ -50,8 +49,9 @@ export default {
         },
         getFoods(){
             let foodstring = "(";
-            for(let i = 0; i < this.recipe.length; i++){
-                if (i+1 != this.recipe.length)
+            let size = Object.keys(this.recipe).length;
+            for(let i = 0; i < size; i++){
+                if (i+1 != size)
                     foodstring += "'" + this.recipe[i].foodname +"',";
                 else
                     foodstring += "'" + this.recipe[i].foodname +"'";
@@ -94,9 +94,8 @@ export default {
             this.$emit('compare', null, id);
         },
         getImageUrl(allergy: string) {
-            console.log(allergy)
             if (allergy.includes('Lactose')) {
-                return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href
+                return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href;
             }
             let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
             return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
@@ -133,7 +132,7 @@ export default {
     <div class="d-flex justify-content-center">
         <div class="row">
           <div class="col">
-            <NutrientGraphRecipe :id="id" class="card" />
+            <NutrientGraphRecipe :id="parseInt(id)" class="card" />
           </div>
         </div>
   </div>

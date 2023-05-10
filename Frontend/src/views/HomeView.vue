@@ -23,7 +23,7 @@ export default {
       fooditems: [] as FoodRow[],
       foodGroupitems: [] as {food_group: string}[],
       foodSubGroupitems: [] as {food_subgroup: string}[],
-      filteritems: null,
+      filteritems: {} as { [key: number]: {allergy: string}},
 
       lowerPages: [] as Array<Number>,
       hardOffset: 0,

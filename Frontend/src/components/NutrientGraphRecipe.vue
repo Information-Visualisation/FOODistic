@@ -1,7 +1,7 @@
 <script lang="ts">
 import { DBService, distinctNames } from '../services/db.service';
 import { avg, mean, std } from '../services/statistics';
-import type { Rows, Row, DistinctRows } from '../services/db.service';
+import type { Rows, Row, DistinctRows } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import BarWithErrorBarChart from './../services/errorbar.chart';
 import { GET_RECIPE_NUTRIENTS } from '../services/queries';
@@ -14,7 +14,6 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js/auto'
-import { Chart } from 'vue-chartjs'
 
 const dbService = new DBService;
 
@@ -28,7 +27,7 @@ export default {
     },
     props: {
         id: {
-            type: String,
+            type: Number,
             required: true
         }
     },
@@ -73,7 +72,7 @@ export default {
     },
     methods: {
         async fetchData() {
-            const queryString: string = GET_RECIPE_NUTRIENTS(this.id);
+            const queryString: string = GET_RECIPE_NUTRIENTS(this.id.toString());
             this.result = await dbService.query(queryString, false);
             this.$nextTick(() => {
                 this.loaded();

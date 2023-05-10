@@ -27,7 +27,7 @@ export default {
       row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
-      allergies: {},
+      allergies: {} as { [key: number]: {allergy: string}},
     }
   },
   created() {
@@ -37,21 +37,19 @@ export default {
   methods: {
     async fetchData(id: string) {
       this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
-      this.name = this.row.naam;
-      console.log(this.name)
-      let result3 = await dbService.query(GET_ALLERGY_FOR("'"+this.name+"'"));
-      this.allergies = result3.rows;
-      console.log(this.allergies)
       this.setFoodGroups();
+      this.name = this.row.naam;
+      console.log(this.name);
+      this.allergies = (await dbService.query(GET_ALLERGY_FOR(this.name))).rows;
+      console.log('done loading allergies');
     },
     setFoodGroups() {
       this.foodGroup = this.row.food_group;
       this.subFoodGroup = this.row.food_subgroup;
     },
     getImageUrl(allergy: string) {
-        console.log(allergy)
         if (allergy.includes('Lactose')) {
-            return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href
+            return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href;
         }
         let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
         return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
@@ -83,7 +81,7 @@ export default {
     <div class="col title">
       <h1>Food: {{ name }}</h1>
       <h2>Id: {{ id }}</h2>
-      <div v-if="allergies.length >= 1">
+      <div v-if="Object.keys(allergies).length >= 1">
         <h2>Allergies: <div v-for="allergy in allergies">
             <img :title=allergy.allergy :src="getImageUrl(allergy.allergy)" style="width: 50px"/>
         </div></h2>
@@ -104,8 +102,7 @@ export default {
 </template>
 
 <style>
-h1,
-h2 {
+h1, h2 {
   padding-top: 5px;
   padding-left: 30px;
 }

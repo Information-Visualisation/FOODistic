@@ -104,7 +104,9 @@ export function GET_RECIPES_FOR(id: string): string {
 		raw_recipes.name as recipename,
 		food.id as foodid, 
 		food.naam as foodname,
-		pp_recipes.techniques as techniques,
+		string_to_array(
+			substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
+		)::boolean[] as techniques,
 		raw_recipes.nutrition as nutritions
 	FROM food,ingredients_filtered,pp_recipes,raw_recipes
 	WHERE (
@@ -123,7 +125,10 @@ export function GET_RECIPE(id: string, ingredients: string): string{
 		food.id as foodid,
 		pp_recipes.id as recipeid,
 		raw_recipes.name as recipename,
-		pp_recipes.techniques as techniques
+		string_to_array(
+			substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
+		)::boolean[] as techniques,
+		raw_recipes.nutrition as nutritions
 	FROM food,ingredients_filtered,pp_recipes,raw_recipes
 	WHERE (
 		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
@@ -163,7 +168,7 @@ export function GET_INGREDIENTS_FOR(id: string): string {
 }
 
 export function GET_ALLERGY_FOR(foodName: string): string {
-	return "SELECT allergy FROM allergies WHERE food="+ foodName;
+	return "SELECT allergy FROM allergies WHERE food='"+ foodName +"'";
 }
 
 export function GET_ALLERGIES_FOR(foods: FoodRow[]): string {

@@ -7,6 +7,7 @@ import RecipeItem from '../components/RecipeItem.vue';
 import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
 import { Bar, Bubble } from 'vue-chartjs';
+import { techniqueStrings } from '@/services/cookingtechniques';
 
 import {
     Chart as ChartJS,
@@ -42,14 +43,14 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: [] as RecipesRow[],
+            recipes: {} as {[key: number]: RecipesRow},
             filters: [] as Array<string>,
-            filteredRecipes: [] as RecipesRow[],
+            filteredRecipes: {} as {[key: number]: RecipesRow},
             image: new Image(20, 20),
             nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
             selectedNutrient: 'Total fat',
             data: {
-                labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
+                labels: techniqueStrings,
                 datasets: [{
                     labels: ' ',
                     fill: false,
@@ -59,7 +60,6 @@ export default {
                 },
                 {
                     labels: ' ',
-                    // backgroundColor: secondary,
                     pointRadius: 10,
                     pointStyle: this.image,
                     data: [],
@@ -106,6 +106,8 @@ export default {
         async fetchData() {
             const queryString: string = GET_RECIPES_FOR(this.id);
             this.recipes = (await dbService.query(queryString, false)).rows;
+            // this.recipes.techniques = Converter.changeStringToArray(this.recipes.techniques);
+
             this.filteredRecipes = this.recipes;
             this.selectNutrient(this.selectedNutrient);
             this.$nextTick(() => {
@@ -115,15 +117,13 @@ export default {
         loaded() {
             this.isLoading = false;
         },
-        fillGraph(indexNutrient: Number) {
+        fillGraph(indexNutrient: number) {
             this.isFiltering = true;
             //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
             let techniqueCount: Array<number> = getTechniqueCounts(this.filteredRecipes);
             for(let i = 0; i < techniqueCount.length; i++){
                 this.data.datasets[0].data[i] = {x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient)};
             }
-
-            // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
@@ -131,10 +131,10 @@ export default {
         getBaseLog(x: number, y: number) {
             return Math.log(y) / Math.log(x);
         },
-        getNutrients(index: Number, indexNutrient: Number){
+        getNutrients(index: number, indexNutrient: number){
             let nutrient = 0;
-            for(let i = 0; i < this.filteredRecipes.length; i++){
-                if(this.filteredRecipes[i].techniques[index] == 1){
+            for(let i = 0; i < Object.keys(this.filteredRecipes).length; i++){
+                if(this.filteredRecipes[i].techniques[index]) {
                     nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
                 }
             }
@@ -159,14 +159,14 @@ export default {
             if (all) {
                 this.filteredRecipes = this.recipes;
             } else {
-                this.filteredRecipes = this.recipes.filter((recipe: any) => {
-                    for (let i = 0; i < this.filters.length; i++) {
-                        if (recipe.recipename === this.filters[i]) {
-                            return true;
-                        }
-                    }
-                    return false;
-                });
+                // this.filteredRecipes = this.recipes.filter((recipe: any) => {   // TODO: fix
+                //     for (let i = 0; i < this.filters.length; i++) {
+                //         if (recipe.recipename === this.filters[i]) {
+                //             return true;
+                //         }
+                //     }
+                //     return false;
+                // });
             }
 
             this.selectNutrient(this.selectedNutrient);
@@ -182,7 +182,7 @@ export default {
 <template>
     <div style="min-height: 353px; width: 640px;">
         <h3>Recipe List</h3>
-        <div v-if="!isLoading && filteredRecipes.length != 1" class="btn-group">
+        <div v-if="!isLoading && Object.keys(filteredRecipes).length != 1" class="btn-group">
             <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
               {{ selectedNutrient }}
             </button>
@@ -198,13 +198,13 @@ export default {
                 <Bar :data="data" :options="options" />
             </div>
             <div v-else="!isLoading" class="position-relative">
-                <div v-if="recipes.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
+                <div v-if="Object.keys(recipes).length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
                     techniques found
                 </div>
-                <div v-if="filteredRecipes.length == 1">
+                <div v-if="Object.keys(filteredRecipes).length == 1">
                     <NutrientGraphRecipe :id="filteredRecipes[0].recipeid"></NutrientGraphRecipe>
                 </div>
-                <div v-if="filteredRecipes.length != 1">
+                <div v-if="Object.keys(filteredRecipes).length != 1">
                     <Bubble v-if="!isFiltering" :data="data" :options="options" />
                 </div>
             </div>
@@ -217,7 +217,7 @@ export default {
             <SpinnerComponent class="position-absolute center-spinner" />
         </div>
         <div v-if="!isLoading" class="container overflow-auto scrollview border rounded">
-            <div v-if="recipes.length <= 0" class="position-absolute top-50 start-50 translate-middle alert alert-dark"
+            <div v-if="Object.keys(recipes).length <= 0" class="position-absolute top-50 start-50 translate-middle alert alert-dark"
                 role="alert">No recipes found</div>
             <ul class="list-group">
                 <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
