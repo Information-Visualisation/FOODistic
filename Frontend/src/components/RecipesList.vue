@@ -4,8 +4,9 @@ import { DBService } from '../services/db.service'
 import type { RecipesRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
+import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
-import { Bar } from 'vue-chartjs';
+import { Bar, Bubble } from 'vue-chartjs';
 
 import {
     Chart as ChartJS,
@@ -25,9 +26,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export default {
     name: 'NutrientGraph',
     components: {
+        NutrientGraphRecipe,
         SpinnerComponent,
         RecipeItem,
         Bar,
+        Bubble,
     },
     props: {
         id: {
@@ -42,17 +45,17 @@ export default {
             recipes: [] as RecipesRow[],
             filters: [] as Array<string>,
             filteredRecipes: [] as RecipesRow[],
-            image: new Image(20, 20) as HTMLImageElement,
+            image: new Image(20, 20),
+            nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
+            selectedNutrient: 'Total fat',
             data: {
                 labels: ['bake', 'barbecue', 'blanch', 'blend', 'boil', 'braise', 'brine', 'broil', 'caramelize', 'combine', 'crock pot', 'crush', 'deglaze', 'devein', 'dice', 'distill', 'drain', 'emulsify', 'ferment', 'freeze', 'fry', 'grate', 'griddle', 'grill', 'knead', 'leaven', 'marinate', 'mash', 'melt', 'microwave', 'parboil', 'pickle', 'poach', 'pour', 'pressure cook', 'puree', 'refrigerate', 'roast', 'saute', 'scald', 'scramble', 'shred', 'simmer', 'skillet', 'slow cook', 'smoke', 'smooth', 'soak', 'sous-vide', 'steam', 'stew', 'strain', 'tenderize', 'thicken', 'toast', 'toss', 'whip', 'whisk'],
                 datasets: [{
                     labels: ' ',
-                    // backgroundColor: $primary,
-                    pointRadius: 10,
-                    pointStyle: this.image,
-                    data: [] as number[],
-                    barPercentage: 1.0,
-                    categoryPercentage: 1.0
+                    fill: false,
+                    borderColor: "rgb(255, 99, 132)",
+                    backgroundColor:"rgba(255, 99, 132, 0.5)",
+                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},  {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
                 },
                 {
                     labels: ' ',
@@ -66,6 +69,10 @@ export default {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                fill: {
+                opacity: 0.8
+            },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -84,14 +91,6 @@ export default {
                             //footer: this.footer,
                         }
                     },
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                    },
-                    y: {
-                        stacked: true,
-                    }
                 }
             },
         }
@@ -108,7 +107,7 @@ export default {
             const queryString: string = GET_RECIPES_FOR(this.id);
             this.recipes = (await dbService.query(queryString, false)).rows;
             this.filteredRecipes = this.recipes;
-            this.fillGraph();
+            this.selectNutrient(this.selectedNutrient);
             this.$nextTick(() => {
                 this.loaded();
             })
@@ -116,14 +115,39 @@ export default {
         loaded() {
             this.isLoading = false;
         },
-        fillGraph() {
+        fillGraph(indexNutrient: Number) {
             this.isFiltering = true;
-            this.data.datasets[0].data = getTechniqueCounts(this.filteredRecipes);
+            //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
+            let techniqueCount: Array<number> = getTechniqueCounts(this.filteredRecipes);
+            for(let i = 0; i < techniqueCount.length; i++){
+                this.data.datasets[0].data[i] = {x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient)};
+            }
+
+            // console.log(getTechniqueCounts(this.filteredRecipes));
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
         },
-        checkedRecipe(event: any, recipeName: string, checked: boolean) {
+        getBaseLog(x: number, y: number) {
+            return Math.log(y) / Math.log(x);
+        },
+        getNutrients(index: Number, indexNutrient: Number){
+            let nutrient = 0;
+            for(let i = 0; i < this.filteredRecipes.length; i++){
+                if(this.filteredRecipes[i].techniques[index] == 1){
+                    nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
+                }
+            }
+            let resultMath = this.getBaseLog(1.5,nutrient);
+            if(resultMath.toString() == "-Infinity"){
+                return 0;
+            }
+            else{
+                return resultMath;
+            }
+            
+        },
+        checkedRecipe(recipeName: string, checked: boolean) {
             if (checked) {
                 this.filters.push(recipeName);
             } else {
@@ -145,7 +169,11 @@ export default {
                 });
             }
 
-            this.fillGraph()
+            this.selectNutrient(this.selectedNutrient);
+        },
+        selectNutrient(nutrient: string){
+            this.selectedNutrient = nutrient;
+            this.fillGraph(this.nutrients.indexOf(nutrient)+1);
         }
     }
 }
@@ -154,6 +182,16 @@ export default {
 <template>
     <div style="min-height: 353px; width: 640px;">
         <h3>Recipe List</h3>
+        <div v-if="!isLoading && filteredRecipes.length != 1" class="btn-group">
+            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ selectedNutrient }}
+            </button>
+            <ul class="dropdown-menu">
+                  <li v-for="nutrient in nutrients">
+                        <p class="dropdown-item" @click="selectNutrient(nutrient)">{{ nutrient}}</p>
+                  </li>
+            </ul>
+        </div>
         <div>
             <div v-if="isLoading" class="position-relative">
                 <SpinnerComponent class="position-absolute spinner" />
@@ -163,7 +201,12 @@ export default {
                 <div v-if="recipes.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
                     techniques found
                 </div>
-                <Bar v-if="!isFiltering" :data="data" :options="options" />
+                <div v-if="filteredRecipes.length == 1">
+                    <NutrientGraphRecipe :id="filteredRecipes[0].recipeid"></NutrientGraphRecipe>
+                </div>
+                <div v-if="filteredRecipes.length != 1">
+                    <Bubble v-if="!isFiltering" :data="data" :options="options" />
+                </div>
             </div>
             <div class="collapse" id="collapseExample">
                 Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
@@ -178,7 +221,7 @@ export default {
                 role="alert">No recipes found</div>
             <ul class="list-group">
                 <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
-                    @checked="checkedRecipe">
+                    @mouseenter="checkedRecipe(recipe.recipename, true)" @mouseleave="checkedRecipe(recipe.recipename, false)" @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid }})"> <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>

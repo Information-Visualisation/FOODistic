@@ -51,6 +51,7 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 	)`;
 }
 
+
 export function MACRO_NUTRIENTS_FOR(id: string): string {
 	return `SELECT 'Fiber' as name,orig_source_name,orig_content as value FROM food,nutrients
 WHERE ( 
@@ -103,7 +104,8 @@ export function GET_RECIPES_FOR(id: string): string {
 		raw_recipes.name as recipename,
 		food.id as foodid, 
 		food.naam as foodname,
-		pp_recipes.techniques as techniques
+		pp_recipes.techniques as techniques,
+		raw_recipes.nutrition as nutritions
 	FROM food,ingredients_filtered,pp_recipes,raw_recipes
 	WHERE (
 		food.id = `+ id +` AND
@@ -113,6 +115,41 @@ export function GET_RECIPES_FOR(id: string): string {
 	)
 	ORDER BY recipename
 	--LIMIT 100`;
+}
+
+export function GET_RECIPE(id: string, ingredients: string): string{
+	return `SELECT DISTINCT
+		food.naam as foodname,
+		food.id as foodid,
+		pp_recipes.id as recipeid,
+		raw_recipes.name as recipename,
+		pp_recipes.techniques as techniques
+	FROM food,ingredients_filtered,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+		AND ingredients_filtered.processed in  `+ ingredients +`
+		AND (lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')))
+	);`
+}
+
+
+export function GET_RECIPE_INGREDIENTS(id: string): string{
+	return `SELECT DISTINCT
+	raw_recipes.ingredients as ingredient
+	FROM pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
+}
+
+export function GET_RECIPE_NUTRIENTS(id: string): string{
+	return `SELECT DISTINCT
+		pp_recipes.id as recipeid,
+		raw_recipes.nutrition as nutritions
+	FROM food,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
 }
 
 export function GET_INGREDIENTS_FOR(id: string): string {
@@ -154,4 +191,8 @@ export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 	}
 	query += "food = '" + foods.pop()?.naam + "') GROUP BY allergy ORDER BY allergy;";
 	return query;
+}
+
+export function GET_ALLERGIES_RECIPE(foods: string){
+	return "SELECT allergies.allergy FROM allergies WHERE allergies.food in "+ foods;
 }
