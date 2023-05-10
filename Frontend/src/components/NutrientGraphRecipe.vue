@@ -4,7 +4,7 @@ import { avg, mean, std } from '../services/statistics';
 import type { Rows, Row, DistinctRows } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import BarWithErrorBarChart from './../services/errorbar.chart';
-import { MACRO_NUTRIENTS_FOR } from '../services/queries';
+import { GET_RECIPE_NUTRIENTS } from '../services/queries';
 import {
     Chart as ChartJS,
     Title,
@@ -20,14 +20,14 @@ const dbService = new DBService;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default {
-    name: 'NutrientGraph',
+    name: 'NutrientGraphRecipe',
     components: {
         SpinnerComponent,
         BarWithErrorBarChart
     },
     props: {
         id: {
-            type: String,
+            type: Number,
             required: true
         }
     },
@@ -37,10 +37,10 @@ export default {
             noData: false,
             result: null as unknown as Rows,
             data: {
-                labels: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+                labels: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
                 datasets: [{
                     labels: ' ',
-                    data: [{}, {}, {}, {}, {}, {}]
+                    data: [0, 0, 0, 0, 0, 0]
                 }]
 
             },
@@ -57,7 +57,7 @@ export default {
                         ticks: {
                             // Include a dollar sign in the ticks
                             callback: function (value: number) {
-                                return value + ' mg/100g';
+                                return value + "% daily value";
                             }
                         }
                     }
@@ -72,7 +72,7 @@ export default {
     },
     methods: {
         async fetchData() {
-            const queryString: string = MACRO_NUTRIENTS_FOR(this.id);
+            const queryString: string = GET_RECIPE_NUTRIENTS(this.id.toString());
             this.result = await dbService.query(queryString, false);
             this.$nextTick(() => {
                 this.loaded();
@@ -87,23 +87,9 @@ export default {
             if (rows.length <= 0) {
                 this.noData = true;
             } else {
-                let distincts: DistinctRows = distinctNames(rows);
-                const MACRO_NUTRIENTS: number = 6;
-
-                let i = 0;
-                Object.keys(distincts).forEach((key: string) => {
-                    const values: number[] = distincts[key];
-
-                    //alternative less biased values v
-                    //let minAndMax: number[] = [Math.min(...values),Math.max(...values)];
-
-                    const m = mean(values);
-                    const s = std(values);
-                    const upper = m + s;
-                    const downer = m - s;
-
-                    this.data.datasets[0].data[i++] = { y: m, yMin: downer, yMax: upper };
-                });
+                for(let i = 1; i < rows[0].nutritions.length; i++){
+                    this.data.datasets[0].data[i-1] = rows[0].nutritions[i]
+                }
             }
         },
     }

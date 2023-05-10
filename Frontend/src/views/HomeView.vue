@@ -4,6 +4,7 @@ import { DBService } from '../services/db.service'
 import FoodPicker from '../components/FoodPicker.vue';
 import SpinnerComponent from '@/components/SpinnerComponent.vue';
 import FoodTable from '@/components/table/FoodTable.vue';
+import type { FoodRow } from '@/services/dbClasses';
 
 const MAX_PAGINATION: number = 10;
 const PAGE_SIZE: number = 24;
@@ -19,10 +20,10 @@ export default {
   data() {
     return {
       isLoading: true,
-      fooditems: null,
-      foodGroupitems: null,
-      foodSubGroupitems: null,
-      filteritems: null,
+      fooditems: [] as FoodRow[],
+      foodGroupitems: [] as {food_group: string}[],
+      foodSubGroupitems: [] as {food_subgroup: string}[],
+      filteritems: {} as { [key: number]: {allergy: string}},
 
       lowerPages: [] as Array<Number>,
       hardOffset: 0,
@@ -43,8 +44,7 @@ export default {
   },
   methods: {
     async fetchData() {
-      this.foodGroupitems = await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`);
-      this.foodGroupitems = this.foodGroupitems.rows;
+      this.foodGroupitems = (await dbService.query(`SELECT DISTINCT food_group FROM food WHERE food_group is NOT NULL`)).rows;
       this.fetchAllergies();
       this.fetchSubFoodGroups();
       this.hardOffset = this.offset;
@@ -52,8 +52,7 @@ export default {
     },
     async fetchSubFoodGroups() {
       if (this.foodGroup != 'All Foodgroups' && this.foodGroup != '') {
-        this.foodSubGroupitems = await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '` + this.foodGroup + `' AND food_subgroup is NOT NULL`);
-        this.foodSubGroupitems = this.foodSubGroupitems.rows;
+        this.foodSubGroupitems = (await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '` + this.foodGroup + `' AND food_subgroup is NOT NULL`)).rows;
       }
     },
     makeArray() {
@@ -80,7 +79,7 @@ export default {
       this.loaded();
     },
     route() {
-      let options = { name: 'home', query: {} };
+      let options = { name: 'home', query: {} as {search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number} };
       if (this.foodName != '')
         options.query.search = this.foodName;
       if (this.allergies.length != 0)
@@ -95,8 +94,7 @@ export default {
       this.$router.push(options);
     },
     async fetchAllergies() {
-      this.filteritems = await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;");
-      this.filteritems = this.filteritems.rows;
+      this.filteritems = (await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;")).rows;
     },
     setPage(i: number) {
       this.offset = i;
@@ -202,7 +200,7 @@ export default {
       </div>
       <div class="">
         <FoodTable
-          :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
+          :foodpickerData="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
           @returnTotalCount="receiveRowCount">
         </FoodTable>
         <nav aria-label="Page navigation example">
