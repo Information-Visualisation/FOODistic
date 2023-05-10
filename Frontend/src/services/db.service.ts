@@ -14,10 +14,10 @@ export class DBService {
 export function distinctNames(rows: Rows): DistinctRows {
   const names: DistinctRows = {};
   rows.forEach((row: Row) => {
-    if (names[row.name]) {
-      names[row.name].push(parseFloat(row.value));
+    if (names[row.nutrient]) {
+      names[row.nutrient].push(parseFloat(row.value));
     } else {
-      names[row.name] = [parseFloat(row.value)];
+      names[row.nutrient] = [parseFloat(row.value)];
     }
   });
   return names;

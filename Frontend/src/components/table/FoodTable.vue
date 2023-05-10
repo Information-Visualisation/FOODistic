@@ -87,6 +87,12 @@ export default {
             }
         },
         async createNutritions() {
+            // let ids: Array<string> = new Array<string>();
+            // this.foodItems.forEach((row) => {
+            //     ids.push(row.id);
+            // })
+            // console.log(MACRO_NUTRIENTS_FOR_FOODS(ids));
+            // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
                 let result = await dbService.query(MACRO_NUTRIENTS_FOR(this.foodItems[i].id.toString()));

@@ -1,7 +1,7 @@
 import { Client } from 'pg';
 import { Logger } from './logger';
 import { exit } from 'node:process';
-import { CREATE_INGREDIENTS_VIEW } from './queries';
+import { CREATE_FOOD_INGREDIENT_LINKER, CREATE_INGREDIENTS_VIEW, CREATE_NUTRIENTS_FILTERED, CREATE_RECIPES } from './queries';
 import { DBConstants } from './globals';
 
 export class DBConnection {
@@ -11,7 +11,8 @@ export class DBConnection {
     constructor(logger: Logger) {
         this.logger = logger;
         this.createConnection();
-        this.createViews();
+        this.createView();
+        this.createTables();
     }
 
     async createConnection() {
@@ -30,11 +31,32 @@ export class DBConnection {
         }
     }
 
-    async createViews() {
+    async createView() {
         try {
-            const res = await this.client.query(CREATE_INGREDIENTS_VIEW());
+            await this.client.query(CREATE_INGREDIENTS_VIEW());
         } catch (error) {
-            this.logger.error("Problem with creating the views: "+error.Message);
+            this.logger.error("Problem with creating the views: "+error);
+        }
+    }
+
+    async createTables() {
+        try {
+            const res = await this.client.query(CREATE_FOOD_INGREDIENT_LINKER());
+            console.log(res);
+        } catch (error) {
+            this.logger.info("Check if linker table created: "+error);
+        }
+        try {
+            const res = await this.client.query(CREATE_RECIPES());
+            console.log(res);
+        } catch (error) {
+            this.logger.info("Check if recipes table created: "+error);
+        }
+        try {
+            const res = await this.client.query(CREATE_NUTRIENTS_FILTERED());
+            console.log(res);
+        } catch (error) {
+            this.logger.info("Check if nutrients table created: "+error);
         }
     }
 

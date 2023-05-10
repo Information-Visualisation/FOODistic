@@ -53,70 +53,34 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 
 
 export function MACRO_NUTRIENTS_FOR(id: string): string {
-	return `SELECT 'Fiber' as name,orig_source_name,orig_content as value FROM food,nutrients
-WHERE ( 
-	food.id = `+ id + ` AND
-	lower(orig_source_name) LIKE '%fiber%' AND
-	food.id = nutrients.food_id
+	return `SELECT *
+	FROM nutrients_filtered as nf
+	WHERE (
+		nf.id = `+id+`
 	)
-UNION ALL
-	SELECT 'Fat' as name,orig_source_name,orig_content as value FROM food,nutrients
-	WHERE ( 
-		food.id = `+ id + ` AND
-		lower(orig_source_name) LIKE '%fat%' AND
-		lower(orig_source_name) NOT LIKE '%fatty acid%' AND
-		food.id = nutrients.food_id
-	)
-UNION ALL
-	SELECT 'Fatty Acid' as name,orig_source_name,orig_content as value FROM food,nutrients
-	WHERE ( 
-		food.id = `+ id + ` AND
-		lower(orig_source_name) LIKE '%fatty acid%' AND
-		food.id = nutrients.food_id
-	)
-UNION ALL
-	SELECT 'Proteins' as name,orig_source_name,orig_content as value FROM food,nutrients
-	WHERE ( 
-		food.id = `+ id + ` AND
-		lower(orig_source_name) LIKE '%protein%' AND
-		food.id = nutrients.food_id
-	)
-UNION ALL
-	SELECT 'Carbohydrate' as name,orig_source_name,orig_content as value FROM food,nutrients
-	WHERE ( 
-		food.id = `+ id + ` AND
-		lower(orig_source_name) LIKE '%carb%' AND
-		food.id = nutrients.food_id
-	)
-UNION ALL
-	SELECT 'Ash' as name,orig_source_name,orig_content as value FROM food,nutrients
-	WHERE ( 
-		food.id = `+ id + ` AND
-		lower(orig_source_name) LIKE '%ash%' AND
-		food.id = nutrients.food_id
-	)
-ORDER BY name`;
+	ORDER BY nutrient`;
 };
 
+export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
+	// TAKES VERY LONG
+	// TODO: Make a smaller nutrients table
+	if (ids.length > 2) {
+		let idList: string = ids[0]
+		for (let i = 1; i < ids.length; i++) {
+			idList += ` OR food.id = `+ ids[i];
+		}
+		return MACRO_NUTRIENTS_FOR(idList);
+	} else
+		throw new Error();
+}
+
 export function GET_RECIPES_FOR(id: string): string {
-	return `SELECT DISTINCT
-		pp_recipes.id as recipeid,
-		raw_recipes.name as recipename,
-		food.id as foodid, 
-		food.naam as foodname,
-		string_to_array(
-			substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
-		)::boolean[] as techniques,
-		raw_recipes.nutrition as nutritions
-	FROM food,ingredients_filtered,pp_recipes,raw_recipes
+	return `SELECT *
+	FROM recipes,food_ingredient_linker as fi
 	WHERE (
-		food.id = `+ id +` AND
-		(lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))) AND 
-		pp_recipes.ingredient_ids ~ CONCAT('(?<=\\D)',CONCAT(ingredients_filtered.id, '(?=\\D)')) AND
-		pp_recipes.id = raw_recipes.id 
-	)
-	ORDER BY recipename
-	--LIMIT 100`;
+		fi.food_id = `+id+` AND
+		fi.ingredient_id = ANY (recipes.ingredient_ids)
+	)`;
 }
 
 export function GET_RECIPE(id: string, ingredients: string): string{
