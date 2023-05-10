@@ -19,6 +19,7 @@ import {
     LinearScale
 } from 'chart.js'
 import { getTechniqueCounts } from '@/services/cookingtechniques';
+import { capitalize } from 'vue';
 
 const dbService = new DBService;
 
@@ -44,7 +45,7 @@ export default {
             isLoading: true,
             isFiltering: false,
             recipes: {} as {[key: number]: RecipesRow},
-            filters: [] as Array<string>,
+            selectedRecipe: null as unknown as number,
             filteredRecipes: {} as {[key: number]: RecipesRow},
             image: new Image(20, 20),
             nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
@@ -71,8 +72,22 @@ export default {
                 responsive: true,
                 maintainAspectRatio: false,
                 fill: {
-                opacity: 0.8
-            },
+                    opacity: 0.8,
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: '# Occurences'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Cooking technique index'
+                        }
+                    }
+                },    
                 plugins: {
                     legend: {
                         position: 'top',
@@ -80,6 +95,11 @@ export default {
                     },
                     tooltip: {
                         usePointStyle: true,
+                        boxPadding: 10,
+                        padding: 10,
+                        bodyFont: {
+                            weight: 'bold',
+                        },
                         callbacks: {
                             labelPointStyle: (context: any) => {
                                 // @ts-ignore --> ignore error that is not an error
@@ -87,8 +107,16 @@ export default {
                                 return {
                                     pointStyle: this.image
                                 }
+                            },
+                            footer: (context: any) => {
+                                return 'Nutrition: ' + Math.round(context[0].raw.r * 100) / 100;
+                            },
+                            title: (context: any) => {
+                                return '';  // to remove default title
+                            },
+                            label: (context: any) => {
+                                return capitalize(context.label);
                             }
-                            //footer: this.footer,
                         }
                     },
                 }
@@ -105,8 +133,9 @@ export default {
     methods: {
         async fetchData() {
             const queryString: string = GET_RECIPES_FOR(this.id);
+            console.log(queryString);
             this.recipes = (await dbService.query(queryString, false)).rows;
-            // this.recipes.techniques = Converter.changeStringToArray(this.recipes.techniques);
+            console.log('done loading recipes');
 
             this.filteredRecipes = this.recipes;
             this.selectNutrient(this.selectedNutrient);
@@ -147,26 +176,19 @@ export default {
             }
             
         },
-        checkedRecipe(recipeName: string, checked: boolean) {
+        checkedRecipe(index: number, checked: boolean) {
             if (checked) {
-                this.filters.push(recipeName);
+                this.selectedRecipe = index;
             } else {
-                this.filters = this.filters.filter(name => name !== recipeName);
+                this.selectedRecipe = null as unknown as number;
             }
-            this.updateFilters(this.filters.length == 0);
+            this.updateFilters(!checked);
         },
         updateFilters(all: boolean) {
             if (all) {
                 this.filteredRecipes = this.recipes;
             } else {
-                // this.filteredRecipes = this.recipes.filter((recipe: any) => {   // TODO: fix
-                //     for (let i = 0; i < this.filters.length; i++) {
-                //         if (recipe.recipename === this.filters[i]) {
-                //             return true;
-                //         }
-                //     }
-                //     return false;
-                // });
+                this.filteredRecipes = [this.recipes[this.selectedRecipe]];
             }
 
             this.selectNutrient(this.selectedNutrient);
@@ -220,8 +242,8 @@ export default {
             <div v-if="Object.keys(recipes).length <= 0" class="position-absolute top-50 start-50 translate-middle alert alert-dark"
                 role="alert">No recipes found</div>
             <ul class="list-group">
-                <RecipeItem v-for="recipe in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
-                    @mouseenter="checkedRecipe(recipe.recipename, true)" @mouseleave="checkedRecipe(recipe.recipename, false)" @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid }})"> <!-- checked aanpassen naar hover + click go to recipes -->
+                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
+                    @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)" @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid }})"> <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>
@@ -245,5 +267,10 @@ export default {
 
 .scrollview {
     height: 289px;
+}
+
+canvas {
+    width: 600px !important;
+    height: 300px !important;
 }
 </style>

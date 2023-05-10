@@ -77,7 +77,9 @@ export function CREATE_RECIPES() {
 	return `CREATE TABLE recipes_filtered AS
 			SELECT 
 				id, 
-				techniques,
+				string_to_array(
+					substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
+				)::boolean[] as techniques,
 				-- convert the ingredient_ids string "{1, 3, 4, 6}" to an array of ints
 				string_to_array(
 					substr(ingredient_ids, 2, length(ingredient_ids) - 2), ', ',' '

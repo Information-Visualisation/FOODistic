@@ -11,8 +11,8 @@ export default {
         columnNames: {type: Array<string>, required: true}
     },
     created() {
-        console.log(this.items);
-        console.log("max value: " + this.max_value)
+        // console.log(this.items);
+        // console.log("max value: " + this.max_value)
     },
     methods: {
         calcBarWitdh(column: number, value: number) {

@@ -13,7 +13,7 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
 		`+orAllergies(allergies)+`
 	) 
-	LIMIT `+pageSize+`
+	--LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
 }
 
@@ -75,12 +75,20 @@ export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
 }
 
 export function GET_RECIPES_FOR(id: string): string {
-	return `SELECT *
-	FROM recipes,food_ingredient_linker as fi
+	return `SELECT DISTINCT
+	fi.food_id as foodid,
+	fi.food_naam as foodname,
+	recipes_filtered.id as recipeid,
+	raw_recipes.name as recipename,
+	recipes_filtered.techniques,
+	raw_recipes.nutrition as nutritions
+	FROM recipes_filtered,raw_recipes,food_ingredient_linker as fi
 	WHERE (
+		recipes_filtered.id = raw_recipes.id AND
 		fi.food_id = `+id+` AND
-		fi.ingredient_id = ANY (recipes.ingredient_ids)
-	)`;
+		fi.ingredient_id = ANY (recipes_filtered.ingredient_ids)
+	)
+	LIMIT 100`;
 }
 
 export function GET_RECIPE(id: string, ingredients: string): string{
@@ -98,7 +106,7 @@ export function GET_RECIPE(id: string, ingredients: string): string{
 		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
 		AND ingredients_filtered.processed in  `+ ingredients +`
 		AND (lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')))
-	);`
+	);`;
 }
 
 
@@ -132,7 +140,7 @@ export function GET_INGREDIENTS_FOR(id: string): string {
 }
 
 export function GET_ALLERGY_FOR(foodName: string): string {
-	return "SELECT allergy FROM allergies WHERE food='"+ foodName +"'";
+	return "SELECT allergy FROM allergies WHERE food='"+ foodName +"' AND allergy IS NOT NULL";
 }
 
 export function GET_ALLERGIES_FOR(foods: FoodRow[]): string {
@@ -163,5 +171,5 @@ export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 }
 
 export function GET_ALLERGIES_RECIPE(foods: string){
-	return "SELECT allergies.allergy FROM allergies WHERE allergies.food in "+ foods;
+	return "SELECT allergies.allergy FROM allergies WHERE allergies.food in "+ foods + " AND allergy IS NOT NULL";
 }

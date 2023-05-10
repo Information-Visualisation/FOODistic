@@ -14,7 +14,7 @@ export default {
     },
     props: {
         name: {type: String, default: ""},
-        allergies: {type: Array<String>, default: ""},
+        allergies: {type: Array<String>, default: []},
         group: {type: String, default: ""},
         subgroup: {type: String, default: ""},
         offset: {type: Number, default: 0},

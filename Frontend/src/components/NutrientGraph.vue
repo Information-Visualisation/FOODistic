@@ -5,6 +5,7 @@ import type { Rows, Row, DistinctRows } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import BarWithErrorBarChart from './../services/errorbar.chart';
 import { MACRO_NUTRIENTS_FOR } from '../services/queries';
+import { foodColors } from '@/services/colors';
 import {
     Chart as ChartJS,
     Title,
@@ -16,6 +17,7 @@ import {
 } from 'chart.js/auto'
 
 const dbService = new DBService;
+const labels = ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'];
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -37,10 +39,11 @@ export default {
             noData: false,
             result: null as unknown as Rows,
             data: {
-                labels: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+                labels: labels,
                 datasets: [{
                     labels: ' ',
-                    data: [{}, {}, {}, {}, {}, {}]
+                    data: [{}, {}, {}, {}, {}, {}],
+                    backgroundColor: (() => {let colors = []; for (let label of labels) {colors.push(foodColors[label]);} return colors;})()
                 }]
 
             },
@@ -106,6 +109,11 @@ export default {
                 });
             }
         },
+        getBarColor(index: number) {
+            if (this.items[index] === undefined)
+                return 'lightslategray';
+            return foodColors[this.columnNames[index]];
+        }
     }
 }
 </script>

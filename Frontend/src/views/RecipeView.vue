@@ -36,11 +36,11 @@ export default {
         async fetchData() {
             let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id));
             let test = this.changeArrayToString(ingredients.rows[0].ingredient);
+            console.log(GET_RECIPE(this.id, test));
             this.recipe = (await dbService.query(GET_RECIPE(this.id, test))).rows;
             this.techniqueStrings = getFilteredTechniques(this.recipe[0].techniques);
             this.allergies = (await dbService.query(GET_ALLERGIES_RECIPE(this.getFoods()))).rows;
             this.$nextTick(() => {
-                console.log(this.recipe);
                 this.loaded();
             })
         },
