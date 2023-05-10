@@ -1,0 +1,41 @@
+$custom-app-colors: (
+    "app-light": #E4DFDA,
+    "app-dark": #143949,
+    "app-red": #C81D2D,
+    "app-green": #73A525
+);
+$app-light: #f0ede9;
+$app-dark: #143949;
+$app-red: #C81D2D;
+$app-green: #73A525;
+
+// overwrite default
+$danger: $app-red;
+$success: $app-green;
+
+$primary: $app-green;
+$secondary: $app-dark;
+
+// pagination
+$pagination-color: $primary;
+$pagination-hover-color: $app-dark;
+
+// navigation
+$nav-link-color: $primary;
+$nav-link-hover-color: $primary;
+
+// custom food colors
+$ash: black;
+$carbohydrate: orange;
+$fat: yellow;
+$fatty-acid: green;
+$fiber: brown;
+$proteins: aqua;
+
+
+// custom allergy colors
+
+// Bootstrap and its default variables
+@import '../node_modules/bootstrap/scss/bootstrap';
+// BootstrapVue and its default variables
+// @import '../node_modules/bootstrap-vue/src/index.scss';

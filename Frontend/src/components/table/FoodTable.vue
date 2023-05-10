@@ -1,5 +1,4 @@
 <script lang="ts">
-import TableRowTemp from './TableRowTemp.vue';
 import TableRowHead from './TableRowHead.vue';
 import TableGraph from './TableGraphs.vue';
 import TableRowNutrition from './TableRowNutrition.vue';
@@ -7,15 +6,17 @@ import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
 import RecipesList from '@/components/RecipesList.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_FOR, GET_ALLERGIES_PER_FOOD_FOR } from '@/services/queries';
-import { DBService, distinctNames, type DistinctRows } from '@/services/db.service';
+import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
+import { DBService, distinctNames } from '@/services/db.service';
+import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
 
 const dbService = new DBService;
 
 export default {
     props: {
-        data: {
+        foodpickerData: {
+            type: Object,
             required: true
         }
     },
@@ -23,7 +24,6 @@ export default {
         TableGraph,
         TableRowHead,
         TableRowNutrition,
-        TableRowTemp,
         FoodPicker,
         RecipesList,
         SpinnerComponent,
@@ -31,11 +31,12 @@ export default {
     },
     data() {
         return {
-            foodItems: [],
-            foodNutritions: {} as Object,
+            foodItems: [] as FoodRow[],
+            foodNutritions: Object() as {[key: string]: number[]},
             tabIndex: 0,
-            allergies: [] as string[],
-            allergiesPerFood: [] as Object[],
+            allergiesPerFood: [] as FoodAllergyRow[],
+            allergyPercentages: [] as AllergyPercentageRow[],
+            nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
         }
     },
     created() {
@@ -46,6 +47,22 @@ export default {
         }
     },
     emits: ["returnTotalCount"],
+    computed: {
+        getAllergyNames() : string[] {
+            let allergies = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                allergies.push(this.allergyPercentages[i].allergy);
+            }
+            return allergies;
+        },
+        getAllergyPercentages() : number[] {
+            let percentages = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                percentages.push(this.allergyPercentages[i].percentage);
+            }
+            return percentages;
+        }
+    },
     methods: {
         getMaxColums() {
             const column = 6;
@@ -70,45 +87,34 @@ export default {
             }
         },
         async createNutritions() {
-            this.foodNutritions = new Object();
+            this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
-                let result = await dbService.query(MACRO_NUTRIENTS_FOR(this.foodItems[i].id));
+                let result = await dbService.query(MACRO_NUTRIENTS_FOR(this.foodItems[i].id.toString()));
                 result = result.rows;
                 const naam = this.foodItems[i].naam;
                 this.foodNutritions[naam] = this.createNutrition(result);
             }
         },
-        createNutrition(result: any): Array<Number> {
-            const NUTRITIONS_COUNT = 6;
-            let nutrition: Array<Number> = new Array<Number>(NUTRITIONS_COUNT);
+        createNutrition(result: any): number[] {
+            let nutrition: number[] = [];
+            nutrition.length = this.nutritionHeaders.length;
             const distincts: DistinctRows = distinctNames(result);
-
             let i = 0;
             Object.keys(distincts).forEach((key: string) => {
                 const values: number[] = distincts[key];
-                const m = mean(values);
-                nutrition[i++] = m;
+                nutrition[i++] = mean(values);
             });
             return nutrition;
         },
         async fetchAllergyInfo() {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
-            // console.log(GET_ALLERGIES_FOR(this.foodItems));
-            let allergies = (await dbService.query(GET_ALLERGIES_FOR(this.foodItems))).rows;
-            this.allergies = [];
-            for (let i = 0; i < allergies.length; ++i) {
-                this.allergies.push(allergies[i].allergy);
-            }
+            this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
         setTabIndex(index: number) {
             this.tabIndex=index;
         },
         getAllergiesOfFood(foodName: string) {
-            return this.allergiesPerFood?.filter(function(item) {return item.food==foodName;});
-        },
-        getAllergyPercentages(numColumns: number) {
-            let percentage = (100 / numColumns).toFixed(2);
-            return Array<string>(numColumns).fill(percentage);
+            return this.allergiesPerFood?.filter(function(item) { return item.food==foodName;});
         },
         getNutrientPercentages(){
             const column = 6;
@@ -151,44 +157,43 @@ export default {
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
-                <FoodPicker v-if="data !== undefined" :name="data?.name" :group="data?.group" :subgroup="data?.subgroup"
-                    :offset="data?.offset" :allergies="data?.allergies" @returnFooditems="receiveFooditems"></FoodPicker>
+                <FoodPicker v-if="foodpickerData !== undefined" :name="foodpickerData?.name" :group="foodpickerData?.group" :subgroup="foodpickerData?.subgroup"
+                    :offset="foodpickerData?.offset" :allergies="foodpickerData?.allergies" @returnFooditems="receiveFooditems"></FoodPicker>
             </div>
+            <!-- Nutrients -->
             <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getNutrientPercentages()" />
+                        <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead
-                            :columnNames="['Name', 'Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins']" />
+                            :columnNames="['Name'].concat(nutritionHeaders)" />
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions"
-                            :id="foodItems[i].id" :name="name" :items="nutritions" :max_value="getMaxColums()"/>
-                        <!--<TableRowTemp v-for="items in test_items" :items='items'/>-->
-                        <!-- change to foods and nutrition values-->
+                        <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(nutritions, key, i) in foodNutritions"
+                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="Object.keys(foodNutritions)[i]" :items="nutritions" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>
             </div>
+            <!-- Allergies -->
             <div class="tab-pane fade" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages(allergies.length)" />
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead
-                            :columnNames="['Name'].concat(allergies)" />
+                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowAllergy v-if="foodNutritions.length != 0" v-for="(nutritions, name, i) in foodNutritions"
-                            :id="foodItems[i].id" :name="name" :allergyColumns="allergies" :allergies="getAllergiesOfFood(name)" />
+                        <TableRowAllergy v-if="foodItems.length != 0" v-for="(food, i) in foodItems"
+                            :id="foodItems[i].id" :name="food.naam" :allergyNames="getAllergyNames" :allergies="getAllergiesOfFood(food.naam)" />
                     </tbody>
                 </table>
             </div>
@@ -199,18 +204,17 @@ export default {
     </div>
 </template>
 
-<style>
+<style scoped lang="scss">
+@import "@/../scss/custom.scss";
 #table {
-    /* background-color: rgb(208, 208, 208); */
-    margin: 5%;
+    margin-top: 50px;
 
 }
 
 .tab-pane {
     border-style: solid;
-    border-width: 0px 1px 0px 1px;
     /* top right bottom left */
-    border-color: #dee2e6;
-    /* tried var(--bs-nav-tabs-link-active-border-color) but didn't work */
+    border-width: 0px 1px 0px 1px;
+    border-color: $gray-300;
 }
 </style>

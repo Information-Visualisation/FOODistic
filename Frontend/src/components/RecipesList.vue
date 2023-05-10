@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import { DBService } from '../services/db.service'
-import type { Rows } from '../services/db.service';
+import type { RecipesRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
@@ -18,7 +18,6 @@ import {
     LinearScale
 } from 'chart.js'
 import { getTechniqueCounts } from '@/services/cookingtechniques';
-import { primary, secondary } from '@/services/colors';
 
 const dbService = new DBService;
 
@@ -35,7 +34,7 @@ export default {
     },
     props: {
         id: {
-            type: Array<String>,
+            type: String,
             required: true
         }
     },
@@ -43,9 +42,9 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: null,
+            recipes: [] as RecipesRow[],
             filters: [] as Array<string>,
-            filteredRecipes: null,
+            filteredRecipes: [] as RecipesRow[],
             image: new Image(20, 20),
             nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
             selectedNutrient: 'Total fat',
@@ -60,7 +59,7 @@ export default {
                 },
                 {
                     labels: ' ',
-                    backgroundColor: secondary,
+                    // backgroundColor: secondary,
                     pointRadius: 10,
                     pointStyle: this.image,
                     data: [],
@@ -83,6 +82,7 @@ export default {
                         usePointStyle: true,
                         callbacks: {
                             labelPointStyle: (context: any) => {
+                                // @ts-ignore --> ignore error that is not an error
                                 this.image.src = '/src/assets/cookingtechniques/' + context.label + '.png'
                                 return {
                                     pointStyle: this.image
@@ -105,8 +105,7 @@ export default {
     methods: {
         async fetchData() {
             const queryString: string = GET_RECIPES_FOR(this.id);
-            this.recipes = await dbService.query(queryString, false);
-            this.recipes = this.recipes.rows;
+            this.recipes = (await dbService.query(queryString, false)).rows;
             this.filteredRecipes = this.recipes;
             this.selectNutrient(this.selectedNutrient);
             this.$nextTick(() => {

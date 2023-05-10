@@ -1,12 +1,32 @@
 <script lang="ts">
+import { foodColors, allergyColors } from '@/services/colors';
+
 export default {
     props: {
-        percentages: Array<number>,
+        columnNames: {
+            type: Array<string>,
+            required: true,
+        },
+        percentages: {
+            type: Array<number>,
+            required: true,
+        }
     },
     methods: {
         calcBarHeight(percentage: number) {
             let height:number = percentage / 100 * 150; //150 is the max height
             return height + 'px';
+        },
+        getBarColor(index: number) {
+            if (this.percentages[index].toString() === 'NaN')
+                return "#000000";
+            let header = this.columnNames[index];
+            if (header in foodColors)
+                return foodColors[header];
+            else if (header in allergyColors)
+                return allergyColors[header];
+            else
+                return '#000000';
         }
     }
 }
@@ -15,24 +35,21 @@ export default {
 <template>
     <tr>
     <th scope="col"></th> <!-- First one should be empty-->
-    <th scope="col" v-for="percentage in percentages">
+    <th scope="col" v-for="(percentage, index) in percentages">
         <div class="bar-wrapper">
-            <p class="bar-percentage">{{ percentage }}%</p>
-            <div class="bar" :style="{height: calcBarHeight(percentage)}">
+            <p class="bar-percentage" :style="{color: getBarColor(index)}">
+                {{ Math.round(percentage * 100) / 100 + (percentage.toString() == 'NaN' ? '': '%')}}
+            </p>
+            <div class="bar" :style="{height: calcBarHeight(percentage) , backgroundColor: getBarColor(index)}">
             </div>
         </div>
     </th>
     </tr>
 </template>
 
-<style>
-:root {
-    --bar-chart-width: 50px;
-}
-
-
+<style scoped>
 .bar-wrapper {
-    width: var(--bar-chart-width);
+    width: 50px;
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -42,10 +59,11 @@ export default {
     text-align: center;
     height: 20px;
     margin-bottom: 5px;
+    font-weight: bold;
 }
-
+/* 
 .bar {
     background-color: brown;
-}
+} */
 
 </style>

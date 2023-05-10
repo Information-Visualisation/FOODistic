@@ -3,6 +3,7 @@ import FoodItem from '../components/FoodItem.vue';
 import SpinnerComponent from './SpinnerComponent.vue';
 import { DBService } from '../services/db.service';
 import { GET_FOOD_FOR_NAME, GET_FOODCOUNT_FOR_NAME } from '@/services/queries';
+import type { FoodRow } from '@/services/dbClasses';
 
 const dbService = new DBService;
 
@@ -13,7 +14,7 @@ export default {
     },
     props: {
         name: {type: String, default: ""},
-        allergies: {type: String, default: ""},
+        allergies: {type: Array<String>, default: ""},
         group: {type: String, default: ""},
         subgroup: {type: String, default: ""},
         offset: {type: Number, default: 0},
@@ -22,7 +23,7 @@ export default {
     data() {
         return {
             isLoading: true,
-            fooditems: null,
+            fooditems: [] as FoodRow[],
             totalCount: 0,
             pageSize: 24,
         }
@@ -36,20 +37,17 @@ export default {
         async query() {
             this.isLoading = true;
             const allergies = await this.getFoodFromAllergies();
-            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset));
-            this.fooditems = this.fooditems.rows;
-            this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
-            this.totalCount = parseInt(this.totalCount.rows[0].c);
+            this.fooditems = (await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset))).rows;
+            this.totalCount = (await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup))).rows[0].c;
             this.returnFooditems();
             this.isLoading = false;
         },
         async getFoodFromAllergies(){
             let resultAllergy = this.changeArrayToString(this.allergies);
-            let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
-            allergyFoodResultQuery = allergyFoodResultQuery.rows;
+            let allergyFoodResultQuery: {food: string}[] = (await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy)).rows;
             let allergyFood = []  as string[];
-            for (var food of allergyFoodResultQuery) {
-                allergyFood.push(food.food);
+            for (var index in allergyFoodResultQuery) {
+                allergyFood.push(allergyFoodResultQuery[index].food);
             }
             return allergyFood
         },

@@ -30,9 +30,9 @@ export default {
 
 <template>
   <button v-if="comparing" class="card small btn btn-outline-success" @click="compare">
-    <div class="position-relative">
-      <FoodImg class="position-absolute img" :id="id" :name="name" :height="50"></FoodImg>
-      <h3 class="position-absolute smallTitle">{{ name }}</h3>
+    <div class="d-flex align-items-center justify-content-start">
+      <FoodImg class="img" :id="id" :name="name" :height="50"></FoodImg>
+      <h3 class="food-name text-truncate">{{ name }}</h3>
     </div>
   </button>
   <router-link v-if="!comparing" class="card normal btn btn-outline-success" :to="{
@@ -44,14 +44,14 @@ export default {
       id: id
     }
   }">
-    <div class="position-relative">
-      <FoodImg class="position-absolute img" :id="id" :name="name" :height="50"></FoodImg>
-      <h2>{{ name }}</h2>
+    <div class="d-flex align-items-center justify-content-start">
+      <FoodImg class="img" :id="id" :name="name" :height="50"></FoodImg>
+      <span class="food-name text-truncate">{{ name }}</span>
     </div>
   </router-link>
 </template>
 
-<style>
+<style scoped>
 .normal {
   width: 31%;
   height: 70px;
@@ -77,6 +77,11 @@ export default {
 }
 
 .img {
-  left: 0px;
+  margin-right: 10px;
+}
+
+.food-name {
+  font-weight: bold;
+  font-size: x-large;
 }
 </style>

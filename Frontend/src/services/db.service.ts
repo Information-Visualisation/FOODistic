@@ -1,14 +1,4 @@
-type Rows = {
-  [x: string]: any;
-  rows: [Row]
-};
-type Row = {
-  name: string,
-  value: string,
-}
-type DistinctRows = {
-  [key: string]: number[]
-}
+import type { Row, Rows, DistinctRows } from './dbClasses';
 
 export class DBService {
   async query(query: string, log: boolean = false): Promise<any> {
@@ -32,5 +22,3 @@ export function distinctNames(rows: Rows): DistinctRows {
   });
   return names;
 }
-
-export type { Rows, Row, DistinctRows }

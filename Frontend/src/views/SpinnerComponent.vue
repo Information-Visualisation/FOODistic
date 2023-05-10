@@ -1,7 +1,10 @@
 <template>
-    <div class="spinner-border m-5" role="status">
-        <span class="visually-hidden">Loading...</span>
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="spinner-border m-5" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
+    
 </template>
   
 <style scoped>

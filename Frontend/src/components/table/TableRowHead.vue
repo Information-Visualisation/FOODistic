@@ -42,15 +42,11 @@ export default {
     </tr>
 </template>
 
-<style>
+<style scoped>
 
 .sort {
     font-weight: bold;
     padding: 0px;
-}
-
-.th {
-    width: 100px;
 }
 
 </style>
