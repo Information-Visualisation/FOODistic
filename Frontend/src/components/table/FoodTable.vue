@@ -78,7 +78,7 @@ export default {
             return max_value_colum;
         },
         receiveFooditems(event: any, foodItems: any, totalCount: number) {
-            if (foodItems !== undefined) {
+            if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
                 this.$emit('returnTotalCount', null, totalCount);
                 this.createNutritions();
@@ -116,7 +116,7 @@ export default {
         async fetchAllergyInfo() {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
-            console.log(this.allergyPercentages);
+            //console.log(this.allergyPercentages);
         },
         setTabIndex(index: number) {
             this.tabIndex=index;

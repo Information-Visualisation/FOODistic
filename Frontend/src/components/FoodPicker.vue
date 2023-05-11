@@ -12,13 +12,13 @@ export default {
         SpinnerComponent,
     },
     props: {
-        name: {type: String, default: ""},
-        allergies: {type: Array<String>, default: ""},
-        group: {type: String, default: ""},
-        subgroup: {type: String, default: ""},
-        offset: {type: Number, default: 0},
-        pageSize: {type: Number, default: 15},
-        comparing: {type: Boolean, default: false},
+        name: { type: String, default: "" },
+        allergies: { type: Array<String>, default: "" },
+        group: { type: String, default: "" },
+        subgroup: { type: String, default: "" },
+        offset: { type: Number, default: 0 },
+        pageSize: { type: Number, default: 15 },
+        comparing: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -36,32 +36,38 @@ export default {
         async query() {
             this.isLoading = true;
             const allergies = await this.getFoodFromAllergies();
-            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset, this.pageSize));
-            this.fooditems = this.fooditems.rows;
-            this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
-            this.totalCount = parseInt(this.totalCount.rows[0].c);
-            this.returnFooditems();
+            try {
+                this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset, this.pageSize));
+            } catch (e) {
+                this.fooditems = undefined;
+            }
+            if (this.fooditems !== undefined) {
+                this.fooditems = this.fooditems.rows;
+                this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
+                this.totalCount = parseInt(this.totalCount.rows[0].c);
+                this.returnFooditems();
+            }
             this.isLoading = false;
         },
-        async getFoodFromAllergies(){
+        async getFoodFromAllergies() {
             let resultAllergy = this.changeArrayToString(this.allergies);
             let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
             allergyFoodResultQuery = allergyFoodResultQuery.rows;
-            let allergyFood = []  as string[];
+            let allergyFood = [] as string[];
             for (var food in allergyFoodResultQuery) {
                 allergyFood.push(food.food);
             }
             return allergyFood
         },
-        changeArrayToString(convert: any){
+        changeArrayToString(convert: any) {
             let allergyInString = "('";
             if (convert != "") {
-              for (let i = 0; i < convert.length; i++) {
-                if (i + 1 != convert.length)
-                    allergyInString += convert[i] + "', '";
-                else
-                    allergyInString += convert[i];
-              }
+                for (let i = 0; i < convert.length; i++) {
+                    if (i + 1 != convert.length)
+                        allergyInString += convert[i] + "', '";
+                    else
+                        allergyInString += convert[i];
+                }
             }
             allergyInString += "')";
             return allergyInString;
@@ -97,14 +103,14 @@ export default {
 </script>
 <template>
     <div class="container vstack">
-
+        <div v-if="fooditems === undefined">No foods found</div>
         <div v-if="fooditems === null || isLoading" class="justify-content-center">
             <SpinnerComponent />
         </div>
-        <div v-if="fooditems !== null && !isLoading">
+        <div v-if="fooditems !== null && fooditems !== undefined && !isLoading">
             <div v-if="fooditems.length == 0">No results found</div>
-            <FoodItem v-for="fooditem in fooditems" :name=fooditem.naam :id="fooditem.id.toString()"
-                :comparing="comparing" @compare="compare"></FoodItem>
+            <FoodItem v-for="fooditem in fooditems" :name=fooditem.naam :id="fooditem.id.toString()" :comparing="comparing"
+                @compare="compare"></FoodItem>
         </div>
 
     </div>
