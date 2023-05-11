@@ -1,8 +1,6 @@
-export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0): string {
+export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0, pageSize: number = 15): string {
 	if (foodGroup == "All Foodgroups") foodGroup = "";
 	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
-
-	const pageSize: number = 24;
 	return `SELECT * 
 	FROM food
 	WHERE (

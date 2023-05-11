@@ -65,15 +65,17 @@ export default {
     </ol>
   </nav>
 
-  <div class="position-relative">
-    <FoodImg class="position-absolute top-0 start-0 m-3" :id="id" :name="name"></FoodImg>
-    <div class="col title">
-      <h1>Food: {{ name }}</h1>
-      <h2>Id: {{ id }}</h2>
+  <div class="d-flex justify-content-start header">
+    <div class="">
+      <FoodImg class="image" :id="id" :name="name" :height="35"></FoodImg>
+    </div>
+    <div class="">
+      <h1 class="title">{{ name }}</h1>
+      <!-- <h2>Id: {{ id }}</h2> -->
     </div>
   </div>
 
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center content">
     <div class="row">
       <div class="col">
         <NutrientGraph :id="id" class="card" />
@@ -92,15 +94,30 @@ h2 {
   padding-left: 30px;
 }
 
-.title {
-  left: 80px;
-}
-
 .card {
   padding: 10px;
+  margin: 10px;
 }
 
 .crumbs {
   margin: 4px;
+}
+
+.image {
+  margin: 10px;
+}
+
+.title {
+  margin-top: 4px;
+  margin-left: 0px;
+  padding-left: 3px;
+}
+
+.header {
+  margin-left: 50px;
+}
+
+.content {
+  padding-left: 50px;
 }
 </style>

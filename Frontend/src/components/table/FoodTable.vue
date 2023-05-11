@@ -42,7 +42,7 @@ export default {
     },
     watch: {
         data(newV, oldV) {
-            console.log(newV);
+            //console.log(newV);
         }
     },
     emits: ["returnTotalCount"],
@@ -166,7 +166,8 @@ export default {
             <div class="tab-pane fade show active" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
                 <FoodPicker v-if="data !== undefined" :name="data?.name" :group="data?.group" :subgroup="data?.subgroup"
-                    :offset="data?.offset" :allergies="data?.allergies" @returnFooditems="receiveFooditems"></FoodPicker>
+                    :offset="data?.offset" :allergies="data?.allergies" :pageSize="data?.pageSize" @returnFooditems="receiveFooditems">
+                </FoodPicker>
             </div>
             <!-- Nutrients -->
             <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">

@@ -4,9 +4,9 @@ import { DBService } from '../services/db.service'
 import FoodPicker from '../components/FoodPicker.vue';
 import SpinnerComponent from '@/components/SpinnerComponent.vue';
 import FoodTable from '@/components/table/FoodTable.vue';
+import VueNumberInput from '@chenfengyuan/vue-number-input';
 
 const MAX_PAGINATION: number = 10;
-const PAGE_SIZE: number = 24;
 
 const dbService = new DBService;
 export default {
@@ -15,6 +15,7 @@ export default {
     FoodPicker,
     SpinnerComponent,
     FoodTable,
+    VueNumberInput
   },
   data() {
     return {
@@ -33,7 +34,7 @@ export default {
       foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All Foodgroups",
       subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All Foodsubgroups",
       offset: this.$route.query.offset !== undefined ? parseInt(this.$route.query.offset as string) : 0,
-
+      pageSize: this.$route.query.pageSize !== undefined ? parseInt(this.$route.query.pageSize as string) : 24,
     }
   },
   created: function () {
@@ -91,6 +92,8 @@ export default {
         options.query.subfoodgroup = this.subFoodGroup;
       if (this.offset >= 0)
         options.query.offset = this.offset;
+      if (this.pageSize >= 1 && this.pageSize <= 1000)
+        options.query.pageSize = this.pageSize;
 
       this.$router.push(options);
     },
@@ -103,7 +106,7 @@ export default {
       this.route();
     },
     receiveRowCount(event: any, totalCount: number) {
-      const pageCount = Math.ceil(totalCount / PAGE_SIZE);
+      const pageCount = Math.ceil(totalCount / this.pageSize);
       if (this.offset >= pageCount) {
         this.setPage(pageCount-1);
       }
@@ -136,6 +139,10 @@ export default {
       array.reverse();
       return array;
     },
+    setItemsPerPage() {
+      this.pageSize = this.$refs.numberinput!.value;
+      this.route();
+    }
   }
 }
 </script>
@@ -202,11 +209,21 @@ export default {
       </div>
       <div class="">
         <FoodTable
-          :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies }"
+          :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies, pageSize: pageSize }"
           @returnTotalCount="receiveRowCount">
         </FoodTable>
+        <!-- Pagination -->
         <nav aria-label="Page navigation example">
           <ul class="pagination justify-content-center">
+            <li>
+              <VueNumberInput ref="numberinput" placeholder="per page" class="ItemPerPage" :min="1" :max="1000" :step="15" :model-value="pageSize" inline center @keyup.enter="setItemsPerPage()"/>
+            </li>
+            <li>
+              <a type="button" class="btn btn-success ItemPerPageButton" @click="setItemsPerPage()" href="#">✓</a>
+            </li>
+            <li :class="'page-item '+(lowerPages.length <= 0 ? 'disabled' : '')" @click="setPage(lowerPages[lowerPages.length-1] as number)">
+              <a class="page-link" href="#">&laquo;</a>
+            </li>
             <li v-for="n in lowerPages" class="page-item" @click="setPage(n as number)">
               <a class="page-link" href="#">{{ n as number + 1 }}</a>
             </li>
@@ -215,6 +232,9 @@ export default {
             </li>
             <li v-for="n in upperPages" class="page-item" @click="setPage(n as number)">
               <a class="page-link" href="#">{{ n as number + 1}}</a>
+            </li>
+            <li :class="'page-item '+(upperPages.length <= 0 ? 'disabled' : '')" @click="setPage(upperPages.length > 0 ? upperPages[0] as number : hardOffset)">
+              <a class="page-link" href="#">&raquo;</a>
             </li>
           </ul>
         </nav>
@@ -241,5 +261,12 @@ export default {
 
 .dropdown-item-checkbox {
   margin-right: 10px;
+}
+
+.ItemPerPage {
+  width: 100px;
+}
+.ItemPerPageButton {
+  margin-right: 20px;
 }
 </style>

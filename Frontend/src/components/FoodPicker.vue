@@ -17,6 +17,7 @@ export default {
         group: {type: String, default: ""},
         subgroup: {type: String, default: ""},
         offset: {type: Number, default: 0},
+        pageSize: {type: Number, default: 15},
         comparing: {type: Boolean, default: false},
     },
     data() {
@@ -24,7 +25,6 @@ export default {
             isLoading: true,
             fooditems: null,
             totalCount: 0,
-            pageSize: 24,
         }
     },
     async created() {
@@ -36,7 +36,7 @@ export default {
         async query() {
             this.isLoading = true;
             const allergies = await this.getFoodFromAllergies();
-            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset));
+            this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset, this.pageSize));
             this.fooditems = this.fooditems.rows;
             this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
             this.totalCount = parseInt(this.totalCount.rows[0].c);
@@ -87,6 +87,9 @@ export default {
             this.query();
         },
         offset(newV, oldV) {
+            this.query();
+        },
+        pageSize(newV, oldV) {
             this.query();
         }
     }
