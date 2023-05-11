@@ -161,13 +161,13 @@ export default {
         </nav>
         <!-- content -->
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
+            <div class="tab-pane fade show active no-rows" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
                 <FoodPicker v-if="foodpickerData !== undefined" :name="foodpickerData?.name" :group="foodpickerData?.group" :subgroup="foodpickerData?.subgroup"
                     :offset="foodpickerData?.offset" :allergies="foodpickerData?.allergies" @returnFooditems="receiveFooditems"></FoodPicker>
             </div>
             <!-- Nutrients -->
-            <div class="tab-pane fade" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
+            <div class="tab-pane fade rows" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
@@ -186,7 +186,7 @@ export default {
                 </table>
             </div>
             <!-- Allergies -->
-            <div class="tab-pane fade" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
+            <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
@@ -203,7 +203,7 @@ export default {
                     </tbody>
                 </table>
             </div>
-            <div class="tab-pane fade" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
+            <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
                 <RecipesList v-if="tabIndex==3" class="mx-auto" id="1"></RecipesList>
             </div>
         </div>
@@ -219,8 +219,17 @@ export default {
 
 .tab-pane {
     border-style: solid;
-    /* top right bottom left */
-    border-width: 0px 1px 0px 1px;
+    
     border-color: $gray-300;
 }
+
+.rows{
+    /* top right bottom left */
+    border-width: 0px 1px 0px 1px;
+}
+
+ .no-rows{
+    /* top right bottom left */
+    border-width: 0px 1px 1px 1px;
+ }
 </style>
