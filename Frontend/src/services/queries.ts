@@ -43,6 +43,19 @@ function orAllergies(allergies: string[]) {
 	}
 }
 
+function orRecipeIngr(query: string[]) {
+	if (query.length!=0) {
+		let queryString: string = `AND (lower(`+query[0].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
+		for (let i = 1; i < query.length; i++) {
+			queryString += `OR lower(`+query[i].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
+		}
+		queryString += ')';
+		return queryString;
+	} else {
+		return '';
+	}
+}
+
 export function GET_FOOD_FOR_ID(id: string = ""): string {
 	return `SELECT * 
 	FROM food
@@ -91,7 +104,7 @@ export function GET_RECIPES_FOR(id: string): string {
 	LIMIT 100`;
 }
 
-export function GET_RECIPE(id: string, ingredients: string): string{
+export function GET_RECIPE(id: string, ingredients: string[]): string{
 	return `SELECT DISTINCT
 		food.naam as foodname,
 		food.id as foodid,
@@ -104,8 +117,7 @@ export function GET_RECIPE(id: string, ingredients: string): string{
 	FROM food,ingredients_filtered,pp_recipes,raw_recipes
 	WHERE (
 		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
-		AND ingredients_filtered.processed in  `+ ingredients +`
-		AND (lower(ingredients_filtered.processed) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')))
+		`+orRecipeIngr(ingredients)+`
 	);`;
 }
 
@@ -171,5 +183,5 @@ export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 }
 
 export function GET_ALLERGIES_RECIPE(foods: string){
-	return "SELECT allergies.allergy FROM allergies WHERE allergies.food in "+ foods + " AND allergy IS NOT NULL";
+	return "SELECT DISTINCT allergies.allergy FROM allergies WHERE allergies.food in "+ foods + " AND allergy IS NOT NULL";
 }

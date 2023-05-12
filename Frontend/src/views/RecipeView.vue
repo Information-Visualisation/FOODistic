@@ -35,8 +35,7 @@ export default {
     methods:{
         async fetchData() {
             let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id));
-            let test = this.changeArrayToString(ingredients.rows[0].ingredient);
-            console.log(GET_RECIPE(this.id, test));
+            let test = this.changeIngredientToArray(ingredients.rows[0].ingredient);
             this.recipe = (await dbService.query(GET_RECIPE(this.id, test))).rows;
             this.techniqueStrings = getFilteredTechniques(this.recipe[0].techniques);
             this.allergies = (await dbService.query(GET_ALLERGIES_RECIPE(this.getFoods()))).rows;
@@ -59,19 +58,14 @@ export default {
             foodstring += ")";
             return foodstring;
         },
-        changeArrayToString(convert: any){
-            let inString = "(";
-            if (convert != "") {
-              for (let i = 0; i < convert.length; i++) {
-                this.replaceAanhaling(convert[i])
-                if (i + 1 != convert.length)
-                    inString += this.replaceAanhaling(convert[i]) + ", ";
-                else
-                    inString += this.replaceAanhaling(convert[i]);
+        changeIngredientToArray(ingredientRow: any){
+            let ingredientArray = new Array<string>;
+            if (ingredientRow != "") {
+              for (var ingredient of ingredientRow) {
+                ingredientArray.push(ingredient);
               }
             }
-            inString += ")";
-            return inString;
+            return ingredientArray;
         },
         replaceAanhaling(ingredient: string){
             let count = 0;
