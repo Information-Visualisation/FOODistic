@@ -3,7 +3,8 @@ import FoodImg from '@/components/FoodImg.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
 import { DBService } from '@/services/db.service';
-import { GET_FOOD_FOR_ID } from '@/services/queries';
+import type { FoodRow } from '@/services/dbClasses';
+import { GET_FOOD_FOR_ID, GET_ALLERGY_FOR } from '@/services/queries';
 
 const dbService = new DBService;
 
@@ -23,9 +24,10 @@ export default {
     return {
       id: this.$route.query.id as string,
       name: '',
-      row: null,
+      row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
+      allergies: {} as { [key: number]: {allergy: string}},
     }
   },
   created() {
@@ -34,14 +36,23 @@ export default {
   },
   methods: {
     async fetchData(id: string) {
-      this.row = await dbService.query(GET_FOOD_FOR_ID(id));
-      this.row = this.row.rows[0];
-      this.name = this.row.naam;
+      this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
       this.setFoodGroups();
+      this.name = this.row.naam;
+      console.log(this.name);
+      this.allergies = (await dbService.query(GET_ALLERGY_FOR(this.name))).rows;
+      console.log('done loading allergies');
     },
     setFoodGroups() {
       this.foodGroup = this.row.food_group;
       this.subFoodGroup = this.row.food_subgroup;
+    },
+    getImageUrl(allergy: string) {
+        if (allergy.includes('Lactose')) {
+            return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href;
+        }
+        let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
+        return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
     },
   },
 }
@@ -72,6 +83,11 @@ export default {
     <div class="">
       <h1 class="title">{{ name }}</h1>
       <!-- <h2>Id: {{ id }}</h2> -->
+	  <div v-if="Object.keys(allergies).length >= 1">
+        <h2>Allergies: <div v-for="allergy in allergies">
+            <img :title=allergy.allergy :src="getImageUrl(allergy.allergy)" style="width: 50px"/>
+        </div></h2>
+      </div>
     </div>
   </div>
 
@@ -88,8 +104,7 @@ export default {
 </template>
 
 <style>
-h1,
-h2 {
+h1, h2 {
   padding-top: 5px;
   padding-left: 30px;
 }

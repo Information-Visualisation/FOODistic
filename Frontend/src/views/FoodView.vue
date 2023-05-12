@@ -160,7 +160,7 @@ export default {
                     },
                     query: {
                         id: id,
-                        compareSearch: this.compareSearch
+                        compareSearch: compareSearch
                     },
                 }).href" v-if="picked" type="button" class="btn btn-success mb-3" aria-label="Close">
                 Main ▶

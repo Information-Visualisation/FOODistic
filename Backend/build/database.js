@@ -45,7 +45,8 @@ var DBConnection = /** @class */ (function () {
     function DBConnection(logger) {
         this.logger = logger;
         this.createConnection();
-        this.createViews();
+        this.createView();
+        this.createTables();
     }
     DBConnection.prototype.createConnection = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -75,29 +76,72 @@ var DBConnection = /** @class */ (function () {
             });
         });
     };
-    DBConnection.prototype.createViews = function () {
+    DBConnection.prototype.createView = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var res, error_2;
+            var error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         return [4 /*yield*/, this.client.query((0, queries_1.CREATE_INGREDIENTS_VIEW)())];
                     case 1:
-                        res = _a.sent();
+                        _a.sent();
                         return [3 /*break*/, 3];
                     case 2:
                         error_2 = _a.sent();
-                        this.logger.error("Problem with creating the views: " + error_2.Message);
+                        this.logger.error("Problem with creating the views: " + error_2);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
             });
         });
     };
+    DBConnection.prototype.createTables = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var res, error_3, res, error_4, res, error_5;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.client.query((0, queries_1.CREATE_FOOD_INGREDIENT_LINKER)())];
+                    case 1:
+                        res = _a.sent();
+                        console.log(res);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_3 = _a.sent();
+                        this.logger.info("Check if linker table created: " + error_3);
+                        return [3 /*break*/, 3];
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, this.client.query((0, queries_1.CREATE_RECIPES)())];
+                    case 4:
+                        res = _a.sent();
+                        console.log(res);
+                        return [3 /*break*/, 6];
+                    case 5:
+                        error_4 = _a.sent();
+                        this.logger.info("Check if recipes table created: " + error_4);
+                        return [3 /*break*/, 6];
+                    case 6:
+                        _a.trys.push([6, 8, , 9]);
+                        return [4 /*yield*/, this.client.query((0, queries_1.CREATE_NUTRIENTS_FILTERED)())];
+                    case 7:
+                        res = _a.sent();
+                        console.log(res);
+                        return [3 /*break*/, 9];
+                    case 8:
+                        error_5 = _a.sent();
+                        this.logger.info("Check if nutrients table created: " + error_5);
+                        return [3 /*break*/, 9];
+                    case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
     DBConnection.prototype.select = function (query) {
         return __awaiter(this, void 0, void 0, function () {
-            var res, error_3;
+            var res, error_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -108,8 +152,8 @@ var DBConnection = /** @class */ (function () {
                         //this.logger.info(res.rows);
                         return [2 /*return*/, res];
                     case 2:
-                        error_3 = _a.sent();
-                        this.logger.error("Problem with connecting query: " + error_3.Message);
+                        error_6 = _a.sent();
+                        this.logger.error("Problem with connecting query: " + error_6.Message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }

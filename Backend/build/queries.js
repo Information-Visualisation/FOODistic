@@ -1,8 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CREATE_INGREDIENTS_VIEW = void 0;
+exports.CREATE_RECIPES = exports.CREATE_FOOD_INGREDIENT_LINKER = exports.CREATE_NUTRIENTS_FILTERED = exports.CREATE_INGREDIENTS_VIEW = void 0;
 function CREATE_INGREDIENTS_VIEW() {
-    return "CREATE OR REPLACE VIEW public.ingredients_filtered\n\tAS\n\tSELECT DISTINCT ingredients.id, ingredients.replaced, ingredients.processed\n\t  FROM ingredients\n\t ORDER BY ingredients.id;";
+    return "CREATE OR REPLACE VIEW public.ingredients_filtered\n\t\t\tAS\n\t\t\tSELECT DISTINCT ingredients.id, ingredients.replaced, ingredients.processed\n\t\t\tFROM ingredients\n\t\t\tORDER BY ingredients.id;";
 }
 exports.CREATE_INGREDIENTS_VIEW = CREATE_INGREDIENTS_VIEW;
+function CREATE_NUTRIENTS_FILTERED() {
+    return "CREATE TABLE nutrients_filtered AS \n\tSELECT food.id, food.naam, 'Fiber' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\tWHERE ( \n\t\tlower(orig_source_name) LIKE '%fiber%' AND\n\t\tfood.id = nutrients.food_id\n\t\t)\n\tUNION ALL\n\t\tSELECT food.id, food.naam, 'Fat' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\t\tWHERE ( \n\t\t\tlower(orig_source_name) LIKE '%fat%' AND\n\t\t\tlower(orig_source_name) NOT LIKE '%fatty acid%' AND\n\t\t\tfood.id = nutrients.food_id\n\t\t)\n\tUNION ALL\n\t\tSELECT food.id, food.naam, 'Fatty Acid' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\t\tWHERE ( \n\t\t\tlower(orig_source_name) LIKE '%fatty acid%' AND\n\t\t\tfood.id = nutrients.food_id\n\t\t)\n\tUNION ALL\n\t\tSELECT food.id, food.naam, 'Proteins' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\t\tWHERE ( \n\t\t\tlower(orig_source_name) LIKE '%protein%' AND\n\t\t\tfood.id = nutrients.food_id\n\t\t)\n\tUNION ALL\n\t\tSELECT food.id, food.naam, 'Carbohydrate' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\t\tWHERE ( \n\t\t\tlower(orig_source_name) LIKE '%carb%' AND\n\t\t\tfood.id = nutrients.food_id\n\t\t)\n\tUNION ALL\n\t\tSELECT food.id, food.naam, 'Ash' as nutrient,orig_source_name,orig_content as value FROM food,nutrients\n\t\tWHERE ( \n\t\t\tlower(orig_source_name) LIKE '%ash%' AND\n\t\t\tfood.id = nutrients.food_id\n\t\t)";
+}
+exports.CREATE_NUTRIENTS_FILTERED = CREATE_NUTRIENTS_FILTERED;
+function CREATE_FOOD_INGREDIENT_LINKER() {
+    return "CREATE TABLE food_ingredient_linker AS\n\t\t\tSELECT \n\t\t\t\tfood.id as food_id, \n\t\t\t\tfood.naam as food_naam,\n\t\t\t\ting.id as ingredient_id,\n\t\t\t\ting.replaced as ingredient_naam\n\t\t\tFROM food, ingredients_filtered as ing\n\t\t\tWHERE (\n\t\t\t\t-- link food name to a replaced ingredient name\n\t\t\t\tlower(ing.replaced) LIKE CONCAT('%', CONCAT(lower(food.naam), '%')) AND \n\t\t\t\t-- make sure that double matches (apple & pineapple) don't happen\n\t\t\t\t-- if apple matches but also pineapple, then record not used\n\t\t\t\t-- meaning apple will only have the apple records and only pineapple will have the pineapple records\n\t\t\t\tNOT lower(ing.replaced) = ANY (\n\t\t\t\t\tSELECT ing.replaced\n\t\t\t\t\tFROM food as f\n\t\t\t\t\tWHERE (\n\t\t\t\t\t\tf.id != food.id AND\n\t\t\t\t\t\tlower(ing.replaced) LIKE CONCAT('%', CONCAT(lower(f.naam), '%')) AND\n\t\t\t\t\t\tLENGTH(f.naam) > LENGTH(food.naam)\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t\tORDER BY food_naam";
+}
+exports.CREATE_FOOD_INGREDIENT_LINKER = CREATE_FOOD_INGREDIENT_LINKER;
+function CREATE_RECIPES() {
+    return "CREATE TABLE recipes_filtered AS\n\t\t\tSELECT \n\t\t\t\tid, \n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '\n\t\t\t\t)::boolean[] as techniques,\n\t\t\t\t-- convert the ingredient_ids string \"{1, 3, 4, 6}\" to an array of ints\n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(ingredient_ids, 2, length(ingredient_ids) - 2), ', ',' '\n\t\t\t\t)::int[] as ingredient_ids\n\t\t\tFROM pp_recipes ";
+}
+exports.CREATE_RECIPES = CREATE_RECIPES;
 //# sourceMappingURL=queries.js.map

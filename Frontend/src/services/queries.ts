@@ -1,3 +1,4 @@
+import type { FoodRow } from './dbClasses';
 export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0, pageSize: number = 15): string {
 	if (foodGroup == "All Foodgroups") foodGroup = "";
 	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
@@ -9,7 +10,7 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
 		`+orAllergies(allergies)+`
 	) 
-	LIMIT `+pageSize+`
+	--LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
 }
 
@@ -39,6 +40,19 @@ function orAllergies(allergies: string[]) {
 	}
 }
 
+function orRecipeIngr(query: string[]) {
+	if (query.length!=0) {
+		let queryString: string = `AND (lower(`+query[0].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
+		for (let i = 1; i < query.length; i++) {
+			queryString += `OR lower(`+query[i].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
+		}
+		queryString += ')';
+		return queryString;
+	} else {
+		return '';
+	}
+}
+
 export function GET_FOOD_FOR_ID(id: string = ""): string {
 	return `SELECT * 
 	FROM food
@@ -46,6 +60,7 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 		id=`+id+`
 	)`;
 }
+
 
 export function MACRO_NUTRIENTS_FOR(id: string): string {
 	return `SELECT *
@@ -70,12 +85,57 @@ export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
 }
 
 export function GET_RECIPES_FOR(id: string): string {
-	return `SELECT *
-	FROM recipes,food_ingredient_linker as fi
+	return `SELECT DISTINCT
+	fi.food_id as foodid,
+	fi.food_naam as foodname,
+	recipes_filtered.id as recipeid,
+	raw_recipes.name as recipename,
+	recipes_filtered.techniques,
+	raw_recipes.nutrition as nutritions
+	FROM recipes_filtered,raw_recipes,food_ingredient_linker as fi
 	WHERE (
+		recipes_filtered.id = raw_recipes.id AND
 		fi.food_id = `+id+` AND
-		fi.ingredient_id = ANY (recipes.ingredient_ids)
-	)`;
+		fi.ingredient_id = ANY (recipes_filtered.ingredient_ids)
+	)
+	LIMIT 100`;
+}
+
+export function GET_RECIPE(id: string, ingredients: string[]): string{
+	return `SELECT DISTINCT
+		food.naam as foodname,
+		food.id as foodid,
+		pp_recipes.id as recipeid,
+		raw_recipes.name as recipename,
+		string_to_array(
+			substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
+		)::boolean[] as techniques,
+		raw_recipes.nutrition as nutritions
+	FROM food,ingredients_filtered,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+		`+orRecipeIngr(ingredients)+`
+	);`;
+}
+
+
+export function GET_RECIPE_INGREDIENTS(id: string): string{
+	return `SELECT DISTINCT
+	raw_recipes.ingredients as ingredient
+	FROM pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
+}
+
+export function GET_RECIPE_NUTRIENTS(id: string): string{
+	return `SELECT DISTINCT
+		pp_recipes.id as recipeid,
+		raw_recipes.nutrition as nutritions
+	FROM food,pp_recipes,raw_recipes
+	WHERE (
+		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
+	);`
 }
 
 export function GET_INGREDIENTS_FOR(id: string): string {
@@ -89,10 +149,10 @@ export function GET_INGREDIENTS_FOR(id: string): string {
 }
 
 export function GET_ALLERGY_FOR(foodName: string): string {
-	return "SELECT allergy FROM allergies WHERE food="+ foodName;
+	return "SELECT allergy FROM allergies WHERE food='"+ foodName +"' AND allergy IS NOT NULL";
 }
 
-export function GET_ALLERGIES_FOR(foods: Object[]): string {
+export function GET_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT null AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
@@ -101,7 +161,7 @@ export function GET_ALLERGIES_FOR(foods: Object[]): string {
 	return query;
 }
 
-export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
+export function GET_ALLERGIES_PER_FOOD_FOR(foods: FoodRow[]): string {
 	let query = "SELECT food, allergy FROM allergies WHERE allergy IS NOT null AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
@@ -110,11 +170,15 @@ export function GET_ALLERGIES_PER_FOOD_FOR(foods: Object[]): string {
 	return query;
 }
 
-export function COUNT_ALLERGIES_FOR(foods: Object[]): string {
+export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage FROM allergies WHERE allergy IS NOT NULL AND (";
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
 	}
 	query += "food = '" + foods.pop()?.naam + "') GROUP BY allergy ORDER BY allergy;";
 	return query;
+}
+
+export function GET_ALLERGIES_RECIPE(foods: string){
+	return "SELECT DISTINCT allergies.allergy FROM allergies WHERE allergies.food in "+ foods + " AND allergy IS NOT NULL";
 }

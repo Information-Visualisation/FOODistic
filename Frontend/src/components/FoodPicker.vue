@@ -3,6 +3,7 @@ import FoodItem from '../components/FoodItem.vue';
 import SpinnerComponent from './SpinnerComponent.vue';
 import { DBService } from '../services/db.service';
 import { GET_FOOD_FOR_NAME, GET_FOODCOUNT_FOR_NAME } from '@/services/queries';
+import type { FoodRow } from '@/services/dbClasses';
 
 const dbService = new DBService;
 
@@ -13,7 +14,7 @@ export default {
     },
     props: {
         name: { type: String, default: "" },
-        allergies: { type: Array<String>, default: "" },
+        allergies: { type: Array<String>, default: [] },
         group: { type: String, default: "" },
         subgroup: { type: String, default: "" },
         offset: { type: Number, default: 0 },
@@ -23,7 +24,7 @@ export default {
     data() {
         return {
             isLoading: true,
-            fooditems: null,
+            fooditems: [] as FoodRow[],
             totalCount: 0,
         }
     },
