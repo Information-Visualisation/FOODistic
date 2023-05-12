@@ -167,10 +167,6 @@ export default {
                 </div>
                 <Bar v-if="!isFiltering" :data="data" :options="options" />
             </div>
-            <div class="collapse" id="collapseExample">
-                Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
-                user activates the relevant trigger.
-            </div>
         </div>
         <div v-if="isLoading" class="position-relative scrollview">
             <SpinnerComponent class="position-absolute center-spinner" />
@@ -185,13 +181,7 @@ export default {
             </ul>
         </div>
         <div class="collapse" id="collapseExample">
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
-            user activates the relevant trigger.
-            TODO: Still only shows 100 recipes!
-            <ul>
-                <li>explain list</li>
-                <li>explain icons, here or on about page</li>
-            </ul>
+            idk
         </div>
     </div>
 </template>

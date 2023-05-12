@@ -103,10 +103,10 @@ export default {
 </script>
 <template>
     <div class="container vstack">
-        <div v-if="fooditems === undefined">No foods found</div>
         <div v-if="fooditems === null || isLoading" class="justify-content-center">
             <SpinnerComponent />
         </div>
+        <div v-if="fooditems === undefined">No results found</div>
         <div v-if="fooditems !== null && fooditems !== undefined && !isLoading">
             <div v-if="fooditems.length == 0">No results found</div>
             <FoodItem v-for="fooditem in fooditems" :name=fooditem.naam :id="fooditem.id.toString()" :comparing="comparing"

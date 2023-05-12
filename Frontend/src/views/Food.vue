@@ -67,7 +67,7 @@ export default {
 
   <div class="d-flex justify-content-start header">
     <div class="">
-      <FoodImg class="image" :id="id" :name="name" :height="35"></FoodImg>
+      <FoodImg class="image" :id="id" :name="name" :height="60"></FoodImg>
     </div>
     <div class="">
       <h1 class="title">{{ name }}</h1>
@@ -108,7 +108,7 @@ h2 {
 }
 
 .title {
-  margin-top: 4px;
+  margin-top: 15px;
   margin-left: 0px;
   padding-left: 3px;
 }
