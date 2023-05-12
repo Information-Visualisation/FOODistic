@@ -15,7 +15,7 @@ const dbService = new DBService;
 
 export default {
     props: {
-        foodpickerData: {
+        data: {
             type: Object,
             required: true
         }
@@ -79,6 +79,7 @@ export default {
             return max_value_colum;
         },
         receiveFooditems(event: any, foodItems: any, totalCount: number) {
+            console.log(foodItems);
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
                 this.$emit('returnTotalCount', null, totalCount);
