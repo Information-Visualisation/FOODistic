@@ -10,7 +10,7 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
 		`+orAllergies(allergies)+`
 	) 
-	--LIMIT `+pageSize+`
+	LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
 }
 
@@ -101,31 +101,17 @@ export function GET_RECIPES_FOR(id: string): string {
 	LIMIT 100`;
 }
 
-export function GET_RECIPE(id: string, ingredients: string[]): string{
-	return `SELECT DISTINCT
-		food.naam as foodname,
-		food.id as foodid,
-		pp_recipes.id as recipeid,
-		raw_recipes.name as recipename,
-		string_to_array(
-			substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
-		)::boolean[] as techniques,
-		raw_recipes.nutrition as nutritions
-	FROM food,ingredients_filtered,pp_recipes,raw_recipes
-	WHERE (
-		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
-		`+orRecipeIngr(ingredients)+`
-	);`;
-}
-
-
-export function GET_RECIPE_INGREDIENTS(id: string): string{
-	return `SELECT DISTINCT
-	raw_recipes.ingredients as ingredient
-	FROM pp_recipes,raw_recipes
-	WHERE (
-		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
-	);`
+export function GET_RECIPE(id: string): string{
+	return `SELECT 
+    fil.food_id as foodid,
+    fil.food_naam as foodname,
+	rf.name as recipename,
+    rf.techniques
+FROM recipes_filtered as rf, food_ingredient_linker as fil
+WHERE (
+    rf.id = `+ id +` AND
+    fil.ingredient_id = ANY (rf.ingredient_ids)
+)`;
 }
 
 export function GET_RECIPE_NUTRIENTS(id: string): string{
@@ -136,16 +122,6 @@ export function GET_RECIPE_NUTRIENTS(id: string): string{
 	WHERE (
 		pp_recipes.id = `+ id +` AND raw_recipes.id = `+ id +`
 	);`
-}
-
-export function GET_INGREDIENTS_FOR(id: string): string {
-	return `SELECT raw_recipes.name,pp_recipes.ingredient_ids,ingredients_filtered.processed
-	FROM raw_recipes, pp_recipes, ingredients_filtered
-	WHERE (
-		pp_recipes.id = `+id+` AND
-		raw_recipes.id = pp_recipes.id AND
-		pp_recipes.ingredient_ids ~ CONCAT('(?<=\D)',CONCAT(ingredients_filtered.id, '(?=\D)'))
-	)`;
 }
 
 export function GET_ALLERGY_FOR(foodName: string): string {

@@ -53,19 +53,11 @@ export default {
             data: {
                 labels: techniqueStrings,
                 datasets: [{
-                    labels: ' ',
+                    labels: techniqueStrings,
                     fill: false,
                     borderColor: "rgb(255, 99, 132)",
                     backgroundColor:"rgba(255, 99, 132, 0.5)",
                     data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},  {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-                },
-                {
-                    labels: ' ',
-                    pointRadius: 10,
-                    pointStyle: this.image,
-                    data: [],
-                    barPercentage: 1.0,
-                    categoryPercentage: 1.0
                 }]
             },
             options: {
@@ -84,7 +76,13 @@ export default {
                     x: {
                         title: {
                             display: true,
-                            text: 'Cooking technique index'
+                            text: 'Cooking technique'
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value, index, values){
+                                return techniqueStrings[value];
+                            }
                         }
                     }
                 },    

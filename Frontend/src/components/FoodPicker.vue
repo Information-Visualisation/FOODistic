@@ -18,7 +18,7 @@ export default {
         group: { type: String, default: "" },
         subgroup: { type: String, default: "" },
         offset: { type: Number, default: 0 },
-        pageSize: { type: Number, default: 15 },
+        pageSize: { type: Number, default: 24 },
         comparing: { type: Boolean, default: false },
     },
     data() {

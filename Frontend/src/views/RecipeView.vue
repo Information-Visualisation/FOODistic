@@ -1,7 +1,7 @@
 <script lang="ts">
 import { DBService, distinctNames } from '@/services/db.service';
 import type { DistinctRows } from '@/services/dbClasses';
-import { GET_ALLERGIES_RECIPE, GET_RECIPE, GET_RECIPE_INGREDIENTS } from '@/services/queries';
+import { GET_ALLERGIES_RECIPE, GET_RECIPE } from '@/services/queries';
 import NutrientGraphRecipe from "../components/NutrientGraphRecipe.vue";
 import FoodItem from "../components/FoodItem.vue";
 import TechniqueIcon from "../components/TechniqueIcon.vue";
@@ -34,9 +34,7 @@ export default {
     emits: ["compare"],
     methods:{
         async fetchData() {
-            let ingredients = await dbService.query(GET_RECIPE_INGREDIENTS(this.id));
-            let test = this.changeIngredientToArray(ingredients.rows[0].ingredient);
-            this.recipe = (await dbService.query(GET_RECIPE(this.id, test))).rows;
+            this.recipe = (await dbService.query(GET_RECIPE(this.id))).rows;
             this.techniqueStrings = getFilteredTechniques(this.recipe[0].techniques);
             this.allergies = (await dbService.query(GET_ALLERGIES_RECIPE(this.getFoods()))).rows;
             this.$nextTick(() => {

@@ -15,7 +15,7 @@ const dbService = new DBService;
 
 export default {
     props: {
-        data: {
+        foodPickerData: {
             type: Object,
             required: true
         }
@@ -96,7 +96,8 @@ export default {
             // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
-                let result = await dbService.query(MACRO_NUTRIENTS_FOR(this.foodItems[i].id.toString()));
+                const id: string = this.foodItems[i].id.toString();
+                let result = await dbService.query(MACRO_NUTRIENTS_FOR(id));
                 result = result.rows;
                 const naam = this.foodItems[i].naam;
                 this.foodNutritions[naam] = this.createNutrition(result);
@@ -114,8 +115,8 @@ export default {
             return nutrition;
         },
         async fetchAllergyInfo() {
-            this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
-            this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
+            //this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
+            //this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
         setTabIndex(index: number) {
             this.tabIndex=index;
@@ -164,8 +165,8 @@ export default {
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active no-rows" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
-                <FoodPicker v-if="data !== undefined" :name="data?.name" :group="data?.group" :subgroup="data?.subgroup"
-                    :offset="data?.offset" :allergies="data?.allergies" :pageSize="data?.pageSize" @returnFooditems="receiveFooditems">
+                <FoodPicker v-if="foodPickerData !== undefined" :name="foodPickerData?.name" :group="foodPickerData?.group" :subgroup="foodPickerData?.subgroup"
+                    :offset="foodPickerData?.offset" :allergies="foodPickerData?.allergies" :pageSize="foodPickerData?.pageSize" @returnFooditems="receiveFooditems">
                 </FoodPicker>
             </div>
             <!-- Nutrients -->

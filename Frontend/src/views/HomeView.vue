@@ -207,7 +207,7 @@ export default {
       </div>
       <div class="">
         <FoodTable
-          :data="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies, pageSize: pageSize }"
+          :foodPickerData="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies, pageSize: pageSize }"
           @returnTotalCount="receiveRowCount">
         </FoodTable>
         <!-- Pagination -->

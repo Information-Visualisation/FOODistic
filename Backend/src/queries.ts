@@ -76,7 +76,8 @@ export function CREATE_FOOD_INGREDIENT_LINKER() {
 export function CREATE_RECIPES() {
 	return `CREATE TABLE recipes_filtered AS
 			SELECT 
-				id, 
+				pp_recipes.id,
+				raw_recipes.name, 
 				string_to_array(
 					substr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '
 				)::boolean[] as techniques,
@@ -84,5 +85,6 @@ export function CREATE_RECIPES() {
 				string_to_array(
 					substr(ingredient_ids, 2, length(ingredient_ids) - 2), ', ',' '
 				)::int[] as ingredient_ids
-			FROM pp_recipes `;
+			FROM pp_recipes, raw_recipes 
+			WHERE pp_recipes.id = raw_recipes.id`;
 }
