@@ -70,13 +70,13 @@ export default {
                     y: {
                         title: {
                             display: true,
-                            text: '# Occurences'
+                            text: ''
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Cooking technique'
+                            text: 'Cooking Techniques'
                         },
                         ticks: {
                             stepSize: 1,
@@ -107,7 +107,7 @@ export default {
                                 }
                             },
                             footer: (context: any) => {
-                                return 'Nutrition: ' + Math.round(context[0].raw.r * 100) / 100;
+                                return this.selectedNutrient+': ' + Math.round(context[0].raw.r * 100) / 100;
                             },
                             title: (context: any) => {
                                 return '';  // to remove default title
@@ -131,9 +131,9 @@ export default {
     methods: {
         async fetchData() {
             const queryString: string = GET_RECIPES_FOR(this.id);
-            console.log(queryString);
+            // console.log(queryString);
             this.recipes = (await dbService.query(queryString, false)).rows;
-            console.log('done loading recipes');
+            // console.log('done loading recipes');
 
             this.filteredRecipes = this.recipes;
             this.selectNutrient(this.selectedNutrient);

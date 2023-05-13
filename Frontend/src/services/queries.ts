@@ -27,24 +27,11 @@ export function GET_FOODCOUNT_FOR_NAME(name: string = "", allergies: string[] = 
 	)`;
 }
 
-function orAllergies(allergies: string[]) {
+function orAllergies(allergies: string[]): string {
 	if (allergies.length!=0) {
 		let queryString: string = `AND NOT (lower(food.naam) LIKE '%`+allergies[0].toLocaleLowerCase()+`%'`;
 		for (let i = 1; i < allergies.length; i++) {
 			queryString += `OR lower(food.naam) LIKE '%`+allergies[i].toLocaleLowerCase()+`%'`;
-		}
-		queryString += ')';
-		return queryString;
-	} else {
-		return '';
-	}
-}
-
-function orRecipeIngr(query: string[]) {
-	if (query.length!=0) {
-		let queryString: string = `AND (lower(`+query[0].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
-		for (let i = 1; i < query.length; i++) {
-			queryString += `OR lower(`+query[i].toLocaleLowerCase()+`) LIKE CONCAT('%', CONCAT(lower(food.naam), '%'))`;
 		}
 		queryString += ')';
 		return queryString;
@@ -130,28 +117,30 @@ export function GET_ALLERGY_FOR(foodName: string): string {
 
 export function GET_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT null AND (";
-	for (let i = 0; i < foods.length - 1; ++i) {
-		query += "food = '" + foods[i]?.naam + "' OR ";
-	}
-	query += "food = '" + foods.pop()?.naam + "') ORDERY BY allergy;";
+	query += orFoods(foods);
+	query += "food = '" + foods[foods.length-1]?.naam + "') ORDER BY allergy;";
 	return query;
 }
 
 export function GET_ALLERGIES_PER_FOOD_FOR(foods: FoodRow[]): string {
 	let query = "SELECT food, allergy FROM allergies WHERE allergy IS NOT null AND (";
-	for (let i = 0; i < foods.length - 1; ++i) {
-		query += "food = '" + foods[i]?.naam + "' OR ";
-	}
-	query += "food = '" + foods.pop()?.naam + "') ORDER BY allergy;";
+	query += orFoods(foods);
+	query += "food = '" + foods[foods.length-1]?.naam + "') ORDER BY allergy;";
 	return query;
 }
 
 export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
 	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage FROM allergies WHERE allergy IS NOT NULL AND (";
+	query += orFoods(foods);
+	query += "food = '" + foods[foods.length-1]?.naam + "') GROUP BY allergy ORDER BY allergy;";
+	return query;
+}
+
+function orFoods(foods: FoodRow[]) {
+	let query: string = ""
 	for (let i = 0; i < foods.length - 1; ++i) {
 		query += "food = '" + foods[i]?.naam + "' OR ";
 	}
-	query += "food = '" + foods.pop()?.naam + "') GROUP BY allergy ORDER BY allergy;";
 	return query;
 }
 

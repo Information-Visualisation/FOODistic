@@ -57,11 +57,21 @@ export default {
                 },
                 scales: {
                     y: {
+                        title: {
+                            display: true,
+                            text: 'Amount in mg/100g'
+                        },
                         ticks: {
                             // Include a dollar sign in the ticks
                             callback: function (value: number) {
-                                return value + ' mg/100g';
+                                return value;
                             }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nutrients/Nutrients'
                         }
                     }
                 }

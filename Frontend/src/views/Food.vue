@@ -39,9 +39,9 @@ export default {
       this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
       this.setFoodGroups();
       this.name = this.row.naam;
-      console.log(this.name);
+      // console.log(this.name);
       this.allergies = (await dbService.query(GET_ALLERGY_FOR(this.name))).rows;
-      console.log('done loading allergies');
+      // console.log('done loading allergies');
     },
     setFoodGroups() {
       this.foodGroup = this.row.food_group;
