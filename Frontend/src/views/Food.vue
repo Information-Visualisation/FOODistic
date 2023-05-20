@@ -1,5 +1,4 @@
 <script lang="ts">
-import FoodImg from '@/components/FoodImg.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
 import FoodTitleTag from '../components/FoodTitleTag.vue';
@@ -14,6 +13,10 @@ export default {
     idp: {
       type: String,
       default: ""
+    },
+    otherIds: {
+      type: Array<string>,
+      default: []
     }
   },
   components: {
@@ -29,25 +32,56 @@ export default {
       row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
-      otherFoods: [] as unknown as [FoodRow],
+      otherFoods: [] as unknown as [FoodRow]
     }
   },
-  created() {
+  async created() {
     this.id = this.idp !== '' ? this.idp as string : this.id;
     this.isIdSet = true;
-    this.fetchData(this.id);
+    this.row = await this.fetchData(this.id);
+    this.setFoodGroups();
+    this.name = this.row.naam;
+
+    this.setOtherFoods();
   },
   methods: {
-    async fetchData(id: string) {
-      this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
-      this.setFoodGroups();
-      this.name = this.row.naam;
+    async fetchData(id: string): Promise<FoodRow> {
+      return (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
     },
     setFoodGroups() {
       this.foodGroup = this.row.food_group;
       this.subFoodGroup = this.row.food_subgroup;
     },
+    async setOtherFoods() {
+      if (this.otherIds.length > 0) {
+        console.log("We zijn hier geraakt!");
+        this.otherIds.forEach(async (id) => {
+          this.otherFoods.push(await this.fetchData(id));
+        })
+      }
+    },
+    makeMain() {
+      this.$router.push({
+        name: 'food',
+        params: {
+          name: this.$route.params.name,
+        },
+        query: {
+          id: this.id,
+        }
+      });
+    },
+    deletePicked(event:any, id: string) {
+      this.$emit('deletePicked', null, id);
+    }
   },
+  emits: ["deletePicked"],
+  watch: {
+        otherIds(newV, oldV) {
+            console.log("does this even?");
+            // this.setOtherFoods();
+        },
+    }
 }
 </script>
 
@@ -59,11 +93,14 @@ export default {
       </li>
       <li class="breadcrumb-item">
         <a v-if="foodGroup == ''">Loading</a>
-        <RouterLink v-if="foodGroup != ''" :to="{name: 'home', query: { foodgroup: foodGroup }}">{{ foodGroup }}</RouterLink>
+        <RouterLink v-if="foodGroup != ''" :to="{ name: 'home', query: { foodgroup: foodGroup } }">{{ foodGroup }}
+        </RouterLink>
       </li>
       <li class="breadcrumb-item">
         <a v-if="subFoodGroup == ''">Loading</a>
-        <RouterLink v-if="subFoodGroup != ''" :to="{name: 'home', query: { foodgroup: foodGroup, subfoodgroup: subFoodGroup }}">{{ subFoodGroup }}</RouterLink>
+        <RouterLink v-if="subFoodGroup != ''"
+          :to="{ name: 'home', query: { foodgroup: foodGroup, subfoodgroup: subFoodGroup } }">{{ subFoodGroup }}
+        </RouterLink>
       </li>
       <li class="breadcrumb-item active" aria-current="page">{{ name }}</li>
     </ol>
@@ -71,7 +108,8 @@ export default {
 
   <div class="d-flex justify-content-start flex-wrap header">
     <FoodTitleTag v-if="isIdSet" :id="id" :name="name" :allowClose="false"></FoodTitleTag>
-    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()" :name="food.naam" :allowClose="true"></FoodTitleTag>
+    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()" :name="food.naam"
+      :allowClose="true" @deletePicked="deletePicked"></FoodTitleTag>
   </div>
 
   <div class="d-flex justify-content-center content">
@@ -87,7 +125,9 @@ export default {
 </template>
 
 <style>
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   padding-top: 5px;
   padding-left: 30px;
 }

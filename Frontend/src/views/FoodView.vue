@@ -16,31 +16,41 @@ export default {
             comparing: false,
             picked: false,
             compareSearch: this.$route.query.search as string,
-            id: '',
+            otherIds: [] as string[],
+            reloading: false,
         }
     },
     created() {
         if (this.$route.query.compareSearch !== undefined) {
             this.comparing = true;
         }
-        if (this.$route.query.otherid !== undefined) {
+        if (this.$route.query.otherids !== undefined) {
             this.comparing = true;
             this.picked = true;
-            this.id = this.$route.query.otherid as string;
+            this.otherIds = this.decompressIds(this.$route.query.otherids as string);
         }
     },
     methods: {
+        compressIds(idList: string[]): string {
+            return idList.join(",");
+        },
+        decompressIds(idString: string): string[] {
+            return idString.split(",");
+        },
         compare(event: any, id: string) {
-            this.id = id;
+            this.reloading = true;
+            if (!this.otherIds.includes(id)) {
+                this.otherIds.push(id);
+            }
             this.picked = true;
-            this.backToPicked();
+            this.pick();
+            this.$nextTick(() => {this.reloading = false;});
         },
         toggleComparing() {
             this.comparing = !this.comparing;
-
             if (this.comparing) {
-                if (this.id !== '' && this.picked) {
-                    this.backToPicked();
+                if (this.otherIds.length > 0 && this.picked) {
+                    this.pick();
                 } else {
                     this.startComparing();
                 }
@@ -48,21 +58,14 @@ export default {
                 this.stopComparing();
             }
         },
-        deletePicked() {
-            this.startComparing();
-            this.picked = false;
-            this.id = '';
-        },
-        makeMain() {
-            this.$router.push({
-                name: 'food',
-                params: {
-                    name: this.$route.params.name,
-                },
-                query: {
-                    id: this.id,
-                }
-            });
+        deletePicked(event: any, toDeleteId: string) {
+            this.reloading = true;
+            this.otherIds = this.otherIds.filter((id) => {
+                return id !== toDeleteId;
+            })
+            this.picked = this.otherIds.length > 0;
+            this.pick();
+            this.$nextTick(() => {this.reloading = false;});
         },
         startComparing() {
             this.$router.push({
@@ -87,19 +90,31 @@ export default {
                 }
             });
         },
-        backToPicked() {
-            this.$router.push({
-                name: 'food',
-                params: {
-                    name: this.$route.params.name,
-                },
-                query: {
-                    id: this.$route.query.id,
-                    otherid: this.id,
-                }
-            });
-        }
-    }
+        pick() {
+            if (this.otherIds.length <= 0) {
+                this.$router.push({
+                    name: 'food',
+                    params: {
+                        name: this.$route.params.name,
+                    },
+                    query: {
+                        id: this.$route.query.id,
+                    }
+                });
+            } else {
+                this.$router.push({
+                    name: 'food',
+                    params: {
+                        name: this.$route.params.name,
+                    },
+                    query: {
+                        id: this.$route.query.id,
+                        otherids: this.compressIds(this.otherIds),
+                    }
+                });
+            }
+        },
+    },
 }
 </script>
 
@@ -108,31 +123,32 @@ export default {
         <div class="hstack gap-3">
             <div class="row">
                 <div class="col">
-                    <Food></Food>
+                    <SpinnerComponent v-if="reloading" ></SpinnerComponent>
+                    <div v-if="!reloading">
+                        <Food :otherIds="otherIds" @deletePicked="deletePicked"></Food>
+                    </div>
                 </div>
                 <Transition>
                     <div class="vr" v-if="comparing"></div>
                 </Transition>
                 <Transition>
                     <div class="col" v-if="comparing">
-                        <div v-if="!picked">
-                            <form class="d-flex justify-content-start search" role="search">
-                                <input v-model="compareSearch" class="form-control me-2" type="search" name="compareSearch"
-                                    placeholder="Search For Another Food To Compare" aria-label="Search">
-                                <RouterLink :to="{
-                                        name: 'food',
-                                        params: {
-                                            name: $route.params.name,
-                                        },
-                                        query: {
-                                            id: $route.query.id,
-                                            compareSearch: compareSearch,
-                                        }
-                                    }" class="btn btn-outline-success" type="submit">Search</RouterLink>
-                            </form>
-                            <FoodPicker class="foodpickerDown" :name="compareSearch" :comparing="true" @compare="compare">
-                            </FoodPicker>
-                        </div>
+                        <form class="d-flex justify-content-start search" role="search">
+                            <input v-model="compareSearch" class="form-control me-2" type="search" name="compareSearch"
+                                placeholder="Search For Another Food To Compare" aria-label="Search">
+                            <RouterLink :to="{
+                                    name: 'food',
+                                    params: {
+                                        name: $route.params.name,
+                                    },
+                                    query: {
+                                        id: $route.query.id,
+                                        compareSearch: compareSearch,
+                                    }
+                                }" class="btn btn-outline-success" type="submit">Search</RouterLink>
+                        </form>
+                        <FoodPicker class="foodpickerDown" :name="compareSearch" :comparing="true" @compare="compare">
+                        </FoodPicker>
                         <!-- <div v-if="picked">
                             <Food :idp="id"></Food>
                         </div> -->
@@ -142,7 +158,7 @@ export default {
         </div>
         <!-- <div class="hl"></div> -->
         <!-- <div v-if="picked" class="row card wide">
-            <RadarPlot :id="($route.query.id as string)" :otherId="id"></RadarPlot>
+            <RadarPlot :id="($route.query.id as string)" :otherids="id"></RadarPlot>
         </div> -->
         <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
             <button v-if="!comparing" class="btn btn-success mb-3" @click="toggleComparing">Compare ▶</button>
@@ -150,9 +166,9 @@ export default {
                 @click="toggleComparing">
                 ◀ Collapse
             </button>
-            <button v-if="picked" type="button" class="btn btn-danger mb-3" aria-label="Close" @click="deletePicked">
+            <!-- <button v-if="picked" type="button" class="btn btn-danger mb-3" aria-label="Close" @click="deletePicked">
                 <b>✕</b>
-            </button>
+            </button> -->
             <!-- <a :href="$router.resolve({
                     name: 'food',
                     params: {

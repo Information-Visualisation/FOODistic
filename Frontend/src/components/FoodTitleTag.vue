@@ -55,7 +55,11 @@ export default {
             let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
             return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
         },
+        deletePicked() {
+            this.$emit('deletePicked', null, this.id);
+        }
     },
+    emits: ["deletePicked"]
 }
 </script>
 
@@ -72,7 +76,7 @@ export default {
                 </div>
             </div>
             <div class="col tagCol1 nopadmarg">
-                <button v-if="allowClose" type="button" class="btn-close" aria-label="Close"></button>
+                <button v-if="allowClose" type="button" class="btn-close" aria-label="Close" @click="deletePicked"></button>
                 <div v-if="!allowClose" class="main">main</div>
             </div>
         </div>
