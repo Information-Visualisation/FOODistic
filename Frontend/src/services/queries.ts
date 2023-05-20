@@ -9,7 +9,8 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 		`+(foodGroup==""?"":(`AND food.food_group = '`+foodGroup+`'`))+`
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
 		`+orAllergies(allergies)+`
-	) 
+	)
+	ORDER BY food.naam
 	LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
 }

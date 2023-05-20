@@ -8,11 +8,11 @@ export default {
             sortDown: true,
         }
     },
+    emits: ['sortByColumn'],
     props: {
         columnNames: Array<string>
     },
     methods: {
-        // TODO: filter list
         setSort(columnIndex: number) {
             if (this.filterColumn == columnIndex) {
                 this.sortDown = !this.sortDown;
@@ -20,6 +20,7 @@ export default {
                 this.filterColumn = columnIndex;
                 this.sortDown = true;
             }
+            this.$emit('sortByColumn', this.filterColumn, this.sortDown);
         },
         getSortArrow(columnIndex: number) {
             if (this.filterColumn == columnIndex) {

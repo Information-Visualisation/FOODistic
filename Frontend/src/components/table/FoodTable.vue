@@ -32,11 +32,12 @@ export default {
     data() {
         return {
             foodItems: [] as FoodRow[],
-            foodNutritions: Object() as {[key: string]: number[]},
+            foodNutritions: {} as {[key: string]: number[]},
             tabIndex: 0,
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+            sortedFoodNames: [] as [string, number | string][],
         }
     },
     created() {
@@ -82,6 +83,7 @@ export default {
             console.log(foodItems);
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
+                this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
                 this.$emit('returnTotalCount', null, totalCount);
                 this.createNutritions();
                 this.fetchAllergyInfo();
@@ -142,6 +144,46 @@ export default {
                 percentage[i] = ((percentage[i]/total)*100).toFixed(2);;
             }
             return percentage;
+        },
+        getInitialSortedFoodNames(foodItems: FoodRow[]): [string, number|string][] {
+            // Create array with [foodName, foodName]
+            let sortedFoodNames = Object.keys(foodItems).map(function(key: string, index: number, keys: string[]) {
+                return [foodItems[index].naam, foodItems[index].naam];
+            }) as [string, number|string][];
+            return sortedFoodNames;
+        },
+        sortNutritions(filterColumn: number, sortDown: boolean) {
+            let foodNutritions = this.foodNutritions;
+            this.sortedFoodNames = Object.keys(foodNutritions).map(function(key, index, keys) {
+                if (filterColumn == 0) {    // filter by name
+                    return [key, key];
+                } else {                    // filter by nutrition value or allergy
+                    return [key, foodNutritions[key][filterColumn - 1]];
+                }
+            }) as [string, number][];
+            if (sortDown) {
+                this.sortedFoodNames.sort((a: any[], b: any[]) => {
+                    if (a[1] == null)
+                        return 1;
+                    else if (b[1] == null)
+                        return -1;
+                    else
+                        return a[1] < b[1] ? -1 : 1;
+                })
+            } else {
+                this.sortedFoodNames.sort((a: any[], b: any[]) => {
+                    if (a[1] == null)
+                        return 1;
+                    else if (b[1] == null)
+                        return -1;
+                    else
+                        return b[1] < a[1] ? -1 : 1;
+                })
+            }
+        },
+        sortAllergies(filterColumn: number, sortDown: boolean) {
+            console.log(filterColumn);
+            console.log(sortDown);
         }
     }
 }
@@ -176,15 +218,14 @@ export default {
                         <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead
-                            :columnNames="['Name'].concat(nutritionHeaders)" />
+                        <TableRowHead :columnNames="['Name'].concat(nutritionHeaders)" @sortByColumn="sortNutritions"/>
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(nutritions, key, i) in foodNutritions"
-                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="Object.keys(foodNutritions)[i]" :items="nutritions" :max_value="getMaxColums()"/>
+                        <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(item, i) in sortedFoodNames"
+                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="item[0]" :items="foodNutritions[item[0]]" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>
             </div>
@@ -195,7 +236,7 @@ export default {
                         <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
+                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)"  @sortByColumn="sortAllergies"/>
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
@@ -222,7 +263,6 @@ export default {
 
 .tab-pane {
     border-style: solid;
-    
     border-color: $gray-300;
 }
 
