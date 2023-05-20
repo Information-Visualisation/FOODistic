@@ -2,9 +2,10 @@
 import FoodImg from '@/components/FoodImg.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
+import FoodTitleTag from '../components/FoodTitleTag.vue';
 import { DBService } from '@/services/db.service';
 import type { FoodRow } from '@/services/dbClasses';
-import { GET_FOOD_FOR_ID, GET_ALLERGY_FOR } from '@/services/queries';
+import { GET_FOOD_FOR_ID } from '@/services/queries';
 
 const dbService = new DBService;
 
@@ -18,20 +19,22 @@ export default {
   components: {
     NutrientGraph: NutrientGraph,
     RecipesList: RecipesList,
-    FoodImg
+    FoodTitleTag,
   },
   data() {
     return {
       id: this.$route.query.id as string,
+      isIdSet: false,
       name: '',
       row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
-      allergies: {} as { [key: number]: {allergy: string}},
+      otherFoods: [] as unknown as [FoodRow],
     }
   },
   created() {
     this.id = this.idp !== '' ? this.idp as string : this.id;
+    this.isIdSet = true;
     this.fetchData(this.id);
   },
   methods: {
@@ -39,20 +42,10 @@ export default {
       this.row = (await dbService.query(GET_FOOD_FOR_ID(id))).rows[0];
       this.setFoodGroups();
       this.name = this.row.naam;
-      // console.log(this.name);
-      this.allergies = (await dbService.query(GET_ALLERGY_FOR(this.name))).rows;
-      // console.log('done loading allergies');
     },
     setFoodGroups() {
       this.foodGroup = this.row.food_group;
       this.subFoodGroup = this.row.food_subgroup;
-    },
-    getImageUrl(allergy: string) {
-        if (allergy.includes('Lactose')) {
-            return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href;
-        }
-        let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
-        return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
     },
   },
 }
@@ -76,19 +69,9 @@ export default {
     </ol>
   </nav>
 
-  <div class="d-flex justify-content-start header">
-    <div class="">
-      <FoodImg class="image" :id="id" :name="name" :height="60"></FoodImg>
-    </div>
-    <div class="">
-      <h1 class="title">{{ name }}</h1>
-      <!-- <h2>Id: {{ id }}</h2> -->
-	  <div v-if="Object.keys(allergies).length >= 1">
-        <h2>Allergies: <div v-for="allergy in allergies">
-            <img :title=allergy.allergy :src="getImageUrl(allergy.allergy)" style="width: 50px"/>
-        </div></h2>
-      </div>
-    </div>
+  <div class="d-flex justify-content-start flex-wrap header">
+    <FoodTitleTag v-if="isIdSet" :id="id" :name="name" :allowClose="false"></FoodTitleTag>
+    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()" :name="food.naam" :allowClose="true"></FoodTitleTag>
   </div>
 
   <div class="d-flex justify-content-center content">
@@ -104,9 +87,15 @@ export default {
 </template>
 
 <style>
-h1, h2 {
+h1, h2, h3 {
   padding-top: 5px;
   padding-left: 30px;
+}
+
+.h-scroll {
+  width: 90em;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .card {
@@ -122,14 +111,8 @@ h1, h2 {
   margin: 10px;
 }
 
-.title {
-  margin-top: 15px;
-  margin-left: 0px;
-  padding-left: 3px;
-}
-
 .header {
-  margin-left: 50px;
+  margin: 0 50px 0 50px;
 }
 
 .content {

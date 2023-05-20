@@ -133,17 +133,17 @@ export default {
                             <FoodPicker class="foodpickerDown" :name="compareSearch" :comparing="true" @compare="compare">
                             </FoodPicker>
                         </div>
-                        <div v-if="picked">
+                        <!-- <div v-if="picked">
                             <Food :idp="id"></Food>
-                        </div>
+                        </div> -->
                     </div>
                 </Transition>
             </div>
         </div>
-        <div class="hl"></div>
-        <div v-if="picked" class="row card wide">
+        <!-- <div class="hl"></div> -->
+        <!-- <div v-if="picked" class="row card wide">
             <RadarPlot :id="($route.query.id as string)" :otherId="id"></RadarPlot>
-        </div>
+        </div> -->
         <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
             <button v-if="!comparing" class="btn btn-success mb-3" @click="toggleComparing">Compare ▶</button>
             <button v-if="comparing" type="button" class="btn btn-success mb-3" aria-label="Collapse"
@@ -153,7 +153,7 @@ export default {
             <button v-if="picked" type="button" class="btn btn-danger mb-3" aria-label="Close" @click="deletePicked">
                 <b>✕</b>
             </button>
-            <a :href="$router.resolve({
+            <!-- <a :href="$router.resolve({
                     name: 'food',
                     params: {
                         name: $route.params.name,
@@ -164,7 +164,7 @@ export default {
                     },
                 }).href" v-if="picked" type="button" class="btn btn-success mb-3" aria-label="Close">
                 Main ▶
-            </a>
+            </a> -->
             <br>
             <button class="btn btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
                 aria-expanded="false" aria-controls="collapseExample">

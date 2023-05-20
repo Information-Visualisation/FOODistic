@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@chenfengyuan/vue-number-input": "^2.0.1",
     "@jridgewell/sourcemap-codec": "^1.4.14",
     "@popperjs/core": "^2.11.7",
     "@types/bootstrap": "^5.2.6",
