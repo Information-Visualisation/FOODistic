@@ -1,4 +1,5 @@
 <script lang="ts">
+import SpinnerComponent from './SpinnerComponent.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
 import FoodTitleTag from '../components/FoodTitleTag.vue';
@@ -23,6 +24,7 @@ export default {
     NutrientGraph: NutrientGraph,
     RecipesList: RecipesList,
     FoodTitleTag,
+    SpinnerComponent,
   },
   data() {
     return {
@@ -32,7 +34,8 @@ export default {
       row: {} as FoodRow,
       foodGroup: "",
       subFoodGroup: "",
-      otherFoods: [] as unknown as [FoodRow]
+      otherFoods: [] as unknown as [FoodRow],
+      loading: false,
     }
   },
   async created() {
@@ -53,12 +56,16 @@ export default {
       this.subFoodGroup = this.row.food_subgroup;
     },
     async setOtherFoods() {
+      this.isLoading();
       if (this.otherIds.length > 0) {
-        console.log("We zijn hier geraakt!");
         this.otherIds.forEach(async (id) => {
           this.otherFoods.push(await this.fetchData(id));
         })
       }
+      this.loading = false;
+    },
+    isLoading() {
+      this.loading = true;
     },
     makeMain() {
       this.$router.push({
@@ -71,17 +78,17 @@ export default {
         }
       });
     },
-    deletePicked(event:any, id: string) {
+    deletePicked(event: any, id: string) {
       this.$emit('deletePicked', null, id);
     }
   },
   emits: ["deletePicked"],
   watch: {
-        otherIds(newV, oldV) {
-            console.log("does this even?");
-            // this.setOtherFoods();
-        },
-    }
+    otherIds(newV, oldV) {
+      //console.log("does this even?");
+      // this.setOtherFoods();
+    },
+  }
 }
 </script>
 
@@ -107,9 +114,10 @@ export default {
   </nav>
 
   <div class="d-flex justify-content-start flex-wrap header">
+    <SpinnerComponent v-if="loading"></SpinnerComponent>
     <FoodTitleTag v-if="isIdSet" :id="id" :name="name" :allowClose="false"></FoodTitleTag>
-    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()" :name="food.naam"
-      :allowClose="true" @deletePicked="deletePicked"></FoodTitleTag>
+    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()"
+      :name="food.naam" :allowClose="true" @deletePicked="deletePicked"></FoodTitleTag>
   </div>
 
   <div class="d-flex justify-content-center content">

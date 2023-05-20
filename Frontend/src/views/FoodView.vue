@@ -44,19 +44,19 @@ export default {
             }
             this.picked = true;
             this.pick();
-            this.$nextTick(() => {this.reloading = false;});
+            this.$nextTick(() => { this.reloading = false; });
         },
         toggleComparing() {
             this.comparing = !this.comparing;
-            if (this.comparing) {
-                if (this.otherIds.length > 0 && this.picked) {
-                    this.pick();
-                } else {
-                    this.startComparing();
-                }
-            } else {
-                this.stopComparing();
-            }
+            // if (this.comparing) {
+            //     if (this.otherIds.length > 0 && this.picked) {
+            //         //this.pick();
+            //     } else {
+            //         this.startComparing();
+            //     }
+            // } else {
+            //     this.stopComparing();
+            // }
         },
         deletePicked(event: any, toDeleteId: string) {
             this.reloading = true;
@@ -65,31 +65,31 @@ export default {
             })
             this.picked = this.otherIds.length > 0;
             this.pick();
-            this.$nextTick(() => {this.reloading = false;});
+            this.$nextTick(() => { this.reloading = false; });
         },
-        startComparing() {
-            this.$router.push({
-                name: 'food',
-                params: {
-                    name: this.$route.params.name,
-                },
-                query: {
-                    id: this.$route.query.id,
-                    compareSearch: this.compareSearch === undefined ? '' : this.compareSearch
-                }
-            });
-        },
-        stopComparing() {
-            this.$router.push({
-                name: 'food',
-                params: {
-                    name: this.$route.params.name,
-                },
-                query: {
-                    id: this.$route.query.id,
-                }
-            });
-        },
+        // startComparing() {
+        //     this.$router.push({
+        //         name: 'food',
+        //         params: {
+        //             name: this.$route.params.name,
+        //         },
+        //         query: {
+        //             id: this.$route.query.id,
+        //             compareSearch: this.compareSearch === undefined ? '' : this.compareSearch
+        //         }
+        //     });
+        // },
+        // stopComparing() {
+        //     this.$router.push({
+        //         name: 'food',
+        //         params: {
+        //             name: this.$route.params.name,
+        //         },
+        //         query: {
+        //             id: this.$route.query.id,
+        //         }
+        //     });
+        // },
         pick() {
             if (this.otherIds.length <= 0) {
                 this.$router.push({
@@ -123,7 +123,9 @@ export default {
         <div class="hstack gap-3">
             <div class="row">
                 <div class="col">
-                    <SpinnerComponent v-if="reloading" ></SpinnerComponent>
+                    <div v-if="reloading">
+                        <SpinnerComponent></SpinnerComponent>
+                    </div>
                     <div v-if="!reloading">
                         <Food :otherIds="otherIds" @deletePicked="deletePicked"></Food>
                     </div>

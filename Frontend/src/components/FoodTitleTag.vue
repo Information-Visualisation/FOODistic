@@ -1,4 +1,5 @@
 <script lang="ts">
+import SpinnerComponent from './SpinnerComponent.vue';
 import FoodImg from './FoodImg.vue';
 import { DBService } from '@/services/db.service';
 import type { FoodRow } from '@/services/dbClasses';
@@ -23,6 +24,7 @@ export default {
     },
     components: {
         FoodImg,
+        SpinnerComponent
     },
     data() {
         return {
@@ -31,6 +33,7 @@ export default {
             foodGroup: "",
             subFoodGroup: "",
             allergies: {} as { [key: number]: { allergy: string } },
+            loading: false,
         }
     },
     created() {
@@ -38,10 +41,12 @@ export default {
     },
     methods: {
         async fetchData() {
+            this.loading = true;
             this.row = (await dbService.query(GET_FOOD_FOR_ID(this.id))).rows[0];
             this.setFoodGroups();
             // console.log(this.name);
             this.allergies = (await dbService.query(GET_ALLERGY_FOR(this.name))).rows;
+            this.loading = false;
         },
         setFoodGroups() {
             this.foodGroup = this.row.food_group;
@@ -64,7 +69,8 @@ export default {
 </script>
 
 <template>
-    <button class="card tag">
+    <div v-if="loading"><SpinnerComponent></SpinnerComponent></div>
+    <button v-if="!loading" class="card tag">
         <div class="row flex-nowrap">
             <div class="col nopadmarg align-self-center">
                 <FoodImg class="image" :id="id" :name="name" :height="80"></FoodImg>
