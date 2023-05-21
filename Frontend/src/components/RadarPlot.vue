@@ -105,6 +105,9 @@ export default {
             } as DatasetStarRow;
         },
         getColorForFood(i: number): string {
+            if (this.foodNames.length == 1) {
+                return '#000000'
+            }
             return foodColors['food'+(i+1).toString()];
         },
     }

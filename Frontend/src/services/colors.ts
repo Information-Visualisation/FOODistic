@@ -7,7 +7,7 @@ const foodColors = {
 } as {[key: string]: string}
 
 const nutrientColors = {
-    'Ash': '#2F313D',
+    'Ash': '#444444',
     'Carbohydrate': '#E9793C',
     'Fat': '#ECA72C',
     'Fatty Acid': '#E54B4B',

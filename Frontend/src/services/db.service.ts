@@ -1,7 +1,7 @@
 import type { DistinctRows, NutrientRow } from './dbClasses';
 
 const nutrientsFoodDB: Array<String> = ['Ash','Carbohydrate','Fat','Fatty Acid','Fiber','Proteins'];
-const nutrientsRecipeDB: Array<String> = ['Fat', 'Sugar', 'Sodium', 'Proteins', 'Saturated fat', 'Carbohydrate'];
+const nutrientsRecipeDB: Array<String> = ['Sodium','Carbohydrate','Fat', 'Sugar', 'Saturated fat', 'Proteins'];
 
 export class DBService {
   async query(query: string, log: boolean = false): Promise<any> {
