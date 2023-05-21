@@ -33,11 +33,12 @@ export default {
         return {
             foodItems: [] as FoodRow[],
             foodNutritions: {} as {[key: string]: number[]},
-            tabIndex: 0,
+            tabIndex: 0,//this.$route.query.tabIndex ?? 1,
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
             sortedFoodNames: [] as [string, number | string][],
+            foodIDs: {} as {[key: string]: number}
         }
     },
     created() {
@@ -62,9 +63,17 @@ export default {
                 percentages.push(this.allergyPercentages[i].percentage);
             }
             return percentages;
-        }
+        },
     },
     methods: {
+        // Returns food names with their id {'food': id}
+        getFoodIDs() {
+            let foodIDs = {} as {[key: string]: number};
+            for (let i = 0; i < this.foodItems.length; ++i) {
+                foodIDs[this.foodItems[i].naam] = this.foodItems[i].id;
+            }
+            return foodIDs;
+        },
         getMaxColums() {
             const column = 6;
             let max_value_colum = Array<number>(column);
@@ -87,6 +96,7 @@ export default {
                 this.$emit('returnTotalCount', null, totalCount);
                 this.createNutritions();
                 this.fetchAllergyInfo();
+                this.foodIDs = this.getFoodIDs();
             }
         },
         async createNutritions() {
@@ -121,6 +131,11 @@ export default {
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
         setTabIndex(index: number) {
+            // this.$router.push({ // push same route, but append tabindex
+            //     name: this.$route.name ?? 'home',
+            //     params: this.$route.params,
+            //     query: { ...this.$route.query, tabIndex: index}
+            // })
             this.tabIndex=index;
         },
         getAllergiesOfFood(foodName: string) {
@@ -205,14 +220,14 @@ export default {
         </nav>
         <!-- content -->
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active no-rows" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
+            <div class="tab-pane fade show active no-rows" id="nav-0" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
                 <FoodPicker v-if="foodPickerData !== undefined" :name="foodPickerData?.name" :group="foodPickerData?.group" :subgroup="foodPickerData?.subgroup"
                     :offset="foodPickerData?.offset" :allergies="foodPickerData?.allergies" :pageSize="foodPickerData?.pageSize" @returnFooditems="receiveFooditems">
                 </FoodPicker>
             </div>
             <!-- Nutrients -->
-            <div class="tab-pane fade rows" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
+            <div class="tab-pane fade rows" id="nav-1" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
@@ -224,13 +239,13 @@ export default {
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(item, i) in sortedFoodNames"
-                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="item[0]" :items="foodNutritions[item[0]]" :max_value="getMaxColums()"/>
+                        <TableRowNutrition v-bind:key="foodIDs[item[0]]" v-if="Object.keys(foodNutritions).length != 0" v-for="(item, i) in sortedFoodNames"
+                            :columnNames="nutritionHeaders" :id="foodIDs[item[0]]" :name="item[0]" :items="foodNutritions[item[0]] ?? []" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>
             </div>
             <!-- Allergies -->
-            <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
+            <div class="tab-pane fade rows" id="nav-2" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
@@ -247,7 +262,7 @@ export default {
                     </tbody>
                 </table>
             </div>
-            <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
+            <div class="tab-pane fade no-rows" id="nav-3" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
                 <RecipesList v-if="tabIndex==3" class="mx-auto" id="1"></RecipesList>
             </div>
         </div>
