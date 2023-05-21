@@ -1,4 +1,4 @@
-export type { Rows, Row, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow }
+export type { Rows, Row, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow, RecipeCount }
 
 type Rows = {
     [x: string]: any;
@@ -48,7 +48,8 @@ type FoodAllergyRow = {
 type AllergyPercentageRow = {
     allergy: string,
     percentage: number,
-}
+    count: number,
+};
 
 type RecipesRow = {
     foodid: number,
@@ -58,3 +59,8 @@ type RecipesRow = {
     techniques: Array<boolean>,
     nutritions: Array<number>
 };
+
+type RecipeCount = {
+    foodid: number,
+    recipecount: number,
+}

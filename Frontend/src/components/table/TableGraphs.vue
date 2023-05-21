@@ -10,6 +10,9 @@ export default {
         percentages: {
             type: Array<number>,
             required: true,
+        },
+        counts: {
+            type: Array<number>,
         }
     },
     methods: {
@@ -40,7 +43,10 @@ export default {
             <p class="bar-percentage" :style="{color: getBarColor(index)}">
                 {{ Math.round(percentage * 100) / 100 + (percentage.toString() == 'NaN' ? '': '%')}}
             </p>
-            <div class="bar" :style="{height: calcBarHeight(percentage) , backgroundColor: getBarColor(index)}">
+            <div v-if="counts != undefined" class="bar" :style="{height: calcBarHeight(percentage) , backgroundColor: getBarColor(index)}">
+                {{ counts[index] }} <!-- Make it hoverable -->
+            </div>
+            <div v-if="counts == undefined" class="bar" :style="{height: calcBarHeight(percentage) , backgroundColor: getBarColor(index)}">
             </div>
         </div>
     </th>
@@ -65,5 +71,6 @@ export default {
 .bar {
     background-color: brown;
 } */
+
 
 </style>

@@ -4,11 +4,11 @@ import TableGraph from './TableGraphs.vue';
 import TableRowNutrition from './TableRowNutrition.vue';
 import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
-import RecipesList from '@/components/RecipesList.vue';
+import TableRecipe from './TableRecipe.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
+import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR, COUNT_RECIPE_FOR } from '@/services/queries';
 import { DBService, distinctNames } from '@/services/db.service';
-import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
+import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow, RecipeCount } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
 
 const dbService = new DBService;
@@ -25,7 +25,7 @@ export default {
         TableRowHead,
         TableRowNutrition,
         FoodPicker,
-        RecipesList,
+        TableRecipe,
         SpinnerComponent,
         TableRowAllergy
     },
@@ -37,6 +37,9 @@ export default {
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+            recipeCount: [] as RecipeCount[],
+            recipeLabel: [] as string[],
+            foodIds: [] as number[],
         }
     },
     created() {
@@ -61,6 +64,13 @@ export default {
                 percentages.push(this.allergyPercentages[i].percentage);
             }
             return percentages;
+        },
+        getAllergyCount() : number[] {
+            let counts = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                counts.push(this.allergyPercentages[i].count);
+            }
+            return counts;
         }
     },
     methods: {
@@ -79,21 +89,25 @@ export default {
             return max_value_colum;
         },
         receiveFooditems(event: any, foodItems: any, totalCount: number) {
-            console.log(foodItems);
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
                 this.$emit('returnTotalCount', null, totalCount);
-                this.createNutritions();
-                this.fetchAllergyInfo();
+                if(this.tabIndex == 1)
+                    this.createNutritions();
+                if(this.tabIndex == 2)
+                    this.fetchAllergyInfo();
+                if(this.tabIndex == 3){
+                    this.fetchRecipeInfo();
+                }
+            }
+        },
+        getFoodInfo(){
+            for(let i = 0; i < this.foodItems.length; i++){
+                this.recipeLabel.push(this.foodItems[i].naam);
+                this.foodIds.push(this.foodItems[i].id);
             }
         },
         async createNutritions() {
-            // let ids: Array<string> = new Array<string>();
-            // this.foodItems.forEach((row) => {
-            //     ids.push(row.id);
-            // })
-            // console.log(MACRO_NUTRIENTS_FOR_FOODS(ids));
-            // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
                 const id: string = this.foodItems[i].id.toString();
@@ -118,8 +132,26 @@ export default {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
+        async fetchRecipeInfo(){
+            this.recipeCount = [];
+            this.foodIds = [];
+            this.recipeLabel = [];
+            this.getFoodInfo();
+            console.log(this.foodIds);
+            const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
+            console.log(queryString);
+            this.recipeCount = (await dbService.query(queryString, false)).rows;
+            console.log(this.recipeCount);
+        },
         setTabIndex(index: number) {
             this.tabIndex=index;
+            if(this.tabIndex == 1)
+                this.createNutritions();
+            if(this.tabIndex == 2)
+                this.fetchAllergyInfo();
+            if(this.tabIndex == 3){
+                this.fetchRecipeInfo();
+            }
         },
         getAllergiesOfFood(foodName: string) {
             return this.allergiesPerFood?.filter(function(item) { return item.food==foodName;});
@@ -192,7 +224,7 @@ export default {
             <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount"/>
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
@@ -207,7 +239,12 @@ export default {
                 </table>
             </div>
             <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
-                <RecipesList v-if="tabIndex==3" class="mx-auto" id="1"></RecipesList>
+                <div v-if="recipeCount.length == 0">
+                            <SpinnerComponent></SpinnerComponent>
+                </div>
+                <div v-if="recipeCount.length != 0">
+                    <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipescount="recipeCount" ></TableRecipe>
+                </div>
             </div>
         </div>
     </div>

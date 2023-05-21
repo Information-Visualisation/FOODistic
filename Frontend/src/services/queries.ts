@@ -111,6 +111,27 @@ export function GET_RECIPE_NUTRIENTS(id: string): string{
 	);`
 }
 
+export function COUNT_RECIPE_FOR(ids: number[]){
+	return `SELECT DISTINCT
+	fi.food_id as foodid,
+	COUNT(raw_recipes.name) as recipecount
+	FROM recipes_filtered,raw_recipes,food_ingredient_linker as fi
+	WHERE (
+		recipes_filtered.id = raw_recipes.id AND
+		(` + orFoodIds(ids) + `fi.food_id = ` + ids[ids.length-1] + `) AND
+		fi.ingredient_id = ANY (recipes_filtered.ingredient_ids)
+	)
+	GROUP BY fi.food_id`
+}
+
+function orFoodIds(ids: number[]) {
+	let query: string = ""
+	for (let i = 0; i < ids.length - 1; ++i) {
+		query += "fi.food_id = " + ids[i] + " OR ";
+	}
+	return query;
+}
+
 export function GET_ALLERGY_FOR(foodName: string): string {
 	return "SELECT allergy FROM allergies WHERE food='"+ foodName +"' AND allergy IS NOT NULL";
 }
@@ -130,7 +151,7 @@ export function GET_ALLERGIES_PER_FOOD_FOR(foods: FoodRow[]): string {
 }
 
 export function COUNT_ALLERGIES_FOR(foods: FoodRow[]): string {
-	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage FROM allergies WHERE allergy IS NOT NULL AND (";
+	let query = "SELECT allergy, COUNT(allergy) / SUM(COUNT(allergy)) OVER() * 100 as percentage, COUNT(allergy) as count FROM allergies WHERE allergy IS NOT NULL AND (";
 	query += orFoods(foods);
 	query += "food = '" + foods[foods.length-1]?.naam + "') GROUP BY allergy ORDER BY allergy;";
 	return query;
