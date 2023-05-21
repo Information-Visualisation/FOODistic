@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import { DBService } from '../services/db.service'
+import { DBService, nutrientsRecipeDB } from '../services/db.service'
 import type { RecipesRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
@@ -20,10 +20,14 @@ import {
 } from 'chart.js'
 import { getTechniqueCounts } from '@/services/cookingtechniques';
 import { capitalize } from 'vue';
+import { nutrientColors } from '@/services/colors';
 
 const dbService = new DBService;
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+
+const defaultColorForNutrient = '#FF6384';
+const labels = nutrientsRecipeDB;
 
 export default {
     name: 'NutrientGraph',
@@ -44,20 +48,20 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: {} as {[key: number]: RecipesRow},
+            recipes: {} as { [key: number]: RecipesRow },
             selectedRecipe: null as unknown as number,
-            filteredRecipes: {} as {[key: number]: RecipesRow},
+            filteredRecipes: {} as { [key: number]: RecipesRow },
             image: new Image(20, 20),
-            nutrients: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
-            selectedNutrient: 'Total fat',
+            nutrients: labels,
+            selectedNutrient: 'Fat',
             data: {
                 labels: techniqueStrings,
                 datasets: [{
                     labels: techniqueStrings,
                     fill: false,
-                    borderColor: "rgb(255, 99, 132)",
-                    backgroundColor:"rgba(255, 99, 132, 0.5)",
-                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},  {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                    borderColor: defaultColorForNutrient,
+                    backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
+                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
                 }]
             },
             options: {
@@ -80,12 +84,12 @@ export default {
                         },
                         ticks: {
                             stepSize: 1,
-                            callback: function(value, index, values){
+                            callback: function (value, index, values) {
                                 return techniqueStrings[value];
                             }
                         }
                     }
-                },    
+                },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -107,7 +111,7 @@ export default {
                                 }
                             },
                             footer: (context: any) => {
-                                return this.selectedNutrient+': ' + Math.round(context[0].raw.r * 100) / 100;
+                                return this.selectedNutrient + ': ' + Math.round(context[0].raw.r * 100) / 100;
                             },
                             title: (context: any) => {
                                 return '';  // to remove default title
@@ -148,8 +152,11 @@ export default {
             this.isFiltering = true;
             //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
             let techniqueCount: Array<number> = getTechniqueCounts(this.filteredRecipes);
-            for(let i = 0; i < techniqueCount.length; i++){
-                this.data.datasets[0].data[i] = {x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient)};
+            const color: string = this.getNutrientColor();
+            this.data.datasets[0].borderColor = color;
+            this.data.datasets[0].backgroundColor = color + '80';
+            for (let i = 0; i < techniqueCount.length; i++) {
+                this.data.datasets[0].data[i] = { x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient) };
             }
             this.$nextTick(() => {
                 this.isFiltering = false;
@@ -158,21 +165,21 @@ export default {
         getBaseLog(x: number, y: number) {
             return Math.log(y) / Math.log(x);
         },
-        getNutrients(index: number, indexNutrient: number){
+        getNutrients(index: number, indexNutrient: number) {
             let nutrient = 0;
-            for(let i = 0; i < Object.keys(this.filteredRecipes).length; i++){
-                if(this.filteredRecipes[i].techniques[index]) {
+            for (let i = 0; i < Object.keys(this.filteredRecipes).length; i++) {
+                if (this.filteredRecipes[i].techniques[index]) {
                     nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
                 }
             }
-            let resultMath = this.getBaseLog(1.5,nutrient);
-            if(resultMath.toString() == "-Infinity"){
+            let resultMath = this.getBaseLog(1.5, nutrient);
+            if (resultMath.toString() == "-Infinity") {
                 return 0;
             }
-            else{
+            else {
                 return resultMath;
             }
-            
+
         },
         checkedRecipe(index: number, checked: boolean) {
             if (checked) {
@@ -191,9 +198,21 @@ export default {
 
             this.selectNutrient(this.selectedNutrient);
         },
-        selectNutrient(nutrient: string){
+        selectNutrient(nutrient: string) {
             this.selectedNutrient = nutrient;
-            this.fillGraph(this.nutrients.indexOf(nutrient)+1);
+            this.fillGraph(this.nutrients.indexOf(nutrient) + 1);
+        },
+        getNutrientColor(): string {
+            let color: string = nutrientColors[this.selectedNutrient];
+            if (color === undefined) {
+                color = defaultColorForNutrient;
+            }
+            this.setCSSNutrientColor(color);
+            return color;
+        },
+        setCSSNutrientColor(hex: string) {
+            let root = document.documentElement;
+            root.style.setProperty('--nutrient-color',hex);
         }
     }
 }
@@ -201,16 +220,21 @@ export default {
 
 <template>
     <div style="min-height: 353px; width: 640px;">
-        <h3>Recipe List</h3>
-        <div v-if="!isLoading && Object.keys(filteredRecipes).length != 1" class="btn-group">
-            <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              {{ selectedNutrient }}
-            </button>
-            <ul class="dropdown-menu">
-                  <li v-for="nutrient in nutrients">
-                        <p class="dropdown-item" @click="selectNutrient(nutrient)">{{ nutrient}}</p>
-                  </li>
-            </ul>
+        <div class="position-relative">
+            <h3 class="headerShrink">Recipe List</h3>
+            <div class="position-absolute nutrientPicker">
+                <div v-if="!isLoading && Object.keys(filteredRecipes).length != 1" class="btn-group">
+                    <button type="button" class="btn btn-outline-custom dropdown-toggle" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        {{ selectedNutrient }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li v-for="nutrient in nutrients">
+                            <p class="dropdown-item" @click="selectNutrient(nutrient)">{{ nutrient }}</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div>
             <div v-if="isLoading" class="position-relative">
@@ -218,7 +242,8 @@ export default {
                 <Bar :data="data" :options="options" />
             </div>
             <div v-else="!isLoading" class="position-relative">
-                <div v-if="Object.keys(recipes).length <= 0" class="position-absolute alert alert-dark noData" role="alert">No cooking
+                <div v-if="Object.keys(recipes).length <= 0" class="position-absolute alert alert-dark noData" role="alert">
+                    No cooking
                     techniques found
                 </div>
                 <div v-if="Object.keys(filteredRecipes).length == 1">
@@ -233,11 +258,14 @@ export default {
             <SpinnerComponent class="position-absolute center-spinner" />
         </div>
         <div v-if="!isLoading" class="container overflow-auto scrollview border rounded">
-            <div v-if="Object.keys(recipes).length <= 0" class="position-absolute top-50 start-50 translate-middle alert alert-dark"
-                role="alert">No recipes found</div>
+            <div v-if="Object.keys(recipes).length <= 0"
+                class="position-absolute top-50 start-50 translate-middle alert alert-dark" role="alert">No recipes found
+            </div>
             <ul class="list-group">
                 <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
-                    @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)" @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid }})"> <!-- checked aanpassen naar hover + click go to recipes -->
+                    @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)"
+                    @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
+                    <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>
@@ -260,5 +288,33 @@ export default {
 canvas {
     width: 600px !important;
     height: 300px !important;
+}
+
+.nutrientPicker {
+    top: 5px;
+    right: 35px;
+}
+
+.headerShrink {
+    top: 0px;
+    left: 0px;
+    width: 300px;
+}
+
+.btn-outline-custom {
+    --bs-btn-color: var(--nutrient-color);
+    --bs-btn-border-color: var(--nutrient-color);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--nutrient-color);
+    --bs-btn-hover-border-color: var(--nutrient-color);
+    --bs-btn-focus-shadow-rgb: 220, 53, 69;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--nutrient-color);
+    --bs-btn-active-border-color: var(--nutrient-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--nutrient-color);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--nutrient-color);
+    --bs-gradient: none;
 }
 </style>

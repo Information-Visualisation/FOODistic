@@ -1,5 +1,8 @@
 import type { DistinctRows, NutrientRow } from './dbClasses';
 
+const nutrientsFoodDB: Array<String> = ['Ash','Carbohydrate','Fat','Fatty Acid','Fiber','Proteins'];
+const nutrientsRecipeDB: Array<String> = ['Fat', 'Sugar', 'Sodium', 'Proteins', 'Saturated fat', 'Carbohydrate'];
+
 export class DBService {
   async query(query: string, log: boolean = false): Promise<any> {
     return fetch('http://127.0.0.1:3080/db?query=' + encodeURI(query), {}).then(function (response) {
@@ -22,3 +25,5 @@ export function distinctNames(rows: Array<NutrientRow>): DistinctRows {
   });
   return names;
 }
+
+export { nutrientsRecipeDB, nutrientsFoodDB }

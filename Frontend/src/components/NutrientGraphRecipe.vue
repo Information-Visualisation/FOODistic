@@ -1,5 +1,5 @@
 <script lang="ts">
-import { DBService, distinctNames } from '../services/db.service';
+import { DBService, distinctNames, nutrientsRecipeDB } from '../services/db.service';
 import { avg, mean, std } from '../services/statistics';
 import type { Rows, Row, DistinctRows } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
@@ -14,8 +14,10 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js/auto'
+import { nutrientColors } from '@/services/colors';
 
 const dbService = new DBService;
+const labels = nutrientsRecipeDB;
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -37,10 +39,11 @@ export default {
             noData: false,
             result: null as unknown as Rows,
             data: {
-                labels: ['Total fat', 'Sugar', 'Sodium', 'Protein', 'Saturated fat', 'Carbohydrates'],
+                labels: labels,
                 datasets: [{
                     labels: ' ',
-                    data: [0, 0, 0, 0, 0, 0]
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: this.getNutrientColors(),
                 }]
 
             },
@@ -91,6 +94,13 @@ export default {
                     this.data.datasets[0].data[i-1] = rows[0].nutritions[i]
                 }
             }
+        },
+        getNutrientColors() {
+            let colors = [];
+            for (let label of labels) {
+                colors.push(nutrientColors[label as string]);
+            }
+            return colors;
         },
     }
 }

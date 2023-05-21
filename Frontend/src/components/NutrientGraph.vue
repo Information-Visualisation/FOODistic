@@ -1,5 +1,5 @@
 <script lang="ts">
-import { DBService, distinctNames } from '../services/db.service';
+import { DBService, distinctNames, nutrientsFoodDB } from '../services/db.service';
 import { avg, mean, std } from '../services/statistics';
 import type { Rows, Row, DistinctRows, DatasetGraphRow, NutrientRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
@@ -20,7 +20,7 @@ import {
 } from 'chart.js/auto'
 
 const dbService = new DBService;
-const labels = ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'];
+const labels = nutrientsFoodDB;
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -108,10 +108,11 @@ export default {
             } else {
                 const foodName: string = nutrientRow[0].naam;
                 this.foodNames.push(foodName);
+                const comparingFoods: boolean = this.ids.length > 1;
                 this.data.datasets.push({
                     label: foodName,
                     data: [{}, {}, {}, {}, {}, {}],
-                    backgroundColor: [this.getColorForFood(i)],
+                    backgroundColor: comparingFoods ? [this.getColorForFood(i)] : this.getBarColor(),
                     //backgroundColor: this.getBarColor(),
                     borderColor: this.getBarColor(),
                     borderWidth: 0,
@@ -146,7 +147,7 @@ export default {
         getBarColor() {
             let colors = []; 
             for (let label of labels) { 
-                colors.push(nutrientColors[label]); 
+                colors.push(nutrientColors[label as string]); 
             } return colors; 
         },
         getColorForFood(i: number): string {

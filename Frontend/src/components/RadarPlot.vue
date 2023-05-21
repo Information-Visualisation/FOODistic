@@ -1,5 +1,5 @@
 <script lang="ts">
-import { DBService, distinctNames } from '@/services/db.service';
+import { DBService, distinctNames, nutrientsFoodDB } from '@/services/db.service';
 import { mean } from '@/services/statistics';
 import { GET_FOOD_FOR_ID, NUTRIENTS_FOR } from '@/services/queries';
 import type { DatasetStarRow, DistinctRows, FoodRow, NutrientRow, Rows } from '@/services/dbClasses';
@@ -47,14 +47,7 @@ export default {
         return {
             isLoading: true,
             data: {
-                labels: [
-                    'Ash',
-                    'Carbohydrates',
-                    'Fat',
-                    'Fatty Acid',
-                    'Fiber',
-                    'Proteins',
-                ],
+                labels: nutrientsFoodDB,
                 datasets: [] as Array<DatasetStarRow>,
             },
             options: {

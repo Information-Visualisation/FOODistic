@@ -135,7 +135,7 @@ export default {
 
   <div class="d-flex justify-content-start flex-wrap header">
     <SpinnerComponent v-if="loading"></SpinnerComponent>
-    <FoodTitleTag v-if="isIdSet" :foodNum="1" :id="id" :name="name" :allowClose="false" :isMinimized="isMinimized"></FoodTitleTag>
+    <FoodTitleTag v-if="isIdSet" :foodNum="otherFoods.length > 0 ? 1 : 0" :id="id" :name="name" :allowClose="false" :isMinimized="isMinimized"></FoodTitleTag>
     <FoodTitleTag v-if="otherFoods.length > 0" v-for="(food, index) in otherFoods" :foodNum="index+2" :id="food.id.toString()" :name="food.naam"
       :allowClose="true" :isMinimized="isMinimized" @deletePicked="deletePicked"></FoodTitleTag>
     <button v-if="!isMinimized" type="button" class="btn align-self-center" @click="toggleMinimize()">

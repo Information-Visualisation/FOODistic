@@ -99,7 +99,8 @@ export default {
                 id: id
             }
         }).href"> -->
-    <button v-if="!loading && !isMinimized" :class="'rounded-pill tag btn-outline-food' + foodNum.toString() + ' btn'">
+    <button v-if="!loading && !isMinimized"
+        :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString()) + ' btn'">
         <div class="row flex-nowrap align-items-center ">
             <div class="col nopadmarg position-relative imgDiv">
                 <div :class="'foodBorder rounded-circle food' + foodNum.toString()"></div>
@@ -124,8 +125,8 @@ export default {
             </div>
         </div>
     </button>
-    <button v-if="!loading && isMinimized"
-        :class="'flexMinimized rounded-pill tag btn-outline-food' + foodNum.toString() + ' btn'" @click="">
+    <button v-if="!loading && isMinimized" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString())
+        + ' btn'" @click="">
         {{ name }}
         <button v-if="allowClose" type="button" class="btn-close ms-1" aria-label="Close" @click="deletePicked"></button>
         <div v-if="!allowClose" class="main ms-1">main</div>
