@@ -10,6 +10,7 @@ import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } 
 import { DBService, distinctNames } from '@/services/db.service';
 import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
+import * as bootstrap from 'bootstrap';
 
 const dbService = new DBService;
 
@@ -35,12 +36,13 @@ export default {
         return {
             foodItems: [] as FoodRow[],
             foodNutritions: {} as {[key: string]: number[]},
-            tabIndex: 0,//this.$route.query.tabIndex ?? 1,
+            tabIndex: (this.$route.query.tabIndex ?? 0) as number,
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
             sortedFoodNames: {} as SortRow[],
-            foodIDs: {} as {[key: string]: number}
+            foodIDs: {} as {[key: string]: number},
+            tabs: ['food', 'nutrition', 'allergies', 'recipes'] // names of the tabs for navigation
         }
     },
     created() {
@@ -133,12 +135,13 @@ export default {
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
         setTabIndex(index: number) {
-            // this.$router.push({ // push same route, but append tabindex
-            //     name: this.$route.name ?? 'home',
-            //     params: this.$route.params,
-            //     query: { ...this.$route.query, tabIndex: index}
-            // })
+            this.$router.push({ // push same route, but append tabindex
+                name: this.$route.name ?? 'home',
+                params: this.$route.params,
+                query: { ...this.$route.query, tabIndex: index}
+            })
             this.tabIndex=index;
+            this.sortNutritions(0, true); // reset sort order of table on change tab
         },
         getAllergiesOfFood(foodName: string): FoodAllergyRow[] {
             return this.allergiesPerFood?.filter(function(item) { return item.food==foodName;});
@@ -243,8 +246,22 @@ export default {
             }
         },
         
+    },
+    mounted() {
+        // const triggerTabList = document.querySelectorAll('[role="tab"]');
+        // triggerTabList.forEach(triggerEl => {
+        //     // event listener for changes tabs
+        //   triggerEl.addEventListener('click', event => {
+        //     console.log('changed tab');
+        //   })
+        // });
+
+        
+        document.getElementById('nav-' + this.tabs[this.tabIndex]+'-tab')?.click(); // open tab that is set in router
     }
 }
+
+
 </script>
 <template>
     <div id="table">

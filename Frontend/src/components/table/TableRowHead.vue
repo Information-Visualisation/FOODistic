@@ -35,7 +35,7 @@ export default {
 
 <template>
     <tr>
-    <th scope="col" v-for="(name, index) in columnNames">
+    <th id="table-header" scope="col" v-for="(name, index) in columnNames">
         <button class="sort btn" type="button" :onclick="function() {setSort(index)}">
             {{name + ' ' + getSortArrow(index)}}
         </button>
@@ -48,6 +48,13 @@ export default {
 .sort {
     font-weight: bold;
     padding: 0px;
+}
+
+#table-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 </style>
