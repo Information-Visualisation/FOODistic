@@ -3,6 +3,8 @@ import SpinnerComponent from './SpinnerComponent.vue';
 import NutrientGraph from '../components/NutrientGraph.vue';
 import RecipesList from '../components/RecipesList.vue';
 import FoodTitleTag from '../components/FoodTitleTag.vue';
+import IconMaximize from '../components/icons/IconMaximize.vue';
+import IconMinimize from '../components/icons/IconMinimize.vue';
 import { DBService } from '@/services/db.service';
 import type { FoodRow } from '@/services/dbClasses';
 import { GET_FOOD_FOR_ID } from '@/services/queries';
@@ -25,6 +27,8 @@ export default {
     RecipesList: RecipesList,
     FoodTitleTag,
     SpinnerComponent,
+    IconMaximize,
+    IconMinimize,
   },
   data() {
     return {
@@ -36,6 +40,7 @@ export default {
       subFoodGroup: "",
       otherFoods: [] as unknown as [FoodRow],
       loading: false,
+      isMinimized: false,
     }
   },
   async created() {
@@ -59,7 +64,7 @@ export default {
       this.isLoading();
       if (this.otherIds.length > 0) {
         this.otherIds.forEach(async (id) => {
-          this.otherFoods.push(await this.fetchData(id));
+          this.otherFoods.push(await this.fetchData(id as string));
         })
       }
       this.loading = false;
@@ -80,6 +85,21 @@ export default {
     },
     deletePicked(event: any, id: string) {
       this.$emit('deletePicked', null, id);
+    },
+    toggleMinimize() {
+      this.isMinimized = !this.isMinimized;
+    },
+    getImageUrl(allergy: string) {
+      if (allergy.includes('Lactose')) {
+        return new URL(`../assets/allergies/Lactose intolerance.png`, import.meta.url).href;
+      }
+      let url: string = new URL(`../assets/allergies/${allergy}.png`, import.meta.url).href;
+      return url.includes('undefined') ? new URL(`../assets/allergies/checkbox.png`, import.meta.url).href : url;
+    },
+    getAllIds(): Array<String> {
+      let ids: Array<String> = [this.id];
+      ids = ids.concat(this.otherIds);
+      return ids;
     }
   },
   emits: ["deletePicked"],
@@ -115,15 +135,23 @@ export default {
 
   <div class="d-flex justify-content-start flex-wrap header">
     <SpinnerComponent v-if="loading"></SpinnerComponent>
-    <FoodTitleTag v-if="isIdSet" :id="id" :name="name" :allowClose="false"></FoodTitleTag>
-    <FoodTitleTag v-if="otherFoods.length > 0" v-for="food in otherFoods" :id="food.id.toString()"
-      :name="food.naam" :allowClose="true" @deletePicked="deletePicked"></FoodTitleTag>
+    <FoodTitleTag v-if="isIdSet" :foodNum="1" :id="id" :name="name" :allowClose="false" :isMinimized="isMinimized"></FoodTitleTag>
+    <FoodTitleTag v-if="otherFoods.length > 0" v-for="(food, index) in otherFoods" :foodNum="index+2" :id="food.id.toString()" :name="food.naam"
+      :allowClose="true" :isMinimized="isMinimized" @deletePicked="deletePicked"></FoodTitleTag>
+    <button v-if="!isMinimized" type="button" class="btn align-self-center" @click="toggleMinimize()">
+      <IconMaximize></IconMaximize>
+      <!-- Minimize -->
+    </button>
+    <button v-if="isMinimized" type="button" class="btn align-self-center" @click="toggleMinimize()">
+      <IconMinimize></IconMinimize>
+      <!-- Maximize -->
+    </button>
   </div>
 
   <div class="d-flex justify-content-center content">
     <div class="row">
       <div class="col">
-        <NutrientGraph :id="id" class="card" />
+        <NutrientGraph :ids="getAllIds()" class="card" />
       </div>
       <div class="col">
         <RecipesList :id="id" class="card" />
@@ -160,10 +188,14 @@ h3 {
 }
 
 .header {
-  margin: 0 50px 0 50px;
+  margin: 0 120px 0 50px;
 }
 
 .content {
   padding-left: 50px;
+}
+
+.minimizeBtn {
+  height: 30px;
 }
 </style>

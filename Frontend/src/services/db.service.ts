@@ -1,4 +1,4 @@
-import type { Row, Rows, DistinctRows } from './dbClasses';
+import type { DistinctRows, NutrientRow } from './dbClasses';
 
 export class DBService {
   async query(query: string, log: boolean = false): Promise<any> {
@@ -11,9 +11,9 @@ export class DBService {
   }
 }
 
-export function distinctNames(rows: Rows): DistinctRows {
+export function distinctNames(rows: Array<NutrientRow>): DistinctRows {
   const names: DistinctRows = {};
-  rows.forEach((row: Row) => {
+  rows.forEach((row) => {
     if (names[row.nutrient]) {
       names[row.nutrient].push(parseFloat(row.value));
     } else {

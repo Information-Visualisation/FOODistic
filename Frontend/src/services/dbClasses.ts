@@ -1,4 +1,4 @@
-export type { Rows, Row, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow }
+export type { Rows, Row, NutrientRow, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow, DatasetGraphRow, DatasetStarRow }
 
 type Rows = {
     [x: string]: any;
@@ -10,6 +10,14 @@ type Row = {
     value: string,
 };
 
+type NutrientRow = {
+    id: string,
+    naam: string,
+    nutrient: string,
+    orig_source_name: string,
+    value: string,
+}
+
 type DistinctRows = {
     [key: string]: number[]
 };
@@ -19,7 +27,7 @@ type FoodRow = {
     created_at: string,
     creator_id: number,
     description: string,
-    export_to_afcdb: boolean, 
+    export_to_afcdb: boolean,
     export_to_foodb: boolean,
     food_group: string,
     food_subgroup: string,
@@ -48,7 +56,7 @@ type FoodAllergyRow = {
 type AllergyPercentageRow = {
     allergy: string,
     percentage: number,
-}
+};
 
 type RecipesRow = {
     foodid: number,
@@ -58,3 +66,22 @@ type RecipesRow = {
     techniques: Array<boolean>,
     nutritions: Array<number>
 };
+
+type DatasetGraphRow = {
+    label: string,
+    data: Array<{}>,
+    backgroundColor: Array<String>,
+    borderColor: Array<String>,
+    borderWidth: number,
+};
+
+type DatasetStarRow = {
+    label: string,
+    data: Array<Number>,
+    backgroundColor: string,
+    borderColor: string,
+    pointBackgroundColor: string,
+    pointBorderColor: string,
+    pointHoverBackgroundColor: string,
+    pointHoverBorderColor: string,
+}

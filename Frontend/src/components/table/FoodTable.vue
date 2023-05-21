@@ -6,7 +6,7 @@ import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
 import RecipesList from '@/components/RecipesList.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
+import { NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
 import { DBService, distinctNames } from '@/services/db.service';
 import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
@@ -92,12 +92,12 @@ export default {
             // this.foodItems.forEach((row) => {
             //     ids.push(row.id);
             // })
-            // console.log(MACRO_NUTRIENTS_FOR_FOODS(ids));
+            // console.log(NUTRIENTS_FOR_FOODS(ids));
             // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
                 const id: string = this.foodItems[i].id.toString();
-                let result = await dbService.query(MACRO_NUTRIENTS_FOR(id));
+                let result = await dbService.query(NUTRIENTS_FOR(id));
                 result = result.rows;
                 const naam = this.foodItems[i].naam;
                 this.foodNutritions[naam] = this.createNutrition(result);

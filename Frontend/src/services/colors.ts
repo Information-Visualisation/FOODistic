@@ -1,4 +1,12 @@
 const foodColors = {
+    'food1': '#8DD3C7',
+    'food2': '#FB8072',
+    'food3': '#BEBADA',
+    'food4': '#FFFFB3',
+    'food5': '#80B1D3',
+} as {[key: string]: string}
+
+const nutrientColors = {
     'Ash': '#2F313D',
     'Carbohydrate': '#E9793C',
     'Fat': '#ECA72C',
@@ -67,4 +75,4 @@ const allergyColors = {
 
 } as {[key: string]: string};
 
-export { foodColors, allergyColors };
+export { nutrientColors, foodColors, allergyColors };

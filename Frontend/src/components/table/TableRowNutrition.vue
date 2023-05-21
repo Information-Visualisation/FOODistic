@@ -1,6 +1,6 @@
 <script lang="ts">
 import FoodImg from '../FoodImg.vue';
-import { foodColors } from '@/services/colors';
+import { nutrientColors } from '@/services/colors';
 
 export default {
     props: {
@@ -24,7 +24,7 @@ export default {
         getBarColor(index: number) {
             if (this.items[index] === undefined)
                 return 'lightslategray';
-            return foodColors[this.columnNames[index]];
+            return nutrientColors[this.columnNames[index]];
         }
     },
     components: { FoodImg }

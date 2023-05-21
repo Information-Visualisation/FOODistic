@@ -47,6 +47,7 @@ export default {
 
 <style scoped lang="scss">
 @import "../scss/custom.scss";
+@import "../scss/foodButtons.scss";
 
 #main-nav {
   background-color: $app-light;

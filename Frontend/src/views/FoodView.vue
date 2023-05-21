@@ -9,7 +9,6 @@ export default {
         SpinnerComponent,
         Food,
         FoodPicker,
-        RadarPlot
     },
     data() {
         return {
@@ -159,10 +158,7 @@ export default {
             </div>
         </div>
         <!-- <div class="hl"></div> -->
-        <!-- <div v-if="picked" class="row card wide">
-            <RadarPlot :id="($route.query.id as string)" :otherids="id"></RadarPlot>
-        </div> -->
-        <div class="position-absolute top-0 end-0 m-3"> <!-- TODO: explain the 3 buttons -->
+        <div class="position-absolute top-0 end-0 m-3">
             <button v-if="!comparing" class="btn btn-success mb-3" @click="toggleComparing">Compare ▶</button>
             <button v-if="comparing" type="button" class="btn btn-success mb-3" aria-label="Collapse"
                 @click="toggleComparing">
@@ -224,9 +220,5 @@ export default {
 
 .foodpickerDown {
     padding-top: 30px;
-}
-
-.wide {
-    width: 680px
 }
 </style>

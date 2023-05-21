@@ -1,5 +1,5 @@
 <script lang="ts">
-import { foodColors, allergyColors } from '@/services/colors';
+import { nutrientColors, allergyColors } from '@/services/colors';
 
 export default {
     props: {
@@ -21,8 +21,8 @@ export default {
             if (this.percentages[index].toString() === 'NaN')
                 return "#000000";
             let header = this.columnNames[index];
-            if (header in foodColors)
-                return foodColors[header];
+            if (header in nutrientColors)
+                return nutrientColors[header];
             else if (header in allergyColors)
                 return allergyColors[header];
             else

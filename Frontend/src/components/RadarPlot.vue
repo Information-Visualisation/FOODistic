@@ -1,8 +1,8 @@
 <script lang="ts">
 import { DBService, distinctNames } from '@/services/db.service';
 import { mean } from '@/services/statistics';
-import { GET_FOOD_FOR_ID, MACRO_NUTRIENTS_FOR } from '@/services/queries';
-import type { FoodRow, Rows } from '@/services/dbClasses';
+import { GET_FOOD_FOR_ID, NUTRIENTS_FOR } from '@/services/queries';
+import type { DatasetStarRow, DistinctRows, FoodRow, NutrientRow, Rows } from '@/services/dbClasses';
 import {
     Chart as ChartJS,
     RadialLinearScale,
@@ -14,6 +14,7 @@ import {
 } from 'chart.js'
 import { Radar } from 'vue-chartjs'
 import SpinnerComponent from './SpinnerComponent.vue';
+import { foodColors } from '@/services/colors';
 
 ChartJS.register(
     RadialLinearScale,
@@ -33,22 +34,18 @@ export default {
         Radar,
     },
     props: {
-        id: {
-            type: String,
-            required: true
+        foodNames: {
+            type: Array<String>,
+            required: true,
         },
-        otherId: {
-            type: String,
+        distinctRowsPerFood: {
+            type: Array<DistinctRows>,
             required: true
         },
     },
     data() {
         return {
             isLoading: true,
-            foodData: [] as FoodRow[],
-            otherFoodData: [] as FoodRow[],
-            rows: {} as Rows,
-            otherRows: {} as Rows,
             data: {
                 labels: [
                     'Ash',
@@ -58,30 +55,7 @@ export default {
                     'Fiber',
                     'Proteins',
                 ],
-                datasets: [
-                    {
-                        label: '',
-                        data: [0, 0, 0, 0, 0, 0],
-                        //TODO: This is hardcoded in the example
-                        backgroundColor: 'rgba(179,181,198,0.2)',
-                        borderColor: 'rgba(179,181,198,1)',
-                        pointBackgroundColor: 'rgba(179,181,198,1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(179,181,198,1)',
-                    },
-                    {
-                        label: '',
-                        data: [0, 0, 0, 0, 0, 0],
-                        //TODO: This is hardcoded in the example
-                        backgroundColor: 'rgba(255,99,132,0.2)',
-                        borderColor: 'rgba(255,99,132,1)',
-                        pointBackgroundColor: 'rgba(255,99,132,1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(255,99,132,1)',
-                    }
-                ],
+                datasets: [] as Array<DatasetStarRow>,
             },
             options: {
                 responsive: true,
@@ -90,60 +64,70 @@ export default {
         }
     },
     created() {
-        this.fetchData().then(() => {
-            this.fillGraph()
-            this.loaded();
-        });
-
+        this.isLoading = true;
+        for (let i = 0; i < this.distinctRowsPerFood.length; i++) {
+            this.fillGraph(i, this.distinctRowsPerFood[i]);
+        }
+        this.$nextTick(() => {this.loaded()});
     },
     methods: {
         async fetchData() {
-            this.foodData = (await dbService.query(GET_FOOD_FOR_ID(this.id))).rows;
-            this.otherFoodData = (await dbService.query(GET_FOOD_FOR_ID(this.otherId))).rows;
 
-            this.rows = (await dbService.query(MACRO_NUTRIENTS_FOR(this.id), false)).rows;
-            this.otherRows = (await dbService.query(MACRO_NUTRIENTS_FOR(this.otherId), false)).rows;
         },
         loaded() {
             this.isLoading = false;
         },
-        fillGraph(log: boolean = false) {
-            this.data.datasets[0].label = this.foodData[0].naam;
-            this.data.datasets[1].label = this.otherFoodData[0].naam;
+        fillGraph(i: number, rows: DistinctRows) {
+            this.data.datasets.push(this.makeDatasetStarRow(i) as DatasetStarRow);
 
-            let distincts1 = distinctNames(this.rows!);
-            let distincts2 = distinctNames(this.otherRows!);
-            const MACRO_NUTRIENTS: number = 6;
+            this.data.datasets[i].label = this.foodNames[i] as string;
 
-            let i = 0;
+            // if (rows.length <= 0) {
+            //     this.noData = true;
+            // } else {
+            // TODO: This obviously doesn't work
 
-            Object.keys(distincts1).forEach((key: string) => {
-                const values1: number[] = distincts1[key];
-                this.data.datasets[0].data[i++] = mean(values1);
+            let j = 0;
+
+            Object.keys(rows).forEach((key: string) => {
+                const values1: number[] = rows[key];
+                this.data.datasets[i].data[j++] = mean(values1);
             });
-
-            i=0;
-
-            Object.keys(distincts2).forEach((key: string) => {
-                const values2: number[] = distincts2[key];
-                this.data.datasets[1].data[i++] = mean(values2);
-            });
+            // }
+        },
+        makeDatasetStarRow(i: number): DatasetStarRow {
+            const foodColor: string = this.getColorForFood(i);
+            const opacity20: string = '33';
+            const opacity100: string = 'FF';
+            return {
+                label: '',
+                data: [0, 0, 0, 0, 0, 0],
+                //TODO: This is hardcoded in the example
+                backgroundColor: foodColor + opacity20,
+                borderColor: foodColor + opacity100,
+                pointBackgroundColor: foodColor + opacity100,
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: foodColor + opacity100
+            } as DatasetStarRow;
+        },
+        getColorForFood(i: number): string {
+            return foodColors['food'+(i+1).toString()];
         },
     }
 }
 </script>
 
 <template>
-    <h3>Radar Plot</h3>
     <div v-if="isLoading" class="position-relative">
         <SpinnerComponent class="position-absolute" />
         <Radar class="radar" :data="data" :options="options" />
     </div>
     <div v-else="!isLoading" class="position-relative">
-        <div v-if="rows.length == 0 || otherRows.length == 0" class="position-absolute alert alert-dark noData"
+        <!-- TODO: <div v-if="rows.length == 0 || otherRows.length == 0" class="position-absolute alert alert-dark noData"
             role="alert">No
             nutrient data available for one food
-        </div>
+        </div> -->
         <Radar class="radar" :data="data" :options="options" />
     </div>
     <div class="collapse" id="collapseExample">

@@ -49,7 +49,7 @@ export function GET_FOOD_FOR_ID(id: string = ""): string {
 }
 
 
-export function MACRO_NUTRIENTS_FOR(id: string): string {
+export function NUTRIENTS_FOR(id: string): string {
 	return `SELECT *
 	FROM nutrients_filtered as nf
 	WHERE (
@@ -58,7 +58,7 @@ export function MACRO_NUTRIENTS_FOR(id: string): string {
 	ORDER BY nutrient`;
 };
 
-export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
+export function NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
 	// TAKES VERY LONG
 	// TODO: Make a smaller nutrients table
 	if (ids.length > 2) {
@@ -66,7 +66,7 @@ export function MACRO_NUTRIENTS_FOR_FOODS(ids: Array<string>): string {
 		for (let i = 1; i < ids.length; i++) {
 			idList += ` OR food.id = `+ ids[i];
 		}
-		return MACRO_NUTRIENTS_FOR(idList);
+		return NUTRIENTS_FOR(idList);
 	} else
 		throw new Error();
 }
