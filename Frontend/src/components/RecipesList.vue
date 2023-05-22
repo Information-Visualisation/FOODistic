@@ -193,9 +193,9 @@ export default {
         },
         updateFilters(all: boolean) {
             if (all) {
-                this.filteredRecipes = this.recipes;
+                this.filteredRecipes = this.recipes[0];
             } else {
-                this.filteredRecipes = [this.recipes[this.selectedRecipe]];
+                this.filteredRecipes = [this.recipes[0][this.selectedRecipe]];
             }
 
             this.selectNutrient(this.selectedNutrient);
@@ -232,7 +232,7 @@ export default {
                     </button>
                     <ul class="dropdown-menu">
                         <li v-for="nutrient in nutrients">
-                            <p class="dropdown-item" @click="selectNutrient(nutrient)">{{ nutrient }}</p>
+                            <p class="dropdown-item" @click="selectNutrient(nutrient.toString())">{{ nutrient }}</p>
                         </li>
                     </ul>
                 </div>
@@ -276,7 +276,7 @@ export default {
                         </div>
                     </div>
                 </li>
-                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques :ofFoods=""
+                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques :ofFoods="['1']"
                     @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)"
                     @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
                     <!-- checked aanpassen naar hover + click go to recipes -->

@@ -154,7 +154,7 @@ export default {
         <NutrientGraph :ids="getAllIds()" class="card" />
       </div>
       <div class="col">
-        <RecipesList :id="id" class="card" />
+        <RecipesList :ids="getAllIds()" class="card" />
       </div>
     </div>
   </div>
