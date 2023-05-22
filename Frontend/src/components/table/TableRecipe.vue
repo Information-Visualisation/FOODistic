@@ -79,7 +79,6 @@ export default {
     },
     methods: {
         fetchData() {
-            console.log(this.recipescount);
             this.fillGraph();
             this.$nextTick(() => {
                 this.loaded();

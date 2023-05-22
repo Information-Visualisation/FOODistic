@@ -31,6 +31,7 @@ export default {
     },
     data() {
         return {
+            isLoading: true,
             foodItems: [] as FoodRow[],
             foodNutritions: Object() as {[key: string]: number[]},
             tabIndex: 0,
@@ -97,6 +98,7 @@ export default {
                 if(this.tabIndex == 2)
                     this.fetchAllergyInfo();
                 if(this.tabIndex == 3){
+                    this.isLoading = true;
                     this.fetchRecipeInfo();
                 }
             }
@@ -137,11 +139,9 @@ export default {
             this.foodIds = [];
             this.recipeLabel = [];
             this.getFoodInfo();
-            console.log(this.foodIds);
             const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
-            console.log(queryString);
             this.recipeCount = (await dbService.query(queryString, false)).rows;
-            console.log(this.recipeCount);
+            this.isLoading = false;
         },
         setTabIndex(index: number) {
             this.tabIndex=index;
@@ -150,6 +150,7 @@ export default {
             if(this.tabIndex == 2)
                 this.fetchAllergyInfo();
             if(this.tabIndex == 3){
+                this.isLoading = true;
                 this.fetchRecipeInfo();
             }
         },
@@ -239,10 +240,10 @@ export default {
                 </table>
             </div>
             <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
-                <div v-if="recipeCount.length == 0">
+                <div v-if="isLoading">
                             <SpinnerComponent></SpinnerComponent>
                 </div>
-                <div v-if="recipeCount.length != 0">
+                <div v-if="!isLoading || recipeCount.length != 0">
                     <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipescount="recipeCount" ></TableRecipe>
                 </div>
             </div>
