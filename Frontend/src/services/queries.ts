@@ -89,7 +89,7 @@ export function GET_RECIPES_FOR(id: string): string {
 }
 
 export function GET_RECIPE(id: string): string{
-	return `SELECT 
+	return `SELECT DISTINCT
     fil.food_id as foodid,
     fil.food_naam as foodname,
 	rf.name as recipename,
