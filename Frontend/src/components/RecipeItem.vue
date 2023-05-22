@@ -12,6 +12,10 @@ export default {
     techniques: {
       type: Array<boolean>,
       required: true
+    },
+    ofFoods: {
+      type: Array<String>,
+      required: true
     }
   },
   components: {
@@ -37,7 +41,7 @@ export default {
     },
     differentChecked() {
       // @ts-ignore --> ignore error that is not an error
-      const isCurrent: boolean =  this.$refs.filtered!.ariaCurrent == 'true';
+      const isCurrent: boolean = this.$refs.filtered!.ariaCurrent == 'true';
       // @ts-ignore --> ignore error that is not an error
       this.$refs.filtered!.ariaCurrent = isCurrent ? 'false' : 'true';
       if (isCurrent) {
@@ -57,14 +61,20 @@ export default {
 </script>
 
 <template>
-  <li ref="filtered" class="list-group-item list-group-item-action" :aria-current="false" @click="differentChecked" @mouseenter="mouseOverChecked">
+  <li ref="filtered" class="list-group-item list-group-item-action" :aria-current="false" @click="differentChecked"
+    @mouseenter="mouseOverChecked">
     <div v-if="isLoading">
       <SpinnerComponent class="mx-auto p-2" />
     </div>
-    <div class="position-relative">
+    <div class="position-relative hoverCursor">
       <div class="row">
         <div class="col text-start">
           {{ recipeName.replace(/\b\w/g, (x) => x.toUpperCase()) }}
+        </div>
+        <div class="col">
+          <div class="row foodIndicatorCol">
+            <div v-for="(food, index) in ofFoods" :class="'rounded-circle foodIndicator food'+(index <= 4 ? index+1 : 0).toString()"/>
+          </div>
         </div>
         <div class="col">
           <div v-for="technique in techniqueStrings" class="">
@@ -76,4 +86,44 @@ export default {
   </li>
 </template>
 
-<style></style>
+<style>
+.hoverCursor {
+  cursor: pointer;
+}
+
+.foodIndicatorCol {
+  margin-left: 0px;
+}
+
+.foodIndicator {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  margin: 1px;
+}
+
+.food1 {
+  background-color: #8DD3C7;
+}
+
+.food2 {
+  background-color: #FB8072;
+}
+
+.food3 {
+  background-color: #BEBADA;
+}
+
+.food4 {
+  background-color: #FFFFB3;
+}
+
+.food5 {
+  background-color: #80B1D3;
+}
+
+.food0 {
+  background-color: #222222;
+}
+
+</style>

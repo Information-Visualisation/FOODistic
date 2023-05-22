@@ -8,6 +8,9 @@ import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
 import { GET_RECIPES_FOR } from '../services/queries';
 import { Bar, Bubble } from 'vue-chartjs';
 import { techniqueStrings } from '@/services/cookingtechniques';
+import { getTechniqueCounts } from '@/services/cookingtechniques';
+import { capitalize } from 'vue';
+import { nutrientColors } from '@/services/colors';
 
 import {
     Chart as ChartJS,
@@ -18,9 +21,6 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js'
-import { getTechniqueCounts } from '@/services/cookingtechniques';
-import { capitalize } from 'vue';
-import { nutrientColors } from '@/services/colors';
 
 const dbService = new DBService;
 
@@ -39,8 +39,8 @@ export default {
         Bubble,
     },
     props: {
-        id: {
-            type: String,
+        ids: {
+            type: Array<String>,
             required: true
         }
     },
@@ -48,7 +48,7 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: {} as { [key: number]: RecipesRow },
+            recipes: [] as Array<{ [key: number]: RecipesRow }>,
             selectedRecipe: null as unknown as number,
             filteredRecipes: {} as { [key: number]: RecipesRow },
             image: new Image(20, 20),
@@ -84,7 +84,7 @@ export default {
                         },
                         ticks: {
                             stepSize: 1,
-                            callback: function (value, index, values) {
+                            callback: function (value: any, index: number, values: any) {
                                 return techniqueStrings[value];
                             }
                         }
@@ -126,20 +126,22 @@ export default {
         }
     },
     created() {
-        this.fetchData();
+        for (let i = 0; i < this.ids.length; i++) {
+            this.fetchData(this.ids[i] as string);
+        }
         let temp = Array(58);
         temp.fill(10);
 
         //this.data.datasets[1].data = temp;
     },
     methods: {
-        async fetchData() {
-            const queryString: string = GET_RECIPES_FOR(this.id);
+        async fetchData(id: string) {
+            const queryString: string = GET_RECIPES_FOR(id);
             // console.log(queryString);
             this.recipes = (await dbService.query(queryString, false)).rows;
             // console.log('done loading recipes');
 
-            this.filteredRecipes = this.recipes;
+            this.filteredRecipes = this.recipes[0];
             this.selectNutrient(this.selectedNutrient);
             this.$nextTick(() => {
                 this.loaded();
@@ -212,7 +214,7 @@ export default {
         },
         setCSSNutrientColor(hex: string) {
             let root = document.documentElement;
-            root.style.setProperty('--nutrient-color',hex);
+            root.style.setProperty('--nutrient-color', hex);
         }
     }
 }
@@ -224,7 +226,7 @@ export default {
             <h3 class="headerShrink">Recipe List</h3>
             <div class="position-absolute nutrientPicker">
                 <div v-if="!isLoading && Object.keys(filteredRecipes).length != 1" class="btn-group">
-                    <button type="button" class="btn btn-outline-custom dropdown-toggle" data-bs-toggle="dropdown"
+                    <button type="button" class="btn-outline-custom btn dropdown-toggle" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         {{ selectedNutrient }}
                     </button>
@@ -262,7 +264,19 @@ export default {
                 class="position-absolute top-50 start-50 translate-middle alert alert-dark" role="alert">No recipes found
             </div>
             <ul class="list-group">
-                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques
+                <li ref="filtered" class="list-group-item disabled" :aria-current="false">
+                    <div v-if="isLoading">
+                        <SpinnerComponent class="mx-auto p-2" />
+                    </div>
+                    <div class="position-relative hoverCursor">
+                        <div class="row">
+                            <div class="col text-start">Recipe Name</div>
+                            <div class="col">Food</div>
+                            <div class="col text-end">Cooking Techniques</div>
+                        </div>
+                    </div>
+                </li>
+                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques :ofFoods=""
                     @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)"
                     @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
                     <!-- checked aanpassen naar hover + click go to recipes -->

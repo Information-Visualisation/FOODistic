@@ -29,13 +29,13 @@ export default {
 </script>
 
 <template>
-  <button v-if="comparing" class="card small btn btn-outline-success" @click="compare">
+  <button v-if="comparing" class="small btn btn-outline-success rounded-pill pad" @click="compare">
     <div class="d-flex align-items-center justify-content-start">
       <FoodImg class="img" :id="id" :name="name" :height="50"></FoodImg>
       <h3 class="food-name text-truncate">{{ name }}</h3>
     </div>
   </button>
-  <router-link v-if="!comparing" class="card normal btn btn-outline-success" :to="{
+  <router-link v-if="!comparing" class="normal btn btn-outline-success rounded-pill pad" :to="{
     name: 'food',
     params: {
       name: name,
@@ -83,5 +83,9 @@ export default {
 .food-name {
   font-weight: bold;
   font-size: x-large;
+}
+
+.pad {
+  margin: 5px;
 }
 </style>

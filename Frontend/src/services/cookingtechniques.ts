@@ -17,7 +17,7 @@ export function getFilteredTechniques(techniques: boolean[]) {
   return tempTechniqueStrings;
 }
 
-export function getTechniqueCounts(rows: {[key: number]: RecipesRow}) {
+export function getTechniqueCounts(rows: {[key: number]: RecipesRow}): Array<number> {
   let techniqueCounts: Array<number> = new Array<number>(techniqueStrings.length).fill(0);
   for (let i = 0; i < Object.keys(rows).length; i++) {
     for (let j = 0; j < rows[i].techniques.length; j++) {

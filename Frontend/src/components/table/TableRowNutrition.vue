@@ -33,8 +33,11 @@ export default {
 
 <template>
     <tr>
-        <th @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })">
-            <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
+        <th>
+            <button @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })"
+                class="btn btn-outline-success rounded-pill" type="button">
+                <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
+            </button>
         </th>
         <td scope="col" v-for="(value, index) in items">
             <div class="sub-bar-wrapper">

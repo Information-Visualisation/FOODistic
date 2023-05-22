@@ -188,7 +188,9 @@ export default {
     </div>
 </template>
     
-<style>
+<style lang="scss">
+// @import "@/../scss/custom.scss";
+
 .v-enter-active,
 .v-leave-active {
     transition: opacity 0.5s ease;

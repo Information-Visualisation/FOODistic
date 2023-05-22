@@ -14,7 +14,7 @@ export default {
     components: { FoodImg },
     methods: {
         hasAllergy(allergy: string) {
-            return this.allergies?.filter(function(item) {return item.allergy==allergy}).length != 0;
+            return this.allergies?.filter(function (item) { return item.allergy == allergy }).length != 0;
         },
         getImageUrl(allergy: string) {
             if (allergy.includes('Lactose')) {
@@ -29,12 +29,15 @@ export default {
 
 <template>
     <tr>
-        <th @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })">
-            <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
+        <th>
+            <button @click="$router.push({ name: 'food', params: { name: name }, query: { id: id } })"
+                class="btn btn-outline-success rounded-pill" type="button">
+                <FoodImg :id="id!.toString()" :name="name!" :height="30"></FoodImg> {{ name }}
+            </button>
         </th>
         <td scope="col" v-for="(allergy, index) in allergyNames">
             <div class="allergy-wrapper">
-                <img v-if="hasAllergy(allergy)" :src="getImageUrl(allergy)" style="width: 50px"/>
+                <img v-if="hasAllergy(allergy)" :src="getImageUrl(allergy)" style="width: 50px" />
                 <div v-else></div>
             </div>
         </td>
@@ -46,5 +49,4 @@ export default {
     display: flex;
     justify-content: center;
 } */
-
 </style>
