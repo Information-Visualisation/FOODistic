@@ -140,7 +140,7 @@ export default {
 $food2: #FB8072;
 $food3: #BEBADA;
 $food4: #b5b575;
-$food4light: FFFFB3;
+$food4light: FCFC74;
 $food5: #80B1D3; */
 
 .btn-outline-food1 {
@@ -210,21 +210,21 @@ $food5: #80B1D3; */
     --bs-btn-color: #b5b575;
     --bs-btn-border-color: #b5b575;
     --bs-btn-hover-color: #000;
-    --bs-btn-hover-bg: #FFFFB3;
-    --bs-btn-hover-border-color: #FFFFB3;
+    --bs-btn-hover-bg: #FCFC74;
+    --bs-btn-hover-border-color: #FCFC74;
     --bs-btn-focus-shadow-rgb: 115, 165, 37;
     --bs-btn-active-color: #000;
-    --bs-btn-active-bg: #FFFFB3;
-    --bs-btn-active-border-color: #FFFFB3;
+    --bs-btn-active-bg: #FCFC74;
+    --bs-btn-active-border-color: #FCFC74;
     --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-    --bs-btn-disabled-color: #FFFFB3;
+    --bs-btn-disabled-color: #FCFC74;
     --bs-btn-disabled-bg: transparent;
-    --bs-btn-disabled-border-color: #FFFFB3;
+    --bs-btn-disabled-border-color: #FCFC74;
     --bs-gradient: none;
 }
 
 .food4 {
-    background-color: #FFFFB3;
+    background-color: #FCFC74;
 }
 
 .btn-outline-food5 {

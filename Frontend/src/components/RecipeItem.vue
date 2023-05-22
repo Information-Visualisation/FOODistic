@@ -14,7 +14,7 @@ export default {
       required: true
     },
     ofFoods: {
-      type: Array<String>,
+      type: Array<Number>,
       required: true
     }
   },
@@ -55,7 +55,7 @@ export default {
     },
     getsChecked(isCurrent: boolean) {
       this.$emit('checked', null, this.recipeName, isCurrent);
-    }
+    },
   }
 }
 </script>
@@ -73,7 +73,7 @@ export default {
         </div>
         <div class="col">
           <div class="row foodIndicatorCol">
-            <div v-for="(food, index) in ofFoods" :class="'rounded-circle foodIndicator food'+(index <= 4 ? index+1 : 0).toString()"/>
+            <div v-for="food,i in ofFoods" :class="'rounded-circle foodIndicator food'+ofFoods[i].toString()"/>
           </div>
         </div>
         <div class="col">
@@ -115,7 +115,7 @@ export default {
 }
 
 .food4 {
-  background-color: #FFFFB3;
+  background-color: #fcfc74;
 }
 
 .food5 {

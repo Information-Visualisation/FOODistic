@@ -1,4 +1,4 @@
-export type { Rows, Row, NutrientRow, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow, DatasetGraphRow, DatasetStarRow }
+export type { Rows, Row, NutrientRow, DistinctRows, FoodRow, FoodAllergyRow, AllergyPercentageRow, RecipesRow, DatasetGraphRow, DatasetStarRow, DatasetRecipeRow, CombinedRecipes }
 
 type Rows = {
     [x: string]: any;
@@ -85,3 +85,16 @@ type DatasetStarRow = {
     pointHoverBackgroundColor: string,
     pointHoverBorderColor: string,
 }
+
+type DatasetRecipeRow = {
+    label: Array<String>,
+    data: Array<{}>,
+    fill: boolean,
+    borderColor: string,
+    backgroundColor: string,
+};
+
+type CombinedRecipes = {
+    ofFoods: Array<Array<String>>,
+    combinedRecipes: Array<RecipesRow>
+};

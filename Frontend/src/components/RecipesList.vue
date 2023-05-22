@@ -1,7 +1,6 @@
 <script lang="ts">
-
 import { DBService, nutrientsRecipeDB } from '../services/db.service'
-import type { RecipesRow } from '../services/dbClasses';
+import type { RecipesRow, DatasetRecipeRow, CombinedRecipes } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
@@ -10,7 +9,7 @@ import { Bar, Bubble } from 'vue-chartjs';
 import { techniqueStrings } from '@/services/cookingtechniques';
 import { getTechniqueCounts } from '@/services/cookingtechniques';
 import { capitalize } from 'vue';
-import { nutrientColors } from '@/services/colors';
+import { foodColors, nutrientColors } from '@/services/colors';
 
 import {
     Chart as ChartJS,
@@ -48,21 +47,17 @@ export default {
         return {
             isLoading: true,
             isFiltering: false,
-            recipes: [] as Array<{ [key: number]: RecipesRow }>,
+            recipesPerFood: [] as Array<{ [key: number]: RecipesRow }>,
             selectedRecipe: null as unknown as number,
-            filteredRecipes: {} as { [key: number]: RecipesRow },
+            filteredRecipes: [] as Array<{ [key: number]: RecipesRow }>,
+            combined: {ofFoods: [], combinedRecipes: []} as CombinedRecipes,
+            doneCombining: false,
             image: new Image(20, 20),
             nutrients: labels,
             selectedNutrient: 'Fat',
             data: {
                 labels: techniqueStrings,
-                datasets: [{
-                    labels: techniqueStrings,
-                    fill: false,
-                    borderColor: defaultColorForNutrient,
-                    backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
-                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-                }]
+                datasets: [] as Array<DatasetRecipeRow>
             },
             options: {
                 responsive: true,
@@ -91,6 +86,7 @@ export default {
                     }
                 },
                 plugins: {
+                    response: true,
                     legend: {
                         position: 'top',
                         display: false
@@ -125,24 +121,24 @@ export default {
             },
         }
     },
-    created() {
+    async created() {
         for (let i = 0; i < this.ids.length; i++) {
-            this.fetchData(this.ids[i] as string);
+            await this.fetchData(i, this.ids[i] as string);
         }
-        let temp = Array(58);
-        temp.fill(10);
+        this.selectNutrient(this.selectedNutrient);
+        // let temp = Array(58);
+        // temp.fill(10);
 
         //this.data.datasets[1].data = temp;
     },
     methods: {
-        async fetchData(id: string) {
+        async fetchData(foodIndex: number, id: string) {
             const queryString: string = GET_RECIPES_FOR(id);
             // console.log(queryString);
-            this.recipes = (await dbService.query(queryString, false)).rows;
+            this.recipesPerFood.push((await dbService.query(queryString, false)).rows);
             // console.log('done loading recipes');
 
-            this.filteredRecipes = this.recipes[0];
-            this.selectNutrient(this.selectedNutrient);
+            this.filteredRecipes = this.recipesPerFood;
             this.$nextTick(() => {
                 this.loaded();
             })
@@ -150,15 +146,30 @@ export default {
         loaded() {
             this.isLoading = false;
         },
-        fillGraph(indexNutrient: number) {
+        selectNutrient(nutrient: string) {
+            this.selectedNutrient = nutrient;
+            for (let foodIndex: number = 0; foodIndex < this.filteredRecipes.length; foodIndex++) {
+                this.fillGraph(foodIndex, this.nutrients.indexOf(nutrient) + 1);
+            }
+            this.combineRecipes();
+        },
+        fillGraph(foodIndex: number, indexNutrient: number) {
+            this.data.datasets.push({
+                label: techniqueStrings,
+                fill: false,
+                borderColor: defaultColorForNutrient,
+                backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
+                data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+            });
+
             this.isFiltering = true;
             //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
-            let techniqueCount: Array<number> = getTechniqueCounts(this.filteredRecipes);
-            const color: string = this.getNutrientColor();
-            this.data.datasets[0].borderColor = color;
-            this.data.datasets[0].backgroundColor = color + '80';
-            for (let i = 0; i < techniqueCount.length; i++) {
-                this.data.datasets[0].data[i] = { x: i, y: techniqueCount[i], r: this.getNutrients(i, indexNutrient) };
+            let techniqueCount: Array<Number> = getTechniqueCounts(this.filteredRecipes[foodIndex]);
+            const color: string = this.ids.length <= 1 ? this.getNutrientColor() : this.getColorForFood(foodIndex);
+            this.data.datasets[foodIndex].borderColor = color;
+            this.data.datasets[foodIndex].backgroundColor = color + '80';
+            for (let techniqueIndex = 0; techniqueIndex < techniqueCount.length; techniqueIndex++) {
+                this.data.datasets[foodIndex].data[techniqueIndex] = { x: techniqueIndex, y: techniqueCount[techniqueIndex], r: this.getNutrients(foodIndex, techniqueIndex, indexNutrient) };
             }
             this.$nextTick(() => {
                 this.isFiltering = false;
@@ -167,14 +178,15 @@ export default {
         getBaseLog(x: number, y: number) {
             return Math.log(y) / Math.log(x);
         },
-        getNutrients(index: number, indexNutrient: number) {
+        getNutrients(i: number, techniqueIndex: number, nutrientIndex: number): number {
             let nutrient = 0;
-            for (let i = 0; i < Object.keys(this.filteredRecipes).length; i++) {
-                if (this.filteredRecipes[i].techniques[index]) {
-                    nutrient += this.filteredRecipes[i].nutritions[indexNutrient];
+            for (let j = 0; j < Object.keys(this.filteredRecipes[i]).length; j++) {
+                const hasTechnique = this.filteredRecipes[i][j].techniques[techniqueIndex]
+                if (hasTechnique) {
+                    nutrient += this.filteredRecipes[i][j].nutritions[nutrientIndex];
                 }
             }
-            let resultMath = this.getBaseLog(1.5, nutrient);
+            let resultMath = this.getBaseLog(2, nutrient);
             if (resultMath.toString() == "-Infinity") {
                 return 0;
             }
@@ -193,16 +205,38 @@ export default {
         },
         updateFilters(all: boolean) {
             if (all) {
-                this.filteredRecipes = this.recipes[0];
+                this.filteredRecipes = this.recipesPerFood;
             } else {
-                this.filteredRecipes = [this.recipes[0][this.selectedRecipe]];
+                this.filteredRecipes = [this.recipesPerFood[this.selectedRecipe]];
             }
 
             this.selectNutrient(this.selectedNutrient);
         },
-        selectNutrient(nutrient: string) {
-            this.selectedNutrient = nutrient;
-            this.fillGraph(this.nutrients.indexOf(nutrient) + 1);
+        combineRecipes() {
+            this.doneCombining = false;
+            let combining: CombinedRecipes = { ofFoods: [], combinedRecipes: [] };
+
+            combining.combinedRecipes = [...new Set(Object.values(this.recipesPerFood).map(Object.values).flat())];
+
+            for (let recipeIndex = 0; recipeIndex < combining.combinedRecipes.length; recipeIndex++) {
+                const recipe: RecipesRow = combining.combinedRecipes[recipeIndex];
+                combining.ofFoods.push(this.getOfFood(recipe));
+            }
+
+            this.combined = combining;
+            this.doneCombining = true;
+        },
+        getOfFood(recipe: RecipesRow): Array<String> {
+            let idList: Array<String> = [];
+            for (let recipes of this.recipesPerFood) {
+                for (let foodid of this.ids) {
+                    if (Object.values(recipes).some(e => e.foodid.toString() === foodid && e.recipeid == recipe.recipeid)) {
+                        idList.push(foodid);
+                        // console.log(foodid);
+                    }
+                }
+            }
+            return idList;
         },
         getNutrientColor(): string {
             let color: string = nutrientColors[this.selectedNutrient];
@@ -212,9 +246,15 @@ export default {
             this.setCSSNutrientColor(color);
             return color;
         },
+        getColorForFood(i: number): string {
+            return foodColors['food' + (i + 1).toString()];
+        },
         setCSSNutrientColor(hex: string) {
             let root = document.documentElement;
             root.style.setProperty('--nutrient-color', hex);
+        },
+        getFoodColorNum(recipeIndex: number): Array<Number> {
+            return this.combined.ofFoods[recipeIndex].map((element) => this.ids.indexOf(element)+1);
         }
     }
 }
@@ -244,15 +284,16 @@ export default {
                 <Bar :data="data" :options="options" />
             </div>
             <div v-else="!isLoading" class="position-relative">
-                <div v-if="Object.keys(recipes).length <= 0" class="position-absolute alert alert-dark noData" role="alert">
+                <div v-if="Object.keys(recipesPerFood).length <= 0" class="position-absolute alert alert-dark noData"
+                    role="alert">
                     No cooking
                     techniques found
                 </div>
                 <div v-if="Object.keys(filteredRecipes).length == 1">
-                    <NutrientGraphRecipe :id="filteredRecipes[0].recipeid"></NutrientGraphRecipe>
+                    <NutrientGraphRecipe :id="filteredRecipes[0][0].recipeid"></NutrientGraphRecipe>
                 </div>
-                <div v-if="Object.keys(filteredRecipes).length != 1">
-                    <Bubble v-if="!isFiltering" :data="data" :options="options" />
+                <div v-if="Object.keys(filteredRecipes).length > 1">
+                    <Bubble v-if="!isFiltering" class="height" :data="data" :options="options" />
                 </div>
             </div>
         </div>
@@ -260,7 +301,7 @@ export default {
             <SpinnerComponent class="position-absolute center-spinner" />
         </div>
         <div v-if="!isLoading" class="container overflow-auto scrollview border rounded">
-            <div v-if="Object.keys(recipes).length <= 0"
+            <div v-if="Object.keys(recipesPerFood).length <= 0"
                 class="position-absolute top-50 start-50 translate-middle alert alert-dark" role="alert">No recipes found
             </div>
             <ul class="list-group">
@@ -276,10 +317,11 @@ export default {
                         </div>
                     </div>
                 </li>
-                <RecipeItem v-for="(recipe, index) in recipes" :recipeName=recipe.recipename :techniques=recipe.techniques :ofFoods="['1']"
-                    @mouseenter="checkedRecipe(index, true)" @mouseleave="checkedRecipe(index, false)"
+                <RecipeItem v-if="doneCombining" v-for="(recipe, index) in combined.combinedRecipes"
+                    :recipeName="recipe.recipename" :techniques="recipe.techniques" :ofFoods="getFoodColorNum(index)"
+                    @mouseenter="checkedRecipe(index, true)"
+                    @mouseleave="checkedRecipe(index, false)"
                     @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
-                    <!-- checked aanpassen naar hover + click go to recipes -->
                 </RecipeItem>
             </ul>
         </div>
@@ -302,6 +344,10 @@ export default {
 canvas {
     width: 600px !important;
     height: 300px !important;
+}
+
+.height {
+    height: 250px;
 }
 
 .nutrientPicker {

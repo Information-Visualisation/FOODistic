@@ -90,15 +90,15 @@ export function GET_RECIPES_FOR(id: string): string {
 
 export function GET_RECIPE(id: string): string{
 	return `SELECT 
-    fil.food_id as foodid,
-    fil.food_naam as foodname,
-	rf.name as recipename,
-    rf.techniques
-FROM recipes_filtered as rf, food_ingredient_linker as fil
-WHERE (
-    rf.id = `+ id +` AND
-    fil.ingredient_id = ANY (rf.ingredient_ids)
-)`;
+		fil.food_id as foodid,
+		fil.food_naam as foodname,
+		rf.name as recipename,
+		rf.techniques
+	FROM recipes_filtered as rf, food_ingredient_linker as fil
+	WHERE (
+		rf.id = `+ id +` AND
+		fil.ingredient_id = ANY (rf.ingredient_ids)
+	)`;
 }
 
 export function GET_RECIPE_NUTRIENTS(id: string): string{
