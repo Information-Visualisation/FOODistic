@@ -225,7 +225,7 @@ export default {
             <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount"/>
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount" :totaalFoods="foodItems.length"/>
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
