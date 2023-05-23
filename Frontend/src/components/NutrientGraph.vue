@@ -52,6 +52,7 @@ export default {
             nutrientRowsPerFood: [] as Array<Array<NutrientRow>>,
             distinctRowsPerFood: [] as Array<DistinctRows>,
             foodNames: [] as Array<String>,
+            focused: -1, 
             data: {
                 labels: labels,
                 datasets: [] as Array<DatasetGraphRow>,
@@ -186,6 +187,7 @@ export default {
                     let data = this.data.datasets[i];
                     data.hidden = this.focusedDataset == -1 ? false : i != this.focusedDataset;
                 }
+                this.focused = this.focusedDataset;
             }
             this.loaded();
         }
@@ -225,13 +227,13 @@ export default {
             <SpinnerComponent class="position-absolute spinner" />
             <div class="row">
                 <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
-                    :focusedDataset="focusedDataset"></RadarPlot>
+                    :focusedDataset="focused"></RadarPlot>
             </div>
         </div>
         <div v-if="!isLoading && isRadarPlot">
             <div class="row">
                 <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
-                    :focusedDataset="focusedDataset"></RadarPlot>
+                    :focusedDataset="focused"></RadarPlot>
             </div>
         </div>
         <div class="collapse" id="collapseExample">

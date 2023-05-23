@@ -108,10 +108,12 @@ export default {
                 this.foodItems = foodItems;
                 this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
                 this.$emit('returnTotalCount', null, totalCount);
-                this.getFoodInfo();
+                this.fetchRecipeInfo();
             }
         },
         getFoodInfo(){
+            this.recipeLabel = [];
+            this.foodIds = [];
             for(let i = 0; i < this.foodItems.length; i++){
                 this.recipeLabel.push(this.foodItems[i].naam);
                 this.foodIds.push(this.foodItems[i].id);
@@ -121,13 +123,15 @@ export default {
             this.foodIDs = this.getFoodIDs();
         },
         async createNutritions() {
-            this.foodNutritions = {};
-            for (let i = 0; i < this.foodItems.length; i++) {
-                const id: string = this.foodItems[i].id.toString();
-                let result = await dbService.query(NUTRIENTS_FOR(id));
-                result = result.rows;
-                const naam = this.foodItems[i].naam;
-                this.foodNutritions[naam] = this.createNutrition(result);
+            if (this.tabIndex == 1) {
+                this.foodNutritions = {};
+                for (let i = 0; i < this.foodItems.length; i++) {
+                    const id: string = this.foodItems[i].id.toString();
+                    let result = await dbService.query(NUTRIENTS_FOR(id));
+                    result = result.rows;
+                    const naam = this.foodItems[i].naam;
+                    this.foodNutritions[naam] = this.createNutrition(result);
+                }
             }
         },
         createNutrition(result: any): number[] {
@@ -142,26 +146,31 @@ export default {
             return nutrition;
         },
         async fetchAllergyInfo() {
-            this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
-            this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
+            if (this.tabIndex == 2) {
+                this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
+                this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
+            }
         },
-        async fetchRecipeInfo(){
-            this.recipeCount = [];
-            this.foodIds = [];
-            this.recipeLabel = [];
+        async fetchRecipeInfo() {
             this.getFoodInfo();
-            const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
-            this.recipeCount = (await dbService.query(queryString, false)).rows;
-            this.isLoading = false;
+            if (this.tabIndex == 3) {
+                this.isLoading = true;
+                this.recipeCount = [];
+                const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
+                this.recipeCount = (await dbService.query(queryString, false)).rows;
+                this.isLoading = false;
+            }
         },
         async setTabIndex(index: number) {
             this.$router.push({ // push same route, but append tabindex
                 name: this.$route.name ?? 'home',
                 params: this.$route.params,
                 query: { ...this.$route.query, tabIndex: index}
-            })
+            });
             this.tabIndex=index;
+            this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
             this.sortNutritions(0, true); // reset sort order of table on change tab
+            this.fetchRecipeInfo();
         },
         getAllergiesOfFood(foodName: string): FoodAllergyRow[] {
             return this.allergiesPerFood?.filter(function(item) { return item.food==foodName;});
@@ -226,7 +235,6 @@ export default {
             function foodHasAllergy(allergiesPerFood: FoodAllergyRow[], foodName: string, allergy: string): boolean {
                 for (var row of allergiesPerFood) {
                     if (row.food == foodName && row.allergy == allergy) {
-                        console.log('has allergy');
                         return true;
                     }
                 }
@@ -319,7 +327,7 @@ export default {
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-bind:key="foodIDs[item.name]" v-if="Object.keys(foodNutritions).length != 0" v-for="item in sortedFoodNames"
+                        <TableRowNutrition v-bind:key="foodIDs[item.name]" v-if="Object.keys(sortedFoodNames).length != 0" v-for="item in sortedFoodNames"
                             :columnNames="nutritionHeaders" :id="foodIDs[item.name]" :name="item.name" :items="foodNutritions[item.name] ?? []" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>

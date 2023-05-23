@@ -3,7 +3,6 @@
 import { DBService } from '../../services/db.service';
 import SpinnerComponent from '../SpinnerComponent.vue';
 import RecipeItem from '../../components/RecipeItem.vue';
-import { COUNT_RECIPE_FOR } from '../../services/queries';
 import { Bar } from 'vue-chartjs';
 
 import {
@@ -15,14 +14,13 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js'
-import { getTechniqueCounts } from '@/services/cookingtechniques';
 
 const dbService = new DBService;
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default {
-    name: 'NutrientGraph',
+    name: 'Recipe Counts',
     components: {
         SpinnerComponent,
         RecipeItem,
@@ -30,15 +28,15 @@ export default {
     },
     props: {
         foodIds: {
-            type: [],
+            type: Array<Number>,
             required: true,
         },
         label: {
-            type: [],
+            type: Array<String>,
             required: true,
         },
         recipescount: {
-            type: [],
+            type: Array<Number>,
             required: true
         }
     },
@@ -119,7 +117,7 @@ export default {
                 <Bar :data="data" :options="options" />
             </div>
             <div v-else="!isLoading" class="position-relative">
-                <div v-if="recipescount.length <= 0" class="position-absolute alert alert-dark noData" role="alert">No recipes found
+                <div v-if="recipescount.length <= 0" class="position-absolute alert alert-warning noDataRecipe" role="alert">No recipes found
                 </div>
                 <Bar v-if="!isFiltering" :data="data" :options="options" />
             </div>
@@ -131,12 +129,16 @@ export default {
     </div>
 </template>
 
-<style>
+<style scoped>
 .center-spinner {
     top: 90px;
     left: 230px
 }
 
+.noDataRecipe {
+    top: 120px;
+    left: 250px
+}
 .scrollview {
     height: 289px;
 }
