@@ -29,7 +29,7 @@ export default {
         }
     },
     async created() {
-        this.getFoodFromAllergies()
+        //this.getFoodFromAllergies();
         this.query();
     },
     emits: ["compare", "returnFooditems"],
@@ -55,7 +55,7 @@ export default {
             let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
             allergyFoodResultQuery = allergyFoodResultQuery.rows;
             let allergyFood = [] as string[];
-            for (var food in allergyFoodResultQuery) {
+            for (var food of allergyFoodResultQuery) {
                 allergyFood.push(food.food);
             }
             return allergyFood
