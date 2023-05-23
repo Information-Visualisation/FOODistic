@@ -48,13 +48,15 @@ export default {
             isLoading: true,
             isFiltering: false,
             recipesPerFood: [] as Array<{ [key: number]: RecipesRow }>,
-            selectedRecipe: null as unknown as number,
+            selectedRecipeIndex: -1 as number,
             filteredRecipes: [] as Array<{ [key: number]: RecipesRow }>,
-            combined: {ofFoods: [], combinedRecipes: []} as CombinedRecipes,
+            combined: { ofFoods: [], combinedRecipes: [] } as CombinedRecipes,
             doneCombining: false,
             image: new Image(20, 20),
             nutrients: labels,
             selectedNutrient: 'Fat',
+            isAverage: false,
+            factor: 1.2,
             data: {
                 labels: techniqueStrings,
                 datasets: [] as Array<DatasetRecipeRow>
@@ -107,7 +109,7 @@ export default {
                                 }
                             },
                             footer: (context: any) => {
-                                return this.selectedNutrient + ': ' + Math.round(context[0].raw.r * 100) / 100;
+                                return this.selectedNutrient +(this.isAverage ? ' average' : '') +': ' + Number.parseFloat(this.decompress(context[0].raw.r)).toFixed(2) + '% of daily value';
                             },
                             title: (context: any) => {
                                 return '';  // to remove default title
@@ -130,6 +132,7 @@ export default {
         // temp.fill(10);
 
         //this.data.datasets[1].data = temp;
+        this.combineRecipes();
     },
     methods: {
         async fetchData(foodIndex: number, id: string) {
@@ -151,7 +154,6 @@ export default {
             for (let foodIndex: number = 0; foodIndex < this.filteredRecipes.length; foodIndex++) {
                 this.fillGraph(foodIndex, this.nutrients.indexOf(nutrient) + 1);
             }
-            this.combineRecipes();
         },
         fillGraph(foodIndex: number, indexNutrient: number) {
             this.data.datasets.push({
@@ -169,48 +171,67 @@ export default {
             this.data.datasets[foodIndex].borderColor = color;
             this.data.datasets[foodIndex].backgroundColor = color + '80';
             for (let techniqueIndex = 0; techniqueIndex < techniqueCount.length; techniqueIndex++) {
-                this.data.datasets[foodIndex].data[techniqueIndex] = { x: techniqueIndex, y: techniqueCount[techniqueIndex], r: this.getNutrients(foodIndex, techniqueIndex, indexNutrient) };
+                this.data.datasets[foodIndex].data[techniqueIndex] = { x: techniqueIndex, y: techniqueCount[techniqueIndex], r: this.getNutrientForTechniques(foodIndex, techniqueIndex, indexNutrient) };
             }
             this.$nextTick(() => {
                 this.isFiltering = false;
             })
         },
-        getBaseLog(x: number, y: number) {
-            return Math.log(y) / Math.log(x);
+        compress(value: number): number {
+            //value / this.factor
+            return Math.log(value) / Math.log(this.factor);
         },
-        getNutrients(i: number, techniqueIndex: number, nutrientIndex: number): number {
+        decompress(value: number): number {
+            //value * this.factor
+            return Math.pow(value, this.factor);
+        },
+        getNutrientForTechniques(foodIndex: number, techniqueIndex: number, nutrientIndex: number, getLog: boolean = true): number {
             let nutrient = 0;
-            for (let j = 0; j < Object.keys(this.filteredRecipes[i]).length; j++) {
-                const hasTechnique = this.filteredRecipes[i][j].techniques[techniqueIndex]
+            let totalCount = 0;
+            for (let j = 0; j < this.filteredRecipes[foodIndex].length; j++) {
+                const hasTechnique = this.filteredRecipes[foodIndex][j].techniques[techniqueIndex]
                 if (hasTechnique) {
-                    nutrient += this.filteredRecipes[i][j].nutritions[nutrientIndex];
+                    nutrient += this.filteredRecipes[foodIndex][j].nutritions[nutrientIndex];
+                    totalCount++;
                 }
             }
-            let resultMath = this.getBaseLog(2, nutrient);
-            if (resultMath.toString() == "-Infinity") {
-                return 0;
-            }
-            else {
-                return resultMath;
+
+            if (this.isAverage) {
+                nutrient /= totalCount;
             }
 
-        },
-        checkedRecipe(index: number, checked: boolean) {
-            if (checked) {
-                this.selectedRecipe = index;
-            } else {
-                this.selectedRecipe = null as unknown as number;
+            if (getLog) {
+                let resultMath = this.compress(nutrient);
+                if (resultMath.toString() == "-Infinity") {
+                    return 0;
+                }
+                else {
+                    return resultMath;
+                }
             }
-            this.updateFilters(!checked);
+            return nutrient;
+
         },
-        updateFilters(all: boolean) {
-            if (all) {
+        showOneRecipe(recipeIndex: number, showOne: boolean) {
+            if (showOne) {
+                this.selectedRecipeIndex = recipeIndex;
+            } else {
+                this.selectedRecipeIndex = -1;
+            }
+            this.updateFilters();
+        },
+        updateFilters() {
+            if (this.selectedRecipeIndex == -1) {
                 this.filteredRecipes = this.recipesPerFood;
             } else {
-                this.filteredRecipes = [this.recipesPerFood[this.selectedRecipe]];
+                this.filteredRecipes = [[this.combined.combinedRecipes[this.selectedRecipeIndex]]];
             }
 
             this.selectNutrient(this.selectedNutrient);
+        },
+        toggleAverage() {
+            this.isAverage = !this.isAverage;
+            this.updateFilters();
         },
         combineRecipes() {
             this.doneCombining = false;
@@ -254,18 +275,22 @@ export default {
             root.style.setProperty('--nutrient-color', hex);
         },
         getFoodColorNum(recipeIndex: number): Array<Number> {
-            return this.combined.ofFoods[recipeIndex].map((element) => this.ids.indexOf(element)+1);
+            return this.combined.ofFoods[recipeIndex].map((element) => this.ids.indexOf(element) + 1);
         }
     }
 }
 </script>
 
 <template>
-    <div style="min-height: 353px; width: 640px;">
+    <div style="width: 640px;">
         <div class="position-relative">
             <h3 class="headerShrink">Recipe List</h3>
-            <div class="position-absolute nutrientPicker">
-                <div v-if="!isLoading && Object.keys(filteredRecipes).length != 1" class="btn-group">
+            <div class="position-absolute controls d-flex">
+                <div v-if="!isLoading && selectedRecipeIndex==-1" class="form-check form-switch toggle">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" @click="toggleAverage">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Average</label>
+                </div>
+                <div v-if="!isLoading" class="btn-group">
                     <button type="button" class="btn-outline-custom btn dropdown-toggle" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         {{ selectedNutrient }}
@@ -289,11 +314,11 @@ export default {
                     No cooking
                     techniques found
                 </div>
-                <div v-if="Object.keys(filteredRecipes).length == 1">
+                <div v-if="Object.keys(filteredRecipes[0]).length == 1">
                     <NutrientGraphRecipe :id="filteredRecipes[0][0].recipeid"></NutrientGraphRecipe>
                 </div>
-                <div v-if="Object.keys(filteredRecipes).length > 1">
-                    <Bubble v-if="!isFiltering" class="height" :data="data" :options="options" />
+                <div v-if="Object.keys(filteredRecipes[0]).length > 1" style="min-height: 353px; width: 640px;">
+                    <Bubble v-if="!isFiltering" :data="data" :options="options" />
                 </div>
             </div>
         </div>
@@ -319,8 +344,7 @@ export default {
                 </li>
                 <RecipeItem v-if="doneCombining" v-for="(recipe, index) in combined.combinedRecipes"
                     :recipeName="recipe.recipename" :techniques="recipe.techniques" :ofFoods="getFoodColorNum(index)"
-                    @mouseenter="checkedRecipe(index, true)"
-                    @mouseleave="checkedRecipe(index, false)"
+                    @mouseenter="showOneRecipe(index, true)" @mouseleave="showOneRecipe(index, false)"
                     @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
                 </RecipeItem>
             </ul>
@@ -341,18 +365,19 @@ export default {
     height: 289px;
 }
 
-canvas {
-    width: 600px !important;
-    height: 300px !important;
-}
-
-.height {
-    height: 250px;
-}
-
-.nutrientPicker {
+.controls {
     top: 5px;
     right: 35px;
+}
+
+.toggle {
+    margin-top: 6px;
+    margin-right: 10px;
+}
+
+.averageToggle {
+    top: 12px;
+    right: 120px;
 }
 
 .headerShrink {

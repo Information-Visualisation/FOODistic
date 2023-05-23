@@ -57,11 +57,21 @@ export default {
                 },
                 scales: {
                     y: {
-                        ticks: {
-                            // Include a dollar sign in the ticks
-                            callback: function (value: number) {
-                                return value + "% daily value";
-                            }
+                        title: {
+                            display: true,
+                            text: '% daily value'
+                        },
+                        // ticks: {
+                        //     // Include a dollar sign in the ticks
+                        //     callback: function (value: number) {
+                        //         return value + "% daily value";
+                        //     }
+                        // }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nutrients'
                         }
                     }
                 }
@@ -109,6 +119,7 @@ export default {
 <template>
     <div style="width: 640px;">
         <h3>Nutrient Graph</h3>
+        <h4 v-if="!isLoading">{{ result.recipeName }}</h4>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
             <BarWithErrorBarChart :data="data" :options="options" />
