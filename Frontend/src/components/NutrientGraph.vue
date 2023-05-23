@@ -52,7 +52,6 @@ export default {
             nutrientRowsPerFood: [] as Array<Array<NutrientRow>>,
             distinctRowsPerFood: [] as Array<DistinctRows>,
             foodNames: [] as Array<String>,
-            focused: -1, 
             data: {
                 labels: labels,
                 datasets: [] as Array<DatasetGraphRow>,
@@ -91,26 +90,19 @@ export default {
         }
     },
     async created() {
-        this.init();
+        await this.fetchData();
     },
     methods: {
-        async init() {
-            this.isLoading = true;
-            this.data.datasets = [];
-            this.distinctRowsPerFood = [];
-            this.noDataFor = []
-            await this.fetchData();
-            this.loaded();
-        },
         async fetchData() {
             for (let i = 0; i < this.ids.length; i++) {
                 const queryString: string = NUTRIENTS_FOR(this.ids[i] as string);
                 await this.nutrientRowsPerFood.push((await dbService.query(queryString, false)).rows as Array<NutrientRow>);
                 this.fillGraphFor(i);
             }
+            this.$nextTick(() => {this.loaded();})
         },
         loaded() {
-            this.$nextTick(() => { this.isLoading = false; })
+            this.isLoading = false;
         },
         fillGraphFor(i: number) {
             let nutrientRow: Array<NutrientRow> = this.nutrientRowsPerFood[i];
@@ -127,7 +119,7 @@ export default {
                     backgroundColor: comparingFoods ? [this.getColorForFood(i)] : this.getBarColor(),
                     borderColor: [''],
                     borderWidth: 0,
-                    hidden: false,
+                    hidden: this.focusedDataset == -1 ? false : i != this.focusedDataset,
                 } as DatasetGraphRow);
                 let distincts: DistinctRows = distinctNames(nutrientRow);
                 const MACRO_NUTRIENTS: number = 6;
@@ -181,15 +173,13 @@ export default {
     },
     watch: {
         focusedDataset(n, o) {
-            if (!this.isLoading) {
-                this.isLoading = true
-                for (let i = 0; i < this.data.datasets.length; i++) {
-                    let data = this.data.datasets[i];
-                    data.hidden = this.focusedDataset == -1 ? false : i != this.focusedDataset;
-                }
-                this.focused = this.focusedDataset;
+            this.isLoading = true;
+            this.data.datasets = [];
+            this.distinctRowsPerFood = [];
+            for (let i = 0; i < this.ids.length; i++) {
+                this.fillGraphFor(i);
             }
-            this.loaded();
+            this.$nextTick(() => {this.loaded()});
         }
     }
 }
@@ -227,13 +217,13 @@ export default {
             <SpinnerComponent class="position-absolute spinner" />
             <div class="row">
                 <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
-                    :focusedDataset="focused"></RadarPlot>
+                    :focusedDataset="focusedDataset"></RadarPlot>
             </div>
         </div>
         <div v-if="!isLoading && isRadarPlot">
             <div class="row">
                 <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
-                    :focusedDataset="focused"></RadarPlot>
+                    :focusedDataset="focusedDataset"></RadarPlot>
             </div>
         </div>
         <div class="collapse" id="collapseExample">

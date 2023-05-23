@@ -6,9 +6,6 @@ import SpinnerComponent from '@/components/SpinnerComponent.vue';
 import FoodTable from '@/components/table/FoodTable.vue';
 import VueNumberInput from '@chenfengyuan/vue-number-input';
 import type { FoodRow } from '@/services/dbClasses';
-
-import { Bubble } from 'vue-chartjs';
-
 const MAX_PAGINATION: number = 10;
 
 const dbService = new DBService;
@@ -19,7 +16,6 @@ export default {
     SpinnerComponent,
     FoodTable,
     VueNumberInput,
-    Bubble
   },
   data() {
     return {
