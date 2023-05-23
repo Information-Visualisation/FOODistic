@@ -96,10 +96,15 @@ export default {
 }
 
 .foodIndicator {
-  width: 10px;
-  height: 10px;
-  padding: 0;
-  margin: 1px;
+  width: 10px !important;
+  height: 10px !important;
+  padding: 0px !important;
+  margin: 1px !important;
+  flex-shrink: 0 !important;
+  max-width: none !important;
+  padding-right: 0px !important;
+  padding-left: 0px !important; 
+  margin-top: 0px !important;
 }
 
 .food1 {

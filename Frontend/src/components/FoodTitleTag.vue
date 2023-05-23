@@ -96,7 +96,7 @@ export default {
     <div v-if="loading">
         <SpinnerComponent></SpinnerComponent>
     </div>
-    <!-- <a /* TODO: other stuff comes here */ :href="$router.resolve({
+    <a :href="$router.resolve({
             name: 'food',
             params: {
                 name: name,
@@ -104,9 +104,8 @@ export default {
             query: {
                 id: id
             }
-        }).href"> -->
-    <button v-if="!loading && !isMinimized"
-        :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString()) + ' btn'"
+        }).href" v-if="!loading && !isMinimized"
+        :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-success' : ' btn-outline-food' + foodNum.toString()) + ' btn'"
         @mouseover="focusDataset" @mouseleave="unfocusDataset">
         <div class="row flex-nowrap align-items-center ">
             <div class="col nopadmarg position-relative imgDiv">
@@ -128,11 +127,11 @@ export default {
             </div>
             <div class="col tagCol1 nopadmarg">
                 <button v-if="allowClose" type="button" class="btn-close" aria-label="Close" @click="deletePicked"></button>
-                <div v-if="!allowClose" class="main">main</div>
+                <!-- <div v-if="!allowClose" class="main">main</div> -->
             </div>
         </div>
-    </button>
-    <button v-if="!loading && isMinimized" @mouseover="focusDataset" @mouseleave="unfocusDataset" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString())
+    </a>
+    <button v-if="!loading && isMinimized" @mouseover="focusDataset" @mouseleave="unfocusDataset" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-success' : ' btn-outline-food' + foodNum.toString())
         + ' btn'" @click="">
         {{ name }}
         <button v-if="allowClose" type="button" class="btn-close ms-1" aria-label="Close" @click="deletePicked"></button>
@@ -149,6 +148,10 @@ $food3: #BEBADA;
 $food4: #b5b575;
 $food4light: FCFC74;
 $food5: #80B1D3; */
+
+.food0 {
+    background-color: #73A525;
+}
 
 .btn-outline-food1 {
     --bs-btn-color: #8DD3C7;

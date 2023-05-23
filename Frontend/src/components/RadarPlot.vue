@@ -70,10 +70,10 @@ export default {
             for (let i = 0; i < this.distinctRowsPerFood.length; i++) {
                 this.fillGraph(i, this.distinctRowsPerFood[i]);
             }
-            this.$nextTick(() => { this.loaded() });
+            this.loaded();
         },
         loaded() {
-            this.isLoading = false;
+            this.$nextTick(() => { this.isLoading = false; });
         },
         fillGraph(i: number, rows: DistinctRows) {
             this.data.datasets.push(this.makeDatasetStarRow(i) as DatasetStarRow);
@@ -107,7 +107,7 @@ export default {
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: foodColor + opacity100,
-                hidden: this.focusedDataset == -1 ? false : i != this.focusedDataset,
+                hidden: false,
             } as DatasetStarRow;
         },
         getColorForFood(i: number): string {
@@ -119,7 +119,14 @@ export default {
     },
     watch: {
         focusedDataset(n, o) {
-            this.init();
+            if (!this.isLoading) {
+                this.isLoading = true
+                for (let i = 0; i < this.data.datasets.length; i++) {
+                    let data = this.data.datasets[i];
+                    data.hidden = this.focusedDataset == -1 ? false : i != this.focusedDataset;
+                }
+            }
+            this.loaded();
         }
     }
 }

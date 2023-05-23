@@ -1,13 +1,13 @@
 <script lang="ts">
 import { DBService, distinctNames, nutrientsFoodDB } from '../services/db.service';
 import { avg, mean, std } from '../services/statistics';
-import type { Rows, Row, DistinctRows, DatasetGraphRow, NutrientRow } from '../services/dbClasses';
+import type { Rows, Row, DistinctRows, DatasetGraphRow, NutrientRow, FoodRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import BarWithErrorBarChart from './../services/errorbar.chart';
 import RadarPlot from './RadarPlot.vue';
 import IconChart from './icons/IconChart.vue';
 import IconStar from './icons/IconStar.vue';
-import { NUTRIENTS_FOR } from '../services/queries';
+import { GET_FOOD_FOR_ID, NUTRIENTS_FOR } from '../services/queries';
 import { foodColors, nutrientColors } from '@/services/colors';
 import {
     Chart as ChartJS,
@@ -48,6 +48,7 @@ export default {
             isLoading: true,
             isRadarPlot: false,
             noData: false,
+            noDataFor: [] as Array<string>,
             nutrientRowsPerFood: [] as Array<Array<NutrientRow>>,
             distinctRowsPerFood: [] as Array<DistinctRows>,
             foodNames: [] as Array<String>,
@@ -60,7 +61,7 @@ export default {
                 plugins: {
                     legend: {
                         position: 'top',
-                        display: true
+                        display: this.ids.length > 1,
                     },
                 },
                 scales: {
@@ -89,26 +90,32 @@ export default {
         }
     },
     async created() {
-        await this.fetchData();
+        this.init();
     },
     methods: {
+        async init() {
+            this.isLoading = true;
+            this.data.datasets = [];
+            this.distinctRowsPerFood = [];
+            this.noDataFor = []
+            await this.fetchData();
+            this.loaded();
+        },
         async fetchData() {
             for (let i = 0; i < this.ids.length; i++) {
                 const queryString: string = NUTRIENTS_FOR(this.ids[i] as string);
                 await this.nutrientRowsPerFood.push((await dbService.query(queryString, false)).rows as Array<NutrientRow>);
                 this.fillGraphFor(i);
             }
-            this.$nextTick(() => {this.loaded();})
         },
         loaded() {
-            this.isLoading = false;
+            this.$nextTick(() => { this.isLoading = false; })
         },
         fillGraphFor(i: number) {
             let nutrientRow: Array<NutrientRow> = this.nutrientRowsPerFood[i];
 
             if (nutrientRow.length <= 0) {
-                this.noData = true;
-                //TODO: This doesn't completely work!
+                this.setNoData(i);
             } else {
                 const foodName: string = nutrientRow[0].naam;
                 this.foodNames.push(foodName);
@@ -117,14 +124,13 @@ export default {
                     label: foodName,
                     data: [{}, {}, {}, {}, {}, {}],
                     backgroundColor: comparingFoods ? [this.getColorForFood(i)] : this.getBarColor(),
-                    //backgroundColor: this.getBarColor(),
                     borderColor: [''],
                     borderWidth: 0,
-                    hidden: this.focusedDataset == -1 ? false : i != this.focusedDataset,
+                    hidden: false,
                 } as DatasetGraphRow);
                 let distincts: DistinctRows = distinctNames(nutrientRow);
                 const MACRO_NUTRIENTS: number = 6;
-                
+
                 let j = 0;
                 Object.keys(distincts).forEach((key: string) => {
                     const values: number[] = distincts[key];
@@ -137,11 +143,24 @@ export default {
                     const upper = m + s;
                     const downer = m - s;
 
-                    const lastIndex: number = this.data.datasets.length-1;
+                    const lastIndex: number = this.data.datasets.length - 1;
                     this.data.datasets[lastIndex].data[j++] = { y: m, yMin: downer, yMax: upper };
                 });
                 this.distinctRowsPerFood.push(distincts);
             }
+        },
+        async setNoData(i: number) {
+            this.noData = true;
+            this.data.datasets.push({
+                    label: 'No data',
+                    data: [{}, {}, {}, {}, {}, {}],
+                    backgroundColor: [''],
+                    borderColor: [''],
+                    borderWidth: 0,
+                    hidden: false,
+                } as DatasetGraphRow);
+            const foodData: FoodRow = (await dbService.query(GET_FOOD_FOR_ID(this.ids[i] as string))).rows[0];
+            this.noDataFor.push(foodData.naam as string);  
         },
         setGraph() {
             this.isRadarPlot = false;
@@ -150,24 +169,25 @@ export default {
             this.isRadarPlot = true;
         },
         getBarColor() {
-            let colors = []; 
-            for (let label of labels) { 
-                colors.push(nutrientColors[label as string]); 
-            } return colors; 
+            let colors = [];
+            for (let label of labels) {
+                colors.push(nutrientColors[label as string]);
+            } return colors;
         },
         getColorForFood(i: number): string {
-            return foodColors['food'+(i+1).toString()];
+            return foodColors['food' + (i + 1).toString()];
         },
     },
     watch: {
         focusedDataset(n, o) {
-            this.isLoading = true;
-            this.data.datasets = [];
-            this.distinctRowsPerFood = [];
-            for (let i = 0; i < this.ids.length; i++) {
-                this.fillGraphFor(i);
+            if (!this.isLoading) {
+                this.isLoading = true
+                for (let i = 0; i < this.data.datasets.length; i++) {
+                    let data = this.data.datasets[i];
+                    data.hidden = this.focusedDataset == -1 ? false : i != this.focusedDataset;
+                }
             }
-            this.$nextTick(() => {this.loaded()});
+            this.loaded();
         }
     }
 }
@@ -178,28 +198,40 @@ export default {
         <div class="position-relative">
             <h3 v-if="!isRadarPlot" class="headerShrink">Nutrient Graph</h3>
             <h3 v-if="isRadarPlot" class="headerShrink">Nutrient Radar Plot</h3>
-            <div class="position-absolute chartTypePicker">
-                <div class="btn-group" role="group" aria-label="Basic example">
+            <div class="position-absolute controls d-flex">
+                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{ noDataFor.join(', ') }}
+                </div>
+                <div class="btn-group btnGroup" role="group" aria-label="Basic example">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" checked>
-                    <label class="btn btn-outline-success" for="btnradio1" @click="setGraph"><IconChart/></label>
+                    <label class="btn btn-outline-success" for="btnradio1" @click="setGraph">
+                        <IconChart />
+                    </label>
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio2">
-                    <label class="btn btn-outline-success" for="btnradio2" @click="setStarPlot"><IconStar/></label>
+                    <label class="btn btn-outline-success" for="btnradio2" @click="setStarPlot">
+                        <IconStar />
+                    </label>
                 </div>
             </div>
         </div>
-        <div v-if="isLoading" class="position-relative">
+        <div v-if="isLoading && !isRadarPlot" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
-            <BarWithErrorBarChart :ref="'bar'" :data="data" :options="options" />
+            <BarWithErrorBarChart :data="data" :options="options" />
         </div>
         <div v-if="!isLoading && !isRadarPlot" class="position-relative">
             <!--TODO: Fix this if you have multiple!-->
-            <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
+            <BarWithErrorBarChart :data="data" :options="options" />
+        </div>
+        <div v-if="isLoading && isRadarPlot" class="position-relative">
+            <SpinnerComponent class="position-absolute spinner" />
+            <div class="row">
+                <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
+                    :focusedDataset="focusedDataset"></RadarPlot>
             </div>
-            <BarWithErrorBarChart :ref="'bar'" :data="data" :options="options" />
         </div>
         <div v-if="!isLoading && isRadarPlot">
             <div class="row">
-                <RadarPlot :ref="'bar'" :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood" :focusedDataset="focusedDataset"></RadarPlot>
+                <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"
+                    :focusedDataset="focusedDataset"></RadarPlot>
             </div>
         </div>
         <div class="collapse" id="collapseExample">
@@ -215,13 +247,20 @@ export default {
 }
 
 .noData {
-    top: 106px;
-    left: 227px
+    top: 0px;
+    left: 0px;
+    margin-right: 5px;
+    height: 40px;
+    padding: 7px;
 }
 
-.chartTypePicker {
+.controls {
     top: 5px;
-    left: 520px
+    right: 10px
+}
+
+.btnGroup {
+    height: 40px;
 }
 
 .headerShrink {

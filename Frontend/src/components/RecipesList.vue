@@ -1,10 +1,10 @@
 <script lang="ts">
 import { DBService, nutrientsRecipeDB } from '../services/db.service'
-import type { RecipesRow, DatasetRecipeRow, CombinedRecipes } from '../services/dbClasses';
+import type { RecipesRow, DatasetRecipeRow, CombinedRecipes, FoodRow } from '../services/dbClasses';
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
-import { GET_RECIPES_FOR } from '../services/queries';
+import { GET_FOOD_FOR_ID, GET_RECIPES_FOR } from '../services/queries';
 import { Bar, Bubble } from 'vue-chartjs';
 import { techniqueStrings } from '@/services/cookingtechniques';
 import { getTechniqueCounts } from '@/services/cookingtechniques';
@@ -61,6 +61,8 @@ export default {
             selectedNutrient: 'Fat',
             isAverage: false,
             factor: 1.5,
+            noData: false,
+            noDataFor: [] as Array<String>,
             data: {
                 labels: techniqueStrings,
                 datasets: [] as Array<DatasetRecipeRow>
@@ -75,13 +77,13 @@ export default {
                     y: {
                         title: {
                             display: true,
-                            text: 'Recipe Count'
+                            text: 'Technique Count'
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Cooking Techniques Count'
+                            text: 'Cooking Techniques'
                         },
                         ticks: {
                             stepSize: 1,
@@ -112,7 +114,7 @@ export default {
                                 }
                             },
                             footer: (context: any) => {
-                                return this.selectedNutrient +(this.isAverage ? ' average' : '') +': ' + Number.parseFloat(this.decompress(context[0].raw.r)).toFixed(2) + '% of daily value';
+                                return this.selectedNutrient + (this.isAverage ? ' average' : '') + ': ' + Number.parseFloat(this.decompress(context[0].raw.r)).toFixed(2) + '% of daily value';
                             },
                             title: (context: any) => {
                                 return '';  // to remove default title
@@ -154,27 +156,31 @@ export default {
             }
         },
         fillGraph(foodIndex: number, indexNutrient: number) {
-            this.data.datasets.push({
-                label: techniqueStrings,
-                fill: false,
-                borderColor: defaultColorForNutrient,
-                backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
-                data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-                hidden: this.focusedDataset == -1 ? false : foodIndex != this.focusedDataset,
-            });
+            if (Object.keys(this.filteredRecipes[foodIndex]).length <= 0) {
+                this.setNoData(foodIndex);
+            } else {
+                this.data.datasets.push({
+                    label: techniqueStrings,
+                    fill: false,
+                    borderColor: defaultColorForNutrient,
+                    backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
+                    data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                    hidden: this.focusedDataset == -1 ? false : foodIndex != this.focusedDataset,
+                });
 
-            this.isFiltering = true;
-            //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
-            let techniqueCount: Array<Number> = getTechniqueCounts(this.filteredRecipes[foodIndex]);
-            const color: string = this.ids.length <= 1 ? this.getNutrientColor() : this.getColorForFood(foodIndex);
-            this.data.datasets[foodIndex].borderColor = color;
-            this.data.datasets[foodIndex].backgroundColor = color + '80';
-            for (let techniqueIndex = 0; techniqueIndex < techniqueCount.length; techniqueIndex++) {
-                this.data.datasets[foodIndex].data[techniqueIndex] = { x: techniqueIndex, y: techniqueCount[techniqueIndex], r: this.getNutrientForTechniques(foodIndex, techniqueIndex, indexNutrient) };
+                this.isFiltering = true;
+                //this.data.datasets[0].data = [{x: 10, y: 30, r: 15},{x: 20, y: 20,r: 10},{x: 15,y: 8,r: 30}];
+                let techniqueCount: Array<Number> = getTechniqueCounts(this.filteredRecipes[foodIndex]);
+                const color: string = this.ids.length <= 1 ? this.getNutrientColor() : this.getColorForFood(foodIndex);
+                this.data.datasets[foodIndex].borderColor = color;
+                this.data.datasets[foodIndex].backgroundColor = color + '80';
+                for (let techniqueIndex = 0; techniqueIndex < techniqueCount.length; techniqueIndex++) {
+                    this.data.datasets[foodIndex].data[techniqueIndex] = { x: techniqueIndex, y: techniqueCount[techniqueIndex], r: this.getNutrientForTechniques(foodIndex, techniqueIndex, indexNutrient) };
+                }
+                this.$nextTick(() => {
+                    this.isFiltering = false;
+                });
             }
-            this.$nextTick(() => {
-                this.isFiltering = false;
-            });
         },
         compress(value: number): number {
             //value / this.factor
@@ -187,6 +193,7 @@ export default {
         getNutrientForTechniques(foodIndex: number, techniqueIndex: number, nutrientIndex: number, getLog: boolean = true): number {
             let nutrient = 0;
             let totalCount = 0;
+            //Don't change this length to object keys. it doens't work otherwise :P
             for (let j = 0; j < this.filteredRecipes[foodIndex].length; j++) {
                 const hasTechnique = this.filteredRecipes[foodIndex][j].techniques[techniqueIndex]
                 if (hasTechnique) {
@@ -196,7 +203,7 @@ export default {
             }
 
             if (this.isAverage) {
-                nutrient /= totalCount;
+                nutrient = nutrient / totalCount;
             }
 
             if (getLog) {
@@ -258,6 +265,19 @@ export default {
             }
             return idList;
         },
+        async setNoData(foodIndex: number) {
+            this.noData = true;
+            this.data.datasets.push({
+                label: ['No Data'],
+                fill: false,
+                borderColor: defaultColorForNutrient,
+                backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
+                data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                hidden: this.focusedDataset == -1 ? false : foodIndex != this.focusedDataset,
+            } as DatasetRecipeRow);
+            const foodData: FoodRow = (await dbService.query(GET_FOOD_FOR_ID(this.ids[foodIndex] as string))).rows[0];
+            this.noDataFor.push(foodData.naam as string);
+        },
         getNutrientColor(): string {
             let color: string = nutrientColors[this.selectedNutrient];
             if (color === undefined) {
@@ -275,12 +295,23 @@ export default {
         },
         getFoodColorNum(recipeIndex: number): Array<Number> {
             return this.combined.ofFoods[recipeIndex].map((element) => this.ids.indexOf(element) + 1);
+        },
+        onlyUnique(value: any, index: number, array: Array<any>) {
+            return array.indexOf(value) === index;
         }
     },
     watch: {
         focusedDataset(n, o) {
             this.data.datasets = [];
             this.updateFilters();
+            // if (!this.isLoading) {
+            //     this.isLoading = true
+            //     for (let i = 0; i < this.data.datasets.length; i++) {
+            //         let data = this.data.datasets[i];
+            //         data.hidden = this.focusedDataset == -1 ? false : i != this.focusedDataset;
+            //     }
+            // }
+            // this.loaded();
         }
     }
 }
@@ -291,8 +322,11 @@ export default {
         <div class="position-relative">
             <h3 class="headerShrink">Recipe List</h3>
             <div class="position-absolute controls d-flex">
-                <div v-if="!isLoading && selectedRecipeIndex==-1" class="form-check form-switch toggle">
-                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" @click="toggleAverage">
+                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{ noDataFor.filter(onlyUnique).join(',') }}
+                </div>
+                <div v-if="!isLoading && selectedRecipeIndex == -1" class="form-check form-switch toggle">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
+                        @click="toggleAverage">
                     <label class="form-check-label" for="flexSwitchCheckDefault">Average</label>
                 </div>
                 <div v-if="!isLoading" class="btn-group">
@@ -311,9 +345,9 @@ export default {
         <div>
             <div v-if="isLoading" class="position-relative">
                 <SpinnerComponent class="position-absolute spinner" />
-                <Bar :data="data" :options="options"  style="min-height: 353px; width: 640px;"/>
+                <Bar :data="data" :options="options" style="min-height: 353px; width: 640px;" />
             </div>
-            <div v-else="!isLoading" class="position-relative">
+            <div v-if="!isLoading" class="position-relative">
                 <div v-if="Object.keys(recipesPerFood).length <= 0" class="position-absolute alert alert-dark noData"
                     role="alert">
                     No cooking

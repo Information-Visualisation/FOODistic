@@ -87,6 +87,11 @@ export default {
     deletePicked(event: any, id: string) {
       this.$emit('deletePicked', null, id);
     },
+    deleteAll() {
+      for (let id of this.otherIds) {
+        this.$emit('deletePicked', null, id);
+      }
+    },
     focusDataset(event: any, foodIndex: number) {
       this.focusedDataset = foodIndex;
     },
@@ -155,12 +160,10 @@ export default {
       <IconMinimize></IconMinimize>
       <!-- Maximize -->
     </button>
-    <div v-if="!loading && otherIds.length != 0">
-      <a v-if="subFoodGroup != ''"
-          :href="$router.resolve({ name: 'food',params: {name: name,},query: {id: id} }).href"
-         ><button type="button" class="btn align-self-center btn-close ms-1"></button>
-         Close All
-    </a>
+    <div v-if="!loading && otherIds.length != 0" class="align-self-center">
+      <div class="btn rounded-pill" @click="deleteAll">
+        <button type="button" class="btn-close ms-1"></button>
+      </div>
     </div>
   </div>
 
