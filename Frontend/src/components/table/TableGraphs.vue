@@ -77,7 +77,7 @@ export default {
 .mytooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted black;
+  /* border-bottom: 1px dotted black; */
 }
 
 .mytooltip .mytooltiptext {
@@ -91,7 +91,6 @@ export default {
   position: absolute;
   z-index: 2;
   bottom: 125%;
-  left: 50%;
   margin-left: -60px;
   opacity: 0;
   transition: opacity 0.3s;

@@ -103,29 +103,22 @@ export default {
             }
             return max_value_colum;
         },
-        receiveFooditems(event: any, foodItems: any, totalCount: number) {
+        async receiveFooditems(event: any, foodItems: any, totalCount: number) {
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
                 this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
                 this.$emit('returnTotalCount', null, totalCount);
-                if(this.tabIndex == 1)
-                    this.createNutritions();
-                if(this.tabIndex == 2)
-                    this.fetchAllergyInfo();
-                if(this.tabIndex == 3){
-                    this.isLoading = true;
-                    this.fetchRecipeInfo();
-                }
+                this.getFoodInfo();
             }
         },
         getFoodInfo(){
             for(let i = 0; i < this.foodItems.length; i++){
                 this.recipeLabel.push(this.foodItems[i].naam);
                 this.foodIds.push(this.foodItems[i].id);
-                this.createNutritions();
-                this.fetchAllergyInfo();
-                this.foodIDs = this.getFoodIDs();
             }
+            this.createNutritions();
+            this.fetchAllergyInfo();
+            this.foodIDs = this.getFoodIDs();
         },
         async createNutritions() {
             this.foodNutritions = {};
@@ -161,21 +154,13 @@ export default {
             this.recipeCount = (await dbService.query(queryString, false)).rows;
             this.isLoading = false;
         },
-        setTabIndex(index: number) {
+        async setTabIndex(index: number) {
             this.$router.push({ // push same route, but append tabindex
                 name: this.$route.name ?? 'home',
                 params: this.$route.params,
                 query: { ...this.$route.query, tabIndex: index}
             })
             this.tabIndex=index;
-            if(this.tabIndex == 1)
-                this.createNutritions();
-            if(this.tabIndex == 2)
-                this.fetchAllergyInfo();
-            if(this.tabIndex == 3){
-                this.isLoading = true;
-                this.fetchRecipeInfo();
-            }
             this.sortNutritions(0, true); // reset sort order of table on change tab
         },
         getAllergiesOfFood(foodName: string): FoodAllergyRow[] {

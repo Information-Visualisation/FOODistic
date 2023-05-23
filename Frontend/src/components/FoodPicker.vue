@@ -54,7 +54,6 @@ export default {
         async getFoodFromAllergies() {
             let resultAllergy = this.changeArrayToString(this.allergies);
             let allergyFoodResultQuery: {food: string}[]  = (await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy)).rows;
-            console.log(allergyFoodResultQuery);
             let allergyFood = [] as string[];
             for (var food of allergyFoodResultQuery) {
                 allergyFood.push(food.food);
