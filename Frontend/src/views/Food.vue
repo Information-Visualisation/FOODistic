@@ -41,6 +41,7 @@ export default {
       otherFoods: [] as unknown as [FoodRow],
       loading: false,
       isMinimized: false,
+      focusedDataset: -1
     }
   },
   async created() {
@@ -85,6 +86,12 @@ export default {
     },
     deletePicked(event: any, id: string) {
       this.$emit('deletePicked', null, id);
+    },
+    focusDataset(event: any, foodIndex: number) {
+      this.focusedDataset = foodIndex;
+    },
+    unfocusDataset(event: any) {
+      this.focusedDataset = -1;
     },
     toggleMinimize() {
       this.isMinimized = !this.isMinimized;
@@ -135,9 +142,11 @@ export default {
 
   <div class="d-flex justify-content-start flex-wrap header">
     <SpinnerComponent v-if="loading"></SpinnerComponent>
-    <FoodTitleTag v-if="isIdSet" :foodNum="otherFoods.length > 0 ? 1 : 0" :id="id" :name="name" :allowClose="false" :isMinimized="isMinimized"></FoodTitleTag>
-    <FoodTitleTag v-if="otherFoods.length > 0" v-for="(food, index) in otherFoods" :foodNum="index+2" :id="food.id.toString()" :name="food.naam"
-      :allowClose="true" :isMinimized="isMinimized" @deletePicked="deletePicked"></FoodTitleTag>
+    <FoodTitleTag v-if="isIdSet" :foodNum="otherFoods.length > 0 ? 1 : 0" :id="id" :name="name" :allowClose="false"
+      :isMinimized="isMinimized" @focusDataset="focusDataset" @unfocusDataset="unfocusDataset"></FoodTitleTag>
+    <FoodTitleTag v-if="otherFoods.length > 0" v-for="(food, index) in otherFoods" :foodNum="index + 2"
+      :id="food.id.toString()" :name="food.naam" :allowClose="true" :isMinimized="isMinimized"
+      @focusDataset="focusDataset" @unfocusDataset="unfocusDataset" @deletePicked="deletePicked"></FoodTitleTag>
     <button v-if="!isMinimized" type="button" class="btn align-self-center" @click="toggleMinimize()">
       <IconMaximize></IconMaximize>
       <!-- Minimize -->
@@ -146,15 +155,22 @@ export default {
       <IconMinimize></IconMinimize>
       <!-- Maximize -->
     </button>
+    <div v-if="!loading && otherIds.length != 0">
+      <a v-if="subFoodGroup != ''"
+          :href="$router.resolve({ name: 'food',params: {name: name,},query: {id: id} }).href"
+         ><button type="button" class="btn align-self-center btn-close ms-1"></button>
+         Close All
+    </a>
+    </div>
   </div>
 
   <div class="d-flex justify-content-center content">
     <div class="row">
       <div class="col">
-        <NutrientGraph :ids="getAllIds()" class="card" />
+        <NutrientGraph :ids="getAllIds()" :focusedDataset="focusedDataset" class="card" />
       </div>
       <div class="col">
-        <RecipesList :ids="getAllIds()" class="card" />
+        <RecipesList :ids="getAllIds()" :focusedDataset="focusedDataset" class="card" />
       </div>
     </div>
   </div>

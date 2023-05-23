@@ -73,6 +73,7 @@ type DatasetGraphRow = {
     backgroundColor: Array<String>,
     borderColor: Array<String>,
     borderWidth: number,
+    hidden: boolean,
 };
 
 type DatasetStarRow = {
@@ -84,6 +85,7 @@ type DatasetStarRow = {
     pointBorderColor: string,
     pointHoverBackgroundColor: string,
     pointHoverBorderColor: string,
+    hidden: boolean,
 }
 
 type DatasetRecipeRow = {
@@ -92,6 +94,7 @@ type DatasetRecipeRow = {
     fill: boolean,
     borderColor: string,
     backgroundColor: string,
+    hidden: boolean,
 };
 
 type CombinedRecipes = {

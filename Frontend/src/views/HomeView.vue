@@ -7,6 +7,8 @@ import FoodTable from '@/components/table/FoodTable.vue';
 import VueNumberInput from '@chenfengyuan/vue-number-input';
 import type { FoodRow } from '@/services/dbClasses';
 
+import { Bubble } from 'vue-chartjs';
+
 const MAX_PAGINATION: number = 10;
 
 const dbService = new DBService;
@@ -16,15 +18,16 @@ export default {
     FoodPicker,
     SpinnerComponent,
     FoodTable,
-    VueNumberInput
+    VueNumberInput,
+    Bubble
   },
   data() {
     return {
       isLoading: true,
       fooditems: [] as FoodRow[],
-      foodGroupitems: [] as {food_group: string}[],
-      foodSubGroupitems: [] as {food_subgroup: string}[],
-      filteritems: {} as { [key: number]: {allergy: string}},
+      foodGroupitems: [] as { food_group: string }[],
+      foodSubGroupitems: [] as { food_subgroup: string }[],
+      filteritems: {} as { [key: number]: { allergy: string } },
 
       lowerPages: [] as Array<Number>,
       hardOffset: 0,
@@ -80,7 +83,7 @@ export default {
       this.loaded();
     },
     route() {
-      let options = { name: 'home', query: {} as {search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number} };
+      let options = { name: 'home', query: {} as { search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number } };
       if (this.foodName != '')
         options.query.search = this.foodName;
       if (this.allergies.length != 0)
@@ -106,7 +109,7 @@ export default {
     receiveRowCount(event: any, totalCount: number) {
       const pageCount = Math.ceil(totalCount / this.pageSize);
       if (this.offset >= pageCount) {
-        this.setPage(pageCount-1);
+        this.setPage(pageCount - 1);
       }
       this.upperPages = this.countUp(this.offset, pageCount);
       this.lowerPages = this.countDown(this.offset);
@@ -147,13 +150,13 @@ export default {
 
 <template>
   <main>
-      <SpinnerComponent v-if="isLoading"></SpinnerComponent>
+    <SpinnerComponent v-if="isLoading"></SpinnerComponent>
 
     <div class="container d-flex flex-column align-items-stretch" v-else>
       <div role="search" class="d-flex flex-column align-self-center" style="width: 80%">
         <div class="d-flex justify-content-center">
-          <input v-model="foodName" class="form-control me-2" type="search" name="foodName"
-            placeholder="Search" aria-label="Search" @keyup.enter="route" @blur="route">
+          <input v-model="foodName" class="form-control me-2" type="search" name="foodName" placeholder="Search"
+            aria-label="Search" @keyup.enter="route" @blur="route">
           <div @click="route" class="btn btn-success">Search</div>
         </div>
         <div class="d-flex justify-content-between" style="margin-top: 5px">
@@ -162,12 +165,14 @@ export default {
           <div>
             <!-- Food group dropdown menu -->
             <div class="select-button btn-group">
-              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 {{ foodGroup }}
               </button>
               <ul class="dropdown-menu">
                 <li class="dropdown-item" @click="setFoodgroup('All Foodgroups')">All Foodgroups</li>
-                <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems" @click="setFoodgroup(foodGroupitem.food_group)">
+                <li class="dropdown-item" v-for="foodGroupitem in foodGroupitems"
+                  @click="setFoodgroup(foodGroupitem.food_group)">
                   {{ foodGroupitem.food_group }}
                 </li>
               </ul>
@@ -175,12 +180,14 @@ export default {
             <span v-if="foodGroup != 'All Foodgroups'">></span>
             <!-- Subfoodgroup dropdown menu -->
             <div v-if="foodGroup != 'All Foodgroups'" class="select-button btn-group">
-              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 {{ subFoodGroup }}
               </button>
               <ul class="dropdown-menu">
                 <li class="dropdown-item" @click="setSubFoodGroup('All Foodsubgroups')">All Foodsubgroups</li>
-                <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems" @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">
+                <li class="dropdown-item" v-for="foodSubGroupitem in foodSubGroupitems"
+                  @click="setSubFoodGroup(foodSubGroupitem.food_subgroup)">
                   {{ foodSubGroupitem.food_subgroup }}
                 </li>
               </ul>
@@ -188,14 +195,16 @@ export default {
           </div>
           <!-- Allergy Filter button -->
           <div class="select-button btn-group">
-            <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+            <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown"
+              data-bs-auto-close="false" aria-expanded="false">
               Exclude Allergies
             </button>
             <ul class="dropdown-menu">
               <li class="dropdown-item" v-for="filteritem in filteritems">
                 <div class="form-check">
-                  <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy" :id="filteritem.allergy" name="alergies"
-                    v-model="allergies" @change="route" :checked="allergies.indexOf(filteritem.allergy) != -1" />
+                  <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
+                    :id="filteritem.allergy" name="alergies" v-model="allergies" @change="route"
+                    :checked="allergies.indexOf(filteritem.allergy) != -1" />
                   <label class="form-check-label" :for="filteritem.allergy">
                     {{ filteritem.allergy }}
                   </label>
@@ -214,12 +223,14 @@ export default {
         <nav aria-label="Page navigation example">
           <ul class="pagination justify-content-center">
             <li>
-              <VueNumberInput ref="numberinput" placeholder="per page" class="ItemPerPage" :min="1" :max="1000" :step="15" :model-value="pageSize" inline center @keyup.enter="setItemsPerPage()"/>
+              <VueNumberInput ref="numberinput" placeholder="per page" class="ItemPerPage" :min="1" :max="1000" :step="15"
+                :model-value="pageSize" inline center @keyup.enter="setItemsPerPage()" />
             </li>
             <li>
               <a type="button" class="btn btn-success ItemPerPageButton" @click="setItemsPerPage()" href="#">✓</a>
             </li>
-            <li :class="'page-item '+(lowerPages.length <= 0 ? 'disabled' : '')" @click="setPage(lowerPages[lowerPages.length-1] as number)">
+            <li :class="'page-item ' + (lowerPages.length <= 0 ? 'disabled' : '')"
+              @click="setPage(lowerPages[lowerPages.length - 1] as number)">
               <a class="page-link" href="#">&laquo;</a>
             </li>
             <li v-for="n in lowerPages" class="page-item" @click="setPage(n as number)">
@@ -229,9 +240,10 @@ export default {
               <a class="page-link" href="#">{{ hardOffset + 1 }}</a>
             </li>
             <li v-for="n in upperPages" class="page-item" @click="setPage(n as number)">
-              <a class="page-link" href="#">{{ n as number + 1}}</a>
+              <a class="page-link" href="#">{{ n as number + 1 }}</a>
             </li>
-            <li :class="'page-item '+(upperPages.length <= 0 ? 'disabled' : '')" @click="setPage(upperPages.length > 0 ? upperPages[0] as number : hardOffset)">
+            <li :class="'page-item ' + (upperPages.length <= 0 ? 'disabled' : '')"
+              @click="setPage(upperPages.length > 0 ? upperPages[0] as number : hardOffset)">
               <a class="page-link" href="#">&raquo;</a>
             </li>
           </ul>
@@ -243,6 +255,7 @@ export default {
 
 <style lang="scss">
 @import "@/../scss/custom.scss";
+
 .container {
   padding: 40px;
 }
@@ -264,7 +277,7 @@ export default {
 .ItemPerPage {
   width: 100px;
 }
+
 .ItemPerPageButton {
   margin-right: 20px;
-}
-</style>
+}</style>

@@ -38,6 +38,10 @@ export default {
             type: Array<String>,
             default: []
         },
+        focusedDataset: {
+            type: Number,
+            default: -1
+        }
     },
     data() {
         return {
@@ -56,7 +60,7 @@ export default {
                 plugins: {
                     legend: {
                         position: 'top',
-                        // display: false
+                        display: true
                     },
                 },
                 scales: {
@@ -114,12 +118,13 @@ export default {
                     data: [{}, {}, {}, {}, {}, {}],
                     backgroundColor: comparingFoods ? [this.getColorForFood(i)] : this.getBarColor(),
                     //backgroundColor: this.getBarColor(),
-                    borderColor: this.getBarColor(),
+                    borderColor: [''],
                     borderWidth: 0,
+                    hidden: this.focusedDataset == -1 ? false : i != this.focusedDataset,
                 } as DatasetGraphRow);
                 let distincts: DistinctRows = distinctNames(nutrientRow);
                 const MACRO_NUTRIENTS: number = 6;
-
+                
                 let j = 0;
                 Object.keys(distincts).forEach((key: string) => {
                     const values: number[] = distincts[key];
@@ -153,6 +158,17 @@ export default {
         getColorForFood(i: number): string {
             return foodColors['food'+(i+1).toString()];
         },
+    },
+    watch: {
+        focusedDataset(n, o) {
+            this.isLoading = true;
+            this.data.datasets = [];
+            this.distinctRowsPerFood = [];
+            for (let i = 0; i < this.ids.length; i++) {
+                this.fillGraphFor(i);
+            }
+            this.$nextTick(() => {this.loaded()});
+        }
     }
 }
 </script>
@@ -173,17 +189,17 @@ export default {
         </div>
         <div v-if="isLoading" class="position-relative">
             <SpinnerComponent class="position-absolute spinner" />
-            <BarWithErrorBarChart :data="data" :options="options" />
+            <BarWithErrorBarChart :ref="'bar'" :data="data" :options="options" />
         </div>
         <div v-if="!isLoading && !isRadarPlot" class="position-relative">
             <!--TODO: Fix this if you have multiple!-->
             <div v-if="noData" class="position-absolute alert alert-dark noData" role="alert">No nutrient data available
             </div>
-            <BarWithErrorBarChart :data="data" :options="options" />
+            <BarWithErrorBarChart :ref="'bar'" :data="data" :options="options" />
         </div>
         <div v-if="!isLoading && isRadarPlot">
             <div class="row">
-                <RadarPlot :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood"></RadarPlot>
+                <RadarPlot :ref="'bar'" :foodNames="foodNames" :distinctRowsPerFood="distinctRowsPerFood" :focusedDataset="focusedDataset"></RadarPlot>
             </div>
         </div>
         <div class="collapse" id="collapseExample">

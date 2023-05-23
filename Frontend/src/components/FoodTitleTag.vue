@@ -70,6 +70,12 @@ export default {
         deletePicked() {
             this.$emit('deletePicked', null, this.id);
         },
+        focusDataset() {
+            this.$emit('focusDataset', null, this.foodNum-1);
+        },
+        unfocusDataset() {
+            this.$emit('unfocusDataset', null);
+        },
         makeMain() {
             this.$router.push({
                 name: 'food',
@@ -82,7 +88,7 @@ export default {
             });
         },
     },
-    emits: ["deletePicked"]
+    emits: ["deletePicked", "focusDataset", "unfocusDataset"]
 }
 </script>
 
@@ -100,7 +106,8 @@ export default {
             }
         }).href"> -->
     <button v-if="!loading && !isMinimized"
-        :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString()) + ' btn'">
+        :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString()) + ' btn'"
+        @mouseover="focusDataset" @mouseleave="unfocusDataset">
         <div class="row flex-nowrap align-items-center ">
             <div class="col nopadmarg position-relative imgDiv">
                 <div :class="'foodBorder rounded-circle food' + foodNum.toString()"></div>
@@ -125,7 +132,7 @@ export default {
             </div>
         </div>
     </button>
-    <button v-if="!loading && isMinimized" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString())
+    <button v-if="!loading && isMinimized" @mouseover="focusDataset" @mouseleave="unfocusDataset" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-dark' : ' btn-outline-food' + foodNum.toString())
         + ' btn'" @click="">
         {{ name }}
         <button v-if="allowClose" type="button" class="btn-close ms-1" aria-label="Close" @click="deletePicked"></button>

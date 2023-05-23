@@ -41,6 +41,10 @@ export default {
         ids: {
             type: Array<String>,
             required: true
+        },
+        focusedDataset: {
+            type: Number,
+            default: -1
         }
     },
     data() {
@@ -56,7 +60,7 @@ export default {
             nutrients: labels,
             selectedNutrient: 'Fat',
             isAverage: false,
-            factor: 1.2,
+            factor: 1.5,
             data: {
                 labels: techniqueStrings,
                 datasets: [] as Array<DatasetRecipeRow>
@@ -71,13 +75,13 @@ export default {
                     y: {
                         title: {
                             display: true,
-                            text: ''
+                            text: 'Recipe Count'
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Cooking Techniques'
+                            text: 'Cooking Techniques Count'
                         },
                         ticks: {
                             stepSize: 1,
@@ -88,7 +92,6 @@ export default {
                     }
                 },
                 plugins: {
-                    response: true,
                     legend: {
                         position: 'top',
                         display: false
@@ -128,18 +131,13 @@ export default {
             await this.fetchData(i, this.ids[i] as string);
         }
         this.selectNutrient(this.selectedNutrient);
-        // let temp = Array(58);
-        // temp.fill(10);
 
-        //this.data.datasets[1].data = temp;
         this.combineRecipes();
     },
     methods: {
         async fetchData(foodIndex: number, id: string) {
             const queryString: string = GET_RECIPES_FOR(id);
-            // console.log(queryString);
             this.recipesPerFood.push((await dbService.query(queryString, false)).rows);
-            // console.log('done loading recipes');
 
             this.filteredRecipes = this.recipesPerFood;
             this.$nextTick(() => {
@@ -162,6 +160,7 @@ export default {
                 borderColor: defaultColorForNutrient,
                 backgroundColor: defaultColorForNutrient + '80', //sets opacity to 50% in hex
                 data: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                hidden: this.focusedDataset == -1 ? false : foodIndex != this.focusedDataset,
             });
 
             this.isFiltering = true;
@@ -175,7 +174,7 @@ export default {
             }
             this.$nextTick(() => {
                 this.isFiltering = false;
-            })
+            });
         },
         compress(value: number): number {
             //value / this.factor
@@ -277,6 +276,12 @@ export default {
         getFoodColorNum(recipeIndex: number): Array<Number> {
             return this.combined.ofFoods[recipeIndex].map((element) => this.ids.indexOf(element) + 1);
         }
+    },
+    watch: {
+        focusedDataset(n, o) {
+            this.data.datasets = [];
+            this.updateFilters();
+        }
     }
 }
 </script>
@@ -306,7 +311,7 @@ export default {
         <div>
             <div v-if="isLoading" class="position-relative">
                 <SpinnerComponent class="position-absolute spinner" />
-                <Bar :data="data" :options="options" />
+                <Bar :data="data" :options="options"  style="min-height: 353px; width: 640px;"/>
             </div>
             <div v-else="!isLoading" class="position-relative">
                 <div v-if="Object.keys(recipesPerFood).length <= 0" class="position-absolute alert alert-dark noData"
@@ -314,7 +319,7 @@ export default {
                     No cooking
                     techniques found
                 </div>
-                <div v-if="Object.keys(filteredRecipes[0]).length == 1">
+                <div v-if="Object.keys(filteredRecipes[0]).length == 1" style="min-height: 353px; width: 640px;">
                     <NutrientGraphRecipe :id="filteredRecipes[0][0].recipeid"></NutrientGraphRecipe>
                 </div>
                 <div v-if="Object.keys(filteredRecipes[0]).length > 1" style="min-height: 353px; width: 640px;">
