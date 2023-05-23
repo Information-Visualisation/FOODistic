@@ -8,11 +8,11 @@ export default {
             sortDown: true,
         }
     },
+    emits: ['sortByColumn'],
     props: {
         columnNames: Array<string>
     },
     methods: {
-        // TODO: filter list
         setSort(columnIndex: number) {
             if (this.filterColumn == columnIndex) {
                 this.sortDown = !this.sortDown;
@@ -20,6 +20,7 @@ export default {
                 this.filterColumn = columnIndex;
                 this.sortDown = true;
             }
+            this.$emit('sortByColumn', this.filterColumn, this.sortDown);
         },
         getSortArrow(columnIndex: number) {
             if (this.filterColumn == columnIndex) {
@@ -34,7 +35,7 @@ export default {
 
 <template>
     <tr>
-    <th scope="col" v-for="(name, index) in columnNames">
+    <th id="table-header" scope="col" v-for="(name, index) in columnNames">
         <button class="sort btn" type="button" :onclick="function() {setSort(index)}">
             {{name + ' ' + getSortArrow(index)}}
         </button>
@@ -47,6 +48,13 @@ export default {
 .sort {
     font-weight: bold;
     padding: 0px;
+}
+
+#table-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 </style>

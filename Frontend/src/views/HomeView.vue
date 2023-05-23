@@ -80,7 +80,7 @@ export default {
       this.loaded();
     },
     route() {
-      let options = { name: 'home', query: {} as {search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number} };
+      let options = { name: 'home', query: {} as {search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number, pageSize: number} };
       if (this.foodName != '')
         options.query.search = this.foodName;
       if (this.allergies.length != 0)

@@ -37,23 +37,24 @@ export default {
         async query() {
             this.isLoading = true;
             const allergies = await this.getFoodFromAllergies();
+            let tempFooditems;
             try {
-                this.fooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset, this.pageSize));
+                tempFooditems = await dbService.query(GET_FOOD_FOR_NAME(this.name, allergies, this.group, this.subgroup, this.offset, this.pageSize));
             } catch (e) {
-                this.fooditems = undefined;
+                tempFooditems = undefined;
             }
-            if (this.fooditems !== undefined) {
-                this.fooditems = this.fooditems.rows;
-                this.totalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
-                this.totalCount = parseInt(this.totalCount.rows[0].c);
+            if (tempFooditems !== undefined) {
+                this.fooditems = tempFooditems.rows;
+                let tempTotalCount = await dbService.query(GET_FOODCOUNT_FOR_NAME(this.name, allergies, this.group, this.subgroup));
+                this.totalCount = parseInt(tempTotalCount.rows[0].c);
                 this.returnFooditems();
             }
             this.isLoading = false;
         },
         async getFoodFromAllergies() {
             let resultAllergy = this.changeArrayToString(this.allergies);
-            let allergyFoodResultQuery = await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy);
-            allergyFoodResultQuery = allergyFoodResultQuery.rows;
+            let allergyFoodResultQuery: {food: string}[]  = (await dbService.query(`SELECT food FROM allergies WHERE allergy in ` + resultAllergy)).rows;
+            console.log(allergyFoodResultQuery);
             let allergyFood = [] as string[];
             for (var food of allergyFoodResultQuery) {
                 allergyFood.push(food.food);

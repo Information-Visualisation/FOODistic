@@ -14,7 +14,7 @@ function CREATE_FOOD_INGREDIENT_LINKER() {
 }
 exports.CREATE_FOOD_INGREDIENT_LINKER = CREATE_FOOD_INGREDIENT_LINKER;
 function CREATE_RECIPES() {
-    return "CREATE TABLE recipes_filtered AS\n\t\t\tSELECT \n\t\t\t\tid, \n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '\n\t\t\t\t)::boolean[] as techniques,\n\t\t\t\t-- convert the ingredient_ids string \"{1, 3, 4, 6}\" to an array of ints\n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(ingredient_ids, 2, length(ingredient_ids) - 2), ', ',' '\n\t\t\t\t)::int[] as ingredient_ids\n\t\t\tFROM pp_recipes ";
+    return "CREATE TABLE recipes_filtered AS\n\t\t\tSELECT \n\t\t\t\tpp_recipes.id,\n\t\t\t\traw_recipes.name, \n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(pp_recipes.techniques, 2, length(pp_recipes.techniques) - 2), ', ',' '\n\t\t\t\t)::boolean[] as techniques,\n\t\t\t\t-- convert the ingredient_ids string \"{1, 3, 4, 6}\" to an array of ints\n\t\t\t\tstring_to_array(\n\t\t\t\t\tsubstr(ingredient_ids, 2, length(ingredient_ids) - 2), ', ',' '\n\t\t\t\t)::int[] as ingredient_ids\n\t\t\tFROM pp_recipes, raw_recipes \n\t\t\tWHERE pp_recipes.id = raw_recipes.id";
 }
 exports.CREATE_RECIPES = CREATE_RECIPES;
 //# sourceMappingURL=queries.js.map
