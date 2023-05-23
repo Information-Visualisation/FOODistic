@@ -4,11 +4,11 @@ import TableGraph from './TableGraphs.vue';
 import TableRowNutrition from './TableRowNutrition.vue';
 import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
-import RecipesList from '@/components/RecipesList.vue';
+import TableRecipe from './TableRecipe.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
+import { MACRO_NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR, COUNT_RECIPE_FOR } from '@/services/queries';
 import { DBService, distinctNames } from '@/services/db.service';
-import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
+import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow, RecipeCount } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
 import * as bootstrap from 'bootstrap';
 
@@ -28,18 +28,22 @@ export default {
         TableRowHead,
         TableRowNutrition,
         FoodPicker,
-        RecipesList,
+        TableRecipe,
         SpinnerComponent,
         TableRowAllergy
     },
     data() {
         return {
+            isLoading: true,
             foodItems: [] as FoodRow[],
             foodNutritions: {} as {[key: string]: number[]},
             tabIndex: (this.$route.query.tabIndex ?? 0) as number,
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+            recipeCount: [] as RecipeCount[],
+            recipeLabel: [] as string[],
+            foodIds: [] as number[],
             sortedFoodNames: {} as SortRow[],
             foodIDs: {} as {[key: string]: number},
             tabs: ['food', 'nutrition', 'allergies', 'recipes'] // names of the tabs for navigation
@@ -68,6 +72,13 @@ export default {
             }
             return percentages;
         },
+        getAllergyCount() : number[] {
+            let counts = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                counts.push(this.allergyPercentages[i].count);
+            }
+            return counts;
+        }
     },
     methods: {
         // Returns food names with their id {'food': id}
@@ -93,23 +104,30 @@ export default {
             return max_value_colum;
         },
         receiveFooditems(event: any, foodItems: any, totalCount: number) {
-            console.log(foodItems);
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
                 this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
                 this.$emit('returnTotalCount', null, totalCount);
+                if(this.tabIndex == 1)
+                    this.createNutritions();
+                if(this.tabIndex == 2)
+                    this.fetchAllergyInfo();
+                if(this.tabIndex == 3){
+                    this.isLoading = true;
+                    this.fetchRecipeInfo();
+                }
+            }
+        },
+        getFoodInfo(){
+            for(let i = 0; i < this.foodItems.length; i++){
+                this.recipeLabel.push(this.foodItems[i].naam);
+                this.foodIds.push(this.foodItems[i].id);
                 this.createNutritions();
                 this.fetchAllergyInfo();
                 this.foodIDs = this.getFoodIDs();
             }
         },
         async createNutritions() {
-            // let ids: Array<string> = new Array<string>();
-            // this.foodItems.forEach((row) => {
-            //     ids.push(row.id);
-            // })
-            // console.log(MACRO_NUTRIENTS_FOR_FOODS(ids));
-            // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
                 const id: string = this.foodItems[i].id.toString();
@@ -134,6 +152,15 @@ export default {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
+        async fetchRecipeInfo(){
+            this.recipeCount = [];
+            this.foodIds = [];
+            this.recipeLabel = [];
+            this.getFoodInfo();
+            const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
+            this.recipeCount = (await dbService.query(queryString, false)).rows;
+            this.isLoading = false;
+        },
         setTabIndex(index: number) {
             this.$router.push({ // push same route, but append tabindex
                 name: this.$route.name ?? 'home',
@@ -141,6 +168,14 @@ export default {
                 query: { ...this.$route.query, tabIndex: index}
             })
             this.tabIndex=index;
+            if(this.tabIndex == 1)
+                this.createNutritions();
+            if(this.tabIndex == 2)
+                this.fetchAllergyInfo();
+            if(this.tabIndex == 3){
+                this.isLoading = true;
+                this.fetchRecipeInfo();
+            }
             this.sortNutritions(0, true); // reset sort order of table on change tab
         },
         getAllergiesOfFood(foodName: string): FoodAllergyRow[] {
@@ -308,7 +343,7 @@ export default {
             <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount" :totaalFoods="foodItems.length"/>
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead :columnNames="['Name'].concat(getAllergyNames)"  @sortByColumn="sortAllergies"/>
@@ -323,7 +358,12 @@ export default {
                 </table>
             </div>
             <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
-                <RecipesList v-if="tabIndex==3" class="mx-auto" id="1"></RecipesList>
+                <div v-if="isLoading">
+                            <SpinnerComponent></SpinnerComponent>
+                </div>
+                <div v-if="!isLoading || recipeCount.length != 0">
+                    <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipescount="recipeCount" ></TableRecipe>
+                </div>
             </div>
         </div>
     </div>

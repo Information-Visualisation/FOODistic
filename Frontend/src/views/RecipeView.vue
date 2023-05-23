@@ -101,13 +101,17 @@ export default {
     <div v-else="!isLoading" class="position-relative">
         <h1>{{ recipe[0].recipename }}</h1>
     </div>
+    <div class="d-flex position-relative">
+        <h1>Ingredients: </h1>
+        
+    </div>
     <div class="d-flex justify-content-center">
         <div class="row">
-            <h1>Ingredients: </h1>
-            <FoodItem v-for="food in recipe" :name=food.foodname :id="food.foodid.toString()"
-                :comparing="comparing" @compare="compare"></FoodItem>
+        <FoodItem v-for="food in recipe" :name=food.foodname :id="food.foodid.toString()"
+            :comparing="comparing" @compare="compare"></FoodItem>
         </div>
     </div>
+    
     <div class="d-flex justify-content-center">
         <h2>Allergies:</h2>
         <div v-for="allergy in allergies">
@@ -122,18 +126,14 @@ export default {
     </div>
     <h2>Nutrients:</h2>
     <div class="d-flex justify-content-center">
-        <div class="row">
-          <div class="col">
             <NutrientGraphRecipe :id="parseInt(id)" class="card" />
-          </div>
-        </div>
   </div>
 </template>
 
-<style>
+<style scoped>
 .box {
-    width: 20px;
-    height: 20px;
+    width: 50px;
+    height: 50px;
     font-family: arial;
 }
 </style>

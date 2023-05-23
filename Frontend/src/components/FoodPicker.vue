@@ -29,7 +29,7 @@ export default {
         }
     },
     async created() {
-        this.getFoodFromAllergies()
+        //this.getFoodFromAllergies();
         this.query();
     },
     emits: ["compare", "returnFooditems"],
