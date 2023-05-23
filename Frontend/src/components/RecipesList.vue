@@ -28,6 +28,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const defaultColorForNutrient = '#FF6384';
 const labels = nutrientsRecipeDB;
 
+function onlyUnique(value: any, index: number, array: Array<any>) {
+  return array.indexOf(value) === index;
+}
+
 export default {
     name: 'NutrientGraph',
     components: {
@@ -157,6 +161,7 @@ export default {
         },
         fillGraph(foodIndex: number, indexNutrient: number) {
             if (Object.keys(this.filteredRecipes[foodIndex]).length <= 0) {
+                //TODO: this don't work  
                 this.setNoData(foodIndex);
             } else {
                 this.data.datasets.push({

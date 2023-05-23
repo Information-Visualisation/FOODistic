@@ -99,7 +99,7 @@ export default {
                 await this.nutrientRowsPerFood.push((await dbService.query(queryString, false)).rows as Array<NutrientRow>);
                 this.fillGraphFor(i);
             }
-            this.$nextTick(() => {this.loaded();})
+            this.$nextTick(() => { this.loaded(); })
         },
         loaded() {
             this.isLoading = false;
@@ -145,15 +145,15 @@ export default {
         async setNoData(i: number) {
             this.noData = true;
             this.data.datasets.push({
-                    label: 'No data',
-                    data: [{}, {}, {}, {}, {}, {}],
-                    backgroundColor: [''],
-                    borderColor: [''],
-                    borderWidth: 0,
-                    hidden: false,
-                } as DatasetGraphRow);
+                label: 'No data',
+                data: [{}, {}, {}, {}, {}, {}],
+                backgroundColor: [''],
+                borderColor: [''],
+                borderWidth: 0,
+                hidden: false,
+            } as DatasetGraphRow);
             const foodData: FoodRow = (await dbService.query(GET_FOOD_FOR_ID(this.ids[i] as string))).rows[0];
-            this.noDataFor.push(foodData.naam as string);  
+            this.noDataFor.push(foodData.naam as string);
         },
         setGraph() {
             this.isRadarPlot = false;
@@ -170,6 +170,9 @@ export default {
         getColorForFood(i: number): string {
             return foodColors['food' + (i + 1).toString()];
         },
+        onlyUnique(value: any, index: number, array: Array<any>) {
+            return array.indexOf(value) === index;
+        }
     },
     watch: {
         focusedDataset(n, o) {
@@ -179,7 +182,7 @@ export default {
             for (let i = 0; i < this.ids.length; i++) {
                 this.fillGraphFor(i);
             }
-            this.$nextTick(() => {this.loaded()});
+            this.$nextTick(() => { this.loaded() });
         }
     }
 }
@@ -191,7 +194,8 @@ export default {
             <h3 v-if="!isRadarPlot" class="headerShrink">Nutrient Graph</h3>
             <h3 v-if="isRadarPlot" class="headerShrink">Nutrient Radar Plot</h3>
             <div class="position-absolute controls d-flex">
-                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{ noDataFor.join(', ') }}
+                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{
+                    noDataFor.filter(onlyUnique).join(', ') }}
                 </div>
                 <div class="btn-group btnGroup" role="group" aria-label="Basic example">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" checked>
