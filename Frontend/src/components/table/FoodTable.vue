@@ -4,14 +4,17 @@ import TableGraph from './TableGraphs.vue';
 import TableRowNutrition from './TableRowNutrition.vue';
 import TableRowAllergy from './TableRowAllergy.vue';
 import FoodPicker from '@/components/FoodPicker.vue';
-import RecipesList from '@/components/RecipesList.vue';
+import TableRecipe from './TableRecipe.vue';
 import SpinnerComponent from '../SpinnerComponent.vue';
-import { NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR } from '@/services/queries';
+import { NUTRIENTS_FOR, GET_ALLERGIES_PER_FOOD_FOR, COUNT_ALLERGIES_FOR, COUNT_RECIPE_FOR} from '@/services/queries';
 import { DBService, distinctNames } from '@/services/db.service';
-import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow } from '@/services/dbClasses';
+import type { DistinctRows, FoodRow, AllergyPercentageRow, FoodAllergyRow, RecipeCount } from '@/services/dbClasses';
 import { mean } from '@/services/statistics';
+import * as bootstrap from 'bootstrap';
 
 const dbService = new DBService;
+
+type SortRow = {name: string, sort: number|string|boolean};
 
 export default {
     props: {
@@ -25,18 +28,25 @@ export default {
         TableRowHead,
         TableRowNutrition,
         FoodPicker,
-        RecipesList,
+        TableRecipe,
         SpinnerComponent,
         TableRowAllergy
     },
     data() {
         return {
+            isLoading: true,
             foodItems: [] as FoodRow[],
-            foodNutritions: Object() as {[key: string]: number[]},
-            tabIndex: 0,
+            foodNutritions: {} as {[key: string]: number[]},
+            tabIndex: (this.$route.query.tabIndex ?? 0) as number,
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
+            recipeCount: [] as RecipeCount[],
+            recipeLabel: [] as string[],
+            foodIds: [] as number[],
+            sortedFoodNames: {} as SortRow[],
+            foodIDs: {} as {[key: string]: number},
+            tabs: ['food', 'nutrition', 'allergies', 'recipes'] // names of the tabs for navigation
         }
     },
     created() {
@@ -61,9 +71,24 @@ export default {
                 percentages.push(this.allergyPercentages[i].percentage);
             }
             return percentages;
+        },
+        getAllergyCount() : number[] {
+            let counts = [];
+            for (let i = 0; i < this.allergyPercentages.length; ++i) {
+                counts.push(this.allergyPercentages[i].count);
+            }
+            return counts;
         }
     },
     methods: {
+        // Returns food names with their id {'food': id}
+        getFoodIDs() {
+            let foodIDs = {} as {[key: string]: number};
+            for (let i = 0; i < this.foodItems.length; ++i) {
+                foodIDs[this.foodItems[i].naam] = this.foodItems[i].id;
+            }
+            return foodIDs;
+        },
         getMaxColums() {
             const column = 6;
             let max_value_colum = Array<number>(column);
@@ -79,21 +104,30 @@ export default {
             return max_value_colum;
         },
         receiveFooditems(event: any, foodItems: any, totalCount: number) {
-            console.log(foodItems);
             if (foodItems !== undefined && foodItems.length != 0) {
                 this.foodItems = foodItems;
+                this.sortedFoodNames = this.getInitialSortedFoodNames(this.foodItems);
                 this.$emit('returnTotalCount', null, totalCount);
+                if(this.tabIndex == 1)
+                    this.createNutritions();
+                if(this.tabIndex == 2)
+                    this.fetchAllergyInfo();
+                if(this.tabIndex == 3){
+                    this.isLoading = true;
+                    this.fetchRecipeInfo();
+                }
+            }
+        },
+        getFoodInfo(){
+            for(let i = 0; i < this.foodItems.length; i++){
+                this.recipeLabel.push(this.foodItems[i].naam);
+                this.foodIds.push(this.foodItems[i].id);
                 this.createNutritions();
                 this.fetchAllergyInfo();
+                this.foodIDs = this.getFoodIDs();
             }
         },
         async createNutritions() {
-            // let ids: Array<string> = new Array<string>();
-            // this.foodItems.forEach((row) => {
-            //     ids.push(row.id);
-            // })
-            // console.log(NUTRIENTS_FOR_FOODS(ids));
-            // console.log(this.foodNutritions);
             this.foodNutritions = {};
             for (let i = 0; i < this.foodItems.length; i++) {
                 const id: string = this.foodItems[i].id.toString();
@@ -118,10 +152,33 @@ export default {
             this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
             this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
         },
-        setTabIndex(index: number) {
-            this.tabIndex=index;
+        async fetchRecipeInfo(){
+            this.recipeCount = [];
+            this.foodIds = [];
+            this.recipeLabel = [];
+            this.getFoodInfo();
+            const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
+            this.recipeCount = (await dbService.query(queryString, false)).rows;
+            this.isLoading = false;
         },
-        getAllergiesOfFood(foodName: string) {
+        setTabIndex(index: number) {
+            this.$router.push({ // push same route, but append tabindex
+                name: this.$route.name ?? 'home',
+                params: this.$route.params,
+                query: { ...this.$route.query, tabIndex: index}
+            })
+            this.tabIndex=index;
+            if(this.tabIndex == 1)
+                this.createNutritions();
+            if(this.tabIndex == 2)
+                this.fetchAllergyInfo();
+            if(this.tabIndex == 3){
+                this.isLoading = true;
+                this.fetchRecipeInfo();
+            }
+            this.sortNutritions(0, true); // reset sort order of table on change tab
+        },
+        getAllergiesOfFood(foodName: string): FoodAllergyRow[] {
             return this.allergiesPerFood?.filter(function(item) { return item.food==foodName;});
         },
         getNutrientPercentages(){
@@ -142,9 +199,104 @@ export default {
                 percentage[i] = ((percentage[i]/total)*100).toFixed(2);;
             }
             return percentage;
-        }
+        },
+        getInitialSortedFoodNames(foodItems: FoodRow[]): SortRow[] {
+            // Create array with [foodName, foodName]
+            let sortedFoodNames = Object.keys(foodItems).map(function(key: string, index: number, keys: string[]) {
+                return {name: foodItems[index].naam, sort: foodItems[index].naam};
+            }) as SortRow[];
+            return sortedFoodNames;
+        },
+        sortNutritions(filterColumn: number, sortDown: boolean) {
+            let foodNutritions = this.foodNutritions;
+            // Make array of structure [foodname, sortValue]
+            this.sortedFoodNames = Object.keys(foodNutritions).map(function(key, index, keys) {
+                if (filterColumn == 0) {    // filter by name
+                    return {name: key, sort: key};
+                } else {                    // filter by nutrition value or allergy
+                    return {name: key, sort: foodNutritions[key][filterColumn - 1]};
+                }
+            }) as SortRow[];
+            if (sortDown) {
+                this.sortedFoodNames.sort((a: SortRow, b: SortRow) => {
+                    if (a.sort == null)
+                        return 1;
+                    else if (b.sort == null)
+                        return -1;
+                    else
+                        return a.sort < b.sort ? -1 : 1; // sort down
+                })
+            } else {
+                this.sortedFoodNames.sort((a: SortRow, b: SortRow) => {
+                    if (a.sort == null)
+                        return 1;
+                    else if (b.sort == null)
+                        return -1;
+                    else
+                        return b.sort < a.sort ? -1 : 1; // sort up
+                })
+            }
+        },
+        sortAllergies(filterColumn: number, sortDown: boolean) {
+            function foodHasAllergy(allergiesPerFood: FoodAllergyRow[], foodName: string, allergy: string): boolean {
+                for (var row of allergiesPerFood) {
+                    if (row.food == foodName && row.allergy == allergy) {
+                        console.log('has allergy');
+                        return true;
+                    }
+                }
+                return false;
+            }
+            let allergyNames = this.getAllergyNames;
+            let foodItems: FoodRow[] = this.foodItems;
+            let allergiesPerFood = this.allergiesPerFood;
+            // make map of structure [foodName]
+            this.sortedFoodNames = Object.keys(foodItems).map(function(key, index, keys) {
+                if (filterColumn == 0) {    // filter by name
+                    return {name: foodItems[index].naam, sort: foodItems[index].naam};
+                } else {                    // filter by nutrition value or allergy
+                    let allergyFilter = allergyNames[filterColumn - 1];
+                    let _foodHasAllergy = foodHasAllergy(allergiesPerFood, foodItems[index].naam, allergyFilter);
+                    return {name: foodItems[index].naam, sort: _foodHasAllergy};
+                }
+            });
+            if (sortDown) {
+                this.sortedFoodNames.sort((a: SortRow, b: SortRow) => {
+                    if (a.sort)
+                    return -1;
+                    else if (b.sort)
+                    return 1;
+                    else
+                    return 0;
+                })
+            } else {
+                this.sortedFoodNames.sort((a: SortRow, b: SortRow) => {
+                    if (a.sort)
+                    return 1;
+                    else if (b.sort)
+                    return -1;
+                    else
+                    return 0;
+                })
+            }
+        },
+        
+    },
+    mounted() {
+        // const triggerTabList = document.querySelectorAll('[role="tab"]');
+        // triggerTabList.forEach(triggerEl => {
+        //     // event listener for changes tabs
+        //   triggerEl.addEventListener('click', event => {
+        //     console.log('changed tab');
+        //   })
+        // });
+
+        
+        document.getElementById('nav-' + this.tabs[this.tabIndex]+'-tab')?.click(); // open tab that is set in router
     }
 }
+
+
 </script>
 <template>
     <div id="table">
@@ -176,15 +328,14 @@ export default {
                         <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead
-                            :columnNames="['Name'].concat(nutritionHeaders)" />
+                        <TableRowHead :columnNames="['Name'].concat(nutritionHeaders)" @sortByColumn="sortNutritions"/>
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowNutrition v-bind:key="foodItems[i].id" v-if="Object.keys(foodNutritions).length != 0" v-for="(nutritions, key, i) in foodNutritions"
-                            :columnNames="nutritionHeaders" :id="foodItems[i].id" :name="Object.keys(foodNutritions)[i]" :items="nutritions" :max_value="getMaxColums()"/>
+                        <TableRowNutrition v-bind:key="foodIDs[item.name]" v-if="Object.keys(foodNutritions).length != 0" v-for="item in sortedFoodNames"
+                            :columnNames="nutritionHeaders" :id="foodIDs[item.name]" :name="item.name" :items="foodNutritions[item.name] ?? []" :max_value="getMaxColums()"/>
                     </tbody>
                 </table>
             </div>
@@ -192,22 +343,27 @@ export default {
             <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames"/>
+                        <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount" :totaalFoods="foodItems.length"/>
                     </thead>
                     <thead class="table-secondary">
-                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)" />
+                        <TableRowHead :columnNames="['Name'].concat(getAllergyNames)"  @sortByColumn="sortAllergies"/>
                     </thead>
                     <tbody>
                         <div v-if="foodItems.length == 0">
                             <SpinnerComponent></SpinnerComponent>
                         </div>
-                        <TableRowAllergy v-if="foodItems.length != 0" v-for="(food, i) in foodItems"
-                            :id="foodItems[i].id" :name="food.naam" :allergyNames="getAllergyNames" :allergies="getAllergiesOfFood(food.naam)" />
+                        <TableRowAllergy v-if="foodItems.length != 0" v-for="item in sortedFoodNames"
+                            :id="foodIDs[item.name]" :name="item.name" :allergyNames="getAllergyNames" :allergies="getAllergiesOfFood(item.name)" />
                     </tbody>
                 </table>
             </div>
             <div class="tab-pane fade no-rows" id="nav-recipes" role="tabpanel" aria-labelledby="nav-recipes-tab" tabindex="0">
-                <RecipesList v-if="tabIndex==3" class="mx-auto" id="1"></RecipesList>
+                <div v-if="isLoading">
+                            <SpinnerComponent></SpinnerComponent>
+                </div>
+                <div v-if="!isLoading || recipeCount.length != 0">
+                    <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipescount="recipeCount" ></TableRecipe>
+                </div>
             </div>
         </div>
     </div>
@@ -222,7 +378,6 @@ export default {
 
 .tab-pane {
     border-style: solid;
-    
     border-color: $gray-300;
 }
 

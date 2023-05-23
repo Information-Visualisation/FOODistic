@@ -87,7 +87,7 @@ export default {
                         },
                         ticks: {
                             stepSize: 1,
-                            callback: function (value: any, index: number, values: any) {
+                            callback: function (value: number, index: number, values: Array<Number>) {
                                 return techniqueStrings[value];
                             }
                         }

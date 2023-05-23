@@ -141,9 +141,4 @@ export default {
     top: 70px;
     left: 266px
 }
-
-.noData {
-    top: 106px;
-    left: 227px
-}
 </style>
