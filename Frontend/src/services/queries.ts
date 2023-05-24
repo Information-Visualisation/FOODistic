@@ -86,7 +86,7 @@ export function GET_RECIPES_FOR(id: string): string {
 		fi.food_id = `+id+` AND
 		fi.ingredient_id = ANY (recipes_filtered.ingredient_ids)
 	)
-	LIMIT 100`;
+	LIMIT 300`;
 }
 
 export function GET_RECIPE(id: string): string{

@@ -18,6 +18,7 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js/auto'
+import { capitalize } from 'vue';
 
 const dbService = new DBService;
 const labels = nutrientsFoodDB;
@@ -62,6 +63,29 @@ export default {
                     legend: {
                         position: 'top',
                         display: this.ids.length > 1,
+                    },
+                    tooltip: {
+                        usePointStyle: true,
+                        boxPadding: 10,
+                        padding: 10,
+                        bodyFont: {
+                            weight: 'bold',
+                        },
+                        callbacks: {
+                            footer: (context: any) => {
+                                return context[0].dataset.label+': '+context[0].raw.y.toFixed(2) + ' mg/100g';
+                            },
+                            afterFooter: (context: any) => {
+                                
+                                return 'Standard deviation: '+ context[0].raw.yMin.toFixed(2)+' - '+context[0].raw.yMax.toFixed(2)+' mg/100g';
+                            },
+                            title: (context: any) => {
+                                return '';  // to remove default title
+                            },
+                            label: (context: any) => {
+                                return capitalize(context.label);
+                            }
+                        }
                     },
                 },
                 scales: {
@@ -231,7 +255,10 @@ export default {
             </div>
         </div>
         <div class="collapse" id="collapseExample">
-            Shows the nutrient data for the food in question. The axis are mg/100g.
+            Shows the nutrient data for the food in question. 
+            The axis are mg/100g. If there are multiple foods selected, they could be compared by hovering over the food at the top or by clicking on them in the legend.
+            The error bars represent standard deviation of the different results from the entities and institutions that calculated different nutrient values for this food. 
+            You could also click the button group to select the Star / Radar plot. This plot shows a visual juxtoposition of the selected foods.
         </div>
     </div>
 </template>

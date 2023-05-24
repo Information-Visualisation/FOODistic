@@ -134,29 +134,30 @@ export default {
         }
     },
     async created() {
+        this.isLoading = true;
         for (let i = 0; i < this.ids.length; i++) {
             await this.fetchData(i, this.ids[i] as string);
         }
         this.selectNutrient(this.selectedNutrient);
 
         this.combineRecipes();
+        this.$nextTick(() => {
+            this.loaded();
+        })
     },
     methods: {
         async fetchData(foodIndex: number, id: string) {
             const queryString: string = GET_RECIPES_FOR(id);
-            this.recipesPerFood.push((await dbService.query(queryString, false)).rows);
+            this.recipesPerFood.push((await dbService.query(queryString)).rows);
             this.countRecipes();
             this.filteredRecipes = this.recipesPerFood;
-            this.$nextTick(() => {
-                this.loaded();
-            })
         },
         async countRecipes() {
             function toNumber(value: String) {
                 return Number(value);
             }
             let ids: Array<number> = this.ids.map(toNumber);
-            let rows = (await dbService.query(COUNT_RECIPE_FOR(ids), false)).rows;
+            let rows = (await dbService.query(COUNT_RECIPE_FOR(ids))).rows;
             for (let row of rows) {
                 this.recipesCount.push(row.recipecount);
             }
@@ -204,7 +205,7 @@ export default {
         },
         decompress(value: number): number {
             //value * this.factor
-            return Math.pow(value, this.factor);
+            return Math.pow(this.factor, value);
         },
         getNutrientForTechniques(foodIndex: number, techniqueIndex: number, nutrientIndex: number, getLog: boolean = true): number {
             let nutrient = 0;
@@ -219,6 +220,10 @@ export default {
             }
 
             if (this.isAverage) {
+                console.log('========');
+                console.log(foodIndex);
+                console.log(nutrient);
+                console.log(totalCount);
                 nutrient = nutrient / totalCount;
             }
 
@@ -260,9 +265,19 @@ export default {
             let combining: CombinedRecipes = { ofFoods: [], combinedRecipes: [] };
 
             combining.combinedRecipes = Object.values(this.recipesPerFood).map(Object.values).flat();
+
+            //code to make sure it doesn't reuse recipes IF they're shared between foods
+            combining.combinedRecipes = combining.combinedRecipes.reduce((accumulator, currentObject) => {
+                let recipeId = currentObject.recipeid;
+                if (!accumulator.some(obj => obj.recipeid === recipeId)) {
+                    accumulator.push(currentObject);
+                }
+                return accumulator;
+            }, []);
+
             
-            let temp: Array<RecipesRow> = [... new Set(combining.combinedRecipes)];
-            console.log(temp);
+            // let temp: Array<RecipesRow> = [... new Set(combining.combinedRecipes)];
+            // console.log(temp);
                 
 
             for (let recipeIndex = 0; recipeIndex < combining.combinedRecipes.length; recipeIndex++) {
@@ -411,7 +426,10 @@ export default {
             </ul>
         </div>
         <div class="collapse" id="collapseExample">
-            idk
+            This bubble chart shows a link between the recipes of this food, the cooking techniques and their nutrient values. 
+            The nutrient value is represented in a percentage % for a healthy day intake. One bubble will show the daily % if you were to cook the selected food with a certain cooking technique for all the recipes that are available.
+            If you hover over a recipe you also can see the nutrient percentage daily intake. Clicking a recipe will make you go to the recipe view. 
+            We have limited the amount of recipes shown to 300 per food because this would otherwise slow down the browser significantly.
         </div>
     </div>
 </template>
