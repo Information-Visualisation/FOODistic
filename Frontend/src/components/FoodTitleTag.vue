@@ -4,6 +4,7 @@ import FoodImg from './FoodImg.vue';
 import { DBService } from '@/services/db.service';
 import type { FoodRow } from '@/services/dbClasses';
 import { GET_ALLERGY_FOR, GET_FOOD_FOR_ID } from '@/services/queries';
+import IconLink from './icons/IconLink.vue';
 
 const dbService = new DBService;
 
@@ -31,9 +32,10 @@ export default {
         }
     },
     components: {
-        FoodImg,
-        SpinnerComponent
-    },
+    FoodImg,
+    SpinnerComponent,
+    IconLink
+},
     data() {
         return {
             row: {} as FoodRow,
@@ -96,15 +98,7 @@ export default {
     <div v-if="loading">
         <SpinnerComponent></SpinnerComponent>
     </div>
-    <a :href="$router.resolve({
-            name: 'food',
-            params: {
-                name: name,
-            },
-            query: {
-                id: id
-            }
-        }).href" v-if="!loading && !isMinimized"
+    <button v-if="!loading && !isMinimized"
         :class="'rounded-pill tag '+(foodNum == 0 ? 'btn-outline-success' : ' btn-outline-food' + foodNum.toString()) + ' btn'"
         @mouseover="focusDataset" @mouseleave="unfocusDataset">
         <div class="row flex-nowrap align-items-center ">
@@ -128,14 +122,16 @@ export default {
             <div class="col tagCol1 nopadmarg">
                 <button v-if="allowClose" type="button" class="btn-close" aria-label="Close" @click="deletePicked"></button>
                 <!-- <div v-if="!allowClose" class="main">main</div> -->
+                <button v-if="allowClose" type="button" class="btn" aria-label="Go To Page" @click="makeMain"><IconLink/></button>
             </div>
         </div>
-    </a>
+    </button>
     <button v-if="!loading && isMinimized" @mouseover="focusDataset" @mouseleave="unfocusDataset" :class="'flexMinimized rounded-pill tag ' +(foodNum == 0 ? 'btn-outline-success' : ' btn-outline-food' + foodNum.toString())
         + ' btn'" @click="">
         {{ name }}
         <button v-if="allowClose" type="button" class="btn-close ms-1" aria-label="Close" @click="deletePicked"></button>
-        <div v-if="!allowClose" class="main ms-1">main</div>
+        <!-- <div v-if="!allowClose" class="main ms-1">main</div> -->
+        <button v-if="allowClose" type="button" class="btn" aria-label="Go To Page" @click="makeMain"><IconLink/></button>
     </button>
 </template>
 

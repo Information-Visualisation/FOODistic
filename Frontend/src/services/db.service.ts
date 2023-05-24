@@ -30,8 +30,4 @@ export function distinctNames(rows: Array<NutrientRow>): DistinctRows {
   return names;
 }
 
-export function onlyUnique(value: any, index: number, array: Array<any>) {
-  return array.indexOf(value) === index;
-}
-
 export { nutrientsRecipeDB, nutrientsFoodDB }

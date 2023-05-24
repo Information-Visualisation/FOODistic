@@ -35,7 +35,7 @@ export default {
             type: Array<String>,
             required: true,
         },
-        recipescount: {
+        recipesCount: {
             type: Array<Number>,
             required: true
         }
@@ -93,12 +93,12 @@ export default {
                 this.isFiltering = false;
             })
         },
-        getRecipeCount(){
+        getRecipeCount(): Array<number> {
             let recipeCount: Array<number> = new Array<number>(this.foodIds.length).fill(0);
             for (let i = 0; i < this.foodIds.length; i++) {
-                for(let j = 0; j < this.recipescount.length; j++){
-                    if(this.recipescount[j].foodid == this.foodIds[i] ){
-                        recipeCount[i] = this.recipescount[j].recipecount
+                for(let j = 0; j < this.recipesCount.length; j++){
+                    if(this.recipesCount[j].foodid == this.foodIds[i] ){
+                        recipeCount[i] = this.recipesCount[j].recipecount
                     }
                 }
             }
@@ -117,7 +117,7 @@ export default {
                 <Bar :data="data" :options="options" />
             </div>
             <div v-else="!isLoading" class="position-relative">
-                <div v-if="recipescount.length <= 0" class="position-absolute alert alert-warning noDataRecipe" role="alert">No recipes found
+                <div v-if="recipesCount.length <= 0" class="position-absolute alert alert-warning noDataRecipe" role="alert">No recipes found
                 </div>
                 <Bar v-if="!isFiltering" :data="data" :options="options" />
             </div>

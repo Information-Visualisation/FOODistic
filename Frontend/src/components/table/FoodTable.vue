@@ -41,7 +41,7 @@ export default {
             allergiesPerFood: [] as FoodAllergyRow[],
             allergyPercentages: [] as AllergyPercentageRow[],
             nutritionHeaders: ['Ash', 'Carbohydrate', 'Fat', 'Fatty Acid', 'Fiber', 'Proteins'],
-            recipeCount: [] as RecipeCount[],
+            recipesCount: [] as RecipeCount[],
             recipeLabel: [] as string[],
             foodIds: [] as number[],
             sortedFoodNames: {} as SortRow[],
@@ -155,9 +155,9 @@ export default {
             this.getFoodInfo();
             if (this.tabIndex == 3) {
                 this.isLoading = true;
-                this.recipeCount = [];
+                this.recipesCount = [];
                 const queryString: string = COUNT_RECIPE_FOR(this.foodIds);
-                this.recipeCount = (await dbService.query(queryString, false)).rows;
+                this.recipesCount = (await dbService.query(queryString, false)).rows;
                 this.isLoading = false;
             }
         },
@@ -354,8 +354,8 @@ export default {
                 <div v-if="isLoading">
                             <SpinnerComponent></SpinnerComponent>
                 </div>
-                <div v-if="!isLoading || recipeCount.length != 0">
-                    <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipescount="recipeCount" ></TableRecipe>
+                <div v-if="!isLoading || recipesCount.length != 0">
+                    <TableRecipe v-if="tabIndex==3" class="mx-auto" :foodIds="foodIds" :label="recipeLabel" :recipesCount="recipesCount" ></TableRecipe>
                 </div>
             </div>
         </div>

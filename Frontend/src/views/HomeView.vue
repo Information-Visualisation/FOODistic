@@ -99,8 +99,8 @@ export default {
       this.filteritems = (await dbService.query("SELECT DISTINCT allergy FROM allergies WHERE allergy IS NOT NULL;")).rows;
     },
     setPage(i: number) {
-      this.offset = i;
       this.route();
+      this.offset = i;
     },
     receiveRowCount(event: any, totalCount: number) {
       const pageCount = Math.ceil(totalCount / this.pageSize);

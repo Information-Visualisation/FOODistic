@@ -4,7 +4,7 @@ import type { RecipesRow, DatasetRecipeRow, CombinedRecipes, FoodRow } from '../
 import SpinnerComponent from './SpinnerComponent.vue';
 import RecipeItem from '../components/RecipeItem.vue';
 import NutrientGraphRecipe from './NutrientGraphRecipe.vue';
-import { GET_FOOD_FOR_ID, GET_RECIPES_FOR } from '../services/queries';
+import { COUNT_RECIPE_FOR, GET_FOOD_FOR_ID, GET_RECIPES_FOR } from '../services/queries';
 import { Bar, Bubble } from 'vue-chartjs';
 import { techniqueStrings } from '@/services/cookingtechniques';
 import { getTechniqueCounts } from '@/services/cookingtechniques';
@@ -29,7 +29,7 @@ const defaultColorForNutrient = '#FF6384';
 const labels = nutrientsRecipeDB;
 
 function onlyUnique(value: any, index: number, array: Array<any>) {
-  return array.indexOf(value) === index;
+    return array.indexOf(value) === index;
 }
 
 export default {
@@ -67,6 +67,7 @@ export default {
             factor: 1.5,
             noData: false,
             noDataFor: [] as Array<String>,
+            recipesCount: [] as Array<Number>,
             data: {
                 labels: techniqueStrings,
                 datasets: [] as Array<DatasetRecipeRow>
@@ -144,11 +145,21 @@ export default {
         async fetchData(foodIndex: number, id: string) {
             const queryString: string = GET_RECIPES_FOR(id);
             this.recipesPerFood.push((await dbService.query(queryString, false)).rows);
-
+            this.countRecipes();
             this.filteredRecipes = this.recipesPerFood;
             this.$nextTick(() => {
                 this.loaded();
             })
+        },
+        async countRecipes() {
+            function toNumber(value: String) {
+                return Number(value);
+            }
+            let ids: Array<number> = this.ids.map(toNumber);
+            let rows = (await dbService.query(COUNT_RECIPE_FOR(ids), false)).rows;
+            for (let row of rows) {
+                this.recipesCount.push(row.recipecount);
+            }
         },
         loaded() {
             this.isLoading = false;
@@ -248,7 +259,11 @@ export default {
             this.doneCombining = false;
             let combining: CombinedRecipes = { ofFoods: [], combinedRecipes: [] };
 
-            combining.combinedRecipes = [...new Set(Object.values(this.recipesPerFood).map(Object.values).flat())];
+            combining.combinedRecipes = Object.values(this.recipesPerFood).map(Object.values).flat();
+            
+            let temp: Array<RecipesRow> = [... new Set(combining.combinedRecipes)];
+            console.log(temp);
+                
 
             for (let recipeIndex = 0; recipeIndex < combining.combinedRecipes.length; recipeIndex++) {
                 const recipe: RecipesRow = combining.combinedRecipes[recipeIndex];
@@ -327,7 +342,8 @@ export default {
         <div class="position-relative">
             <h3 class="headerShrink">Recipe List</h3>
             <div class="position-absolute controls d-flex">
-                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{ noDataFor.filter(onlyUnique).join(',') }}
+                <div v-if="noData" class="alert alert-warning noData" role="alert">No data for {{
+                    noDataFor.filter(onlyUnique).join(',') }}
                 </div>
                 <div v-if="!isLoading && selectedRecipeIndex == -1" class="form-check form-switch toggle">
                     <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
@@ -378,6 +394,7 @@ export default {
                     <div v-if="isLoading">
                         <SpinnerComponent class="mx-auto p-2" />
                     </div>
+                    <div>Recipe Count: {{ recipesCount.filter(onlyUnique).join(',') }}</div>
                     <div class="position-relative hoverCursor">
                         <div class="row">
                             <div class="col text-start">Recipe Name</div>
