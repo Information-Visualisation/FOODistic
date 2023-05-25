@@ -361,7 +361,7 @@ export default {
                         @click="toggleAverage">
                     <label class="form-check-label" for="flexSwitchCheckDefault">Average</label>
                 </div>
-                <div v-if="!isLoading" class="btn-group">
+                <div v-if="!isLoading && selectedRecipeIndex == -1" class="btn-group">
                     <button type="button" class="btn-outline-custom btn dropdown-toggle" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         {{ selectedNutrient }}
@@ -409,13 +409,13 @@ export default {
                     <div class="position-relative hoverCursor">
                         <div class="row">
                             <div class="col text-start">Recipe Name</div>
-                            <div class="col">Food</div>
+                            <div v-if="ids.length != 1" class="col">Food</div>
                             <div class="col text-end">Cooking Techniques</div>
                         </div>
                     </div>
                 </li>
                 <RecipeItem v-if="doneCombining" v-for="(recipe, index) in combined.combinedRecipes"
-                    :recipeName="recipe.recipename" :techniques="recipe.techniques" :ofFoods="getFoodColorNum(index)"
+                    :recipeName="recipe.recipename" :techniques="recipe.techniques" :ofFoods="ids.length == 1 ? [-1] : getFoodColorNum(index)"
                     @mouseenter="showOneRecipe(index, true)" @mouseleave="showOneRecipe(index, false)"
                     @click="$router.push({ name: 'recipe', query: { id: recipe.recipeid } })">
                 </RecipeItem>

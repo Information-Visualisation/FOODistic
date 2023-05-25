@@ -71,7 +71,7 @@ export default {
         <div class="col text-start">
           {{ recipeName.replace(/\b\w/g, (x) => x.toUpperCase()) }}
         </div>
-        <div class="col">
+        <div v-if="ofFoods[0] != -1" class="col">
           <div class="row foodIndicatorCol">
             <div v-for="food,i in ofFoods" :class="'rounded-circle foodIndicator food'+ofFoods[i].toString()"/>
           </div>
