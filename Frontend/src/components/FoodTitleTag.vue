@@ -131,7 +131,7 @@ export default {
         {{ name }}
         <button v-if="allowClose" type="button" class="btn-close ms-1" aria-label="Close" @click="deletePicked"></button>
         <!-- <div v-if="!allowClose" class="main ms-1">main</div> -->
-        <button v-if="allowClose" type="button" class="btn" aria-label="Go To Page" @click="makeMain"><IconLink/></button>
+        <!-- <button v-if="allowClose" type="button" class="btn" aria-label="Go To Page" @click="makeMain"><IconLink/></button> -->
     </button>
 </template>
 

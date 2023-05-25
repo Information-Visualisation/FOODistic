@@ -123,7 +123,7 @@ export default {
             this.foodIDs = this.getFoodIDs();
         },
         async createNutritions() {
-            if (this.tabIndex == 1) {
+            // if (this.tabIndex == 1) {
                 this.foodNutritions = {};
                 for (let i = 0; i < this.foodItems.length; i++) {
                     const id: string = this.foodItems[i].id.toString();
@@ -132,7 +132,7 @@ export default {
                     const naam = this.foodItems[i].naam;
                     this.foodNutritions[naam] = this.createNutrition(result);
                 }
-            }
+            // }
         },
         createNutrition(result: any): number[] {
             let nutrition: number[] = [];
@@ -146,10 +146,10 @@ export default {
             return nutrition;
         },
         async fetchAllergyInfo() {
-            if (this.tabIndex == 2) {
+            // if (this.tabIndex == 2) {
                 this.allergiesPerFood = (await dbService.query(GET_ALLERGIES_PER_FOOD_FOR(this.foodItems))).rows;
                 this.allergyPercentages = (await dbService.query(COUNT_ALLERGIES_FOR(this.foodItems))).rows;
-            }
+            // }
         },
         async fetchRecipeInfo() {
             this.getFoodInfo();

@@ -12,7 +12,10 @@ const nutrientColors = {
     'Fat': '#ECA72C',
     'Fatty Acid': '#E54B4B',
     'Fiber': '#028090',
-    'Proteins': '#447604'
+    'Proteins': '#447604',
+    'Sodium': '#B9314F',
+    'Sugar': '#71677C',
+    'Saturated fat': '#6E9887',
 } as {[key: string]: string};
 
 const bordeau = '#B6393B';

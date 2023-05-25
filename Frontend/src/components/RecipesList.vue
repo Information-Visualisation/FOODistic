@@ -220,10 +220,6 @@ export default {
             }
 
             if (this.isAverage) {
-                console.log('========');
-                console.log(foodIndex);
-                console.log(nutrient);
-                console.log(totalCount);
                 nutrient = nutrient / totalCount;
             }
 
@@ -409,7 +405,7 @@ export default {
                     <div v-if="isLoading">
                         <SpinnerComponent class="mx-auto p-2" />
                     </div>
-                    <div>Recipe Count: {{ recipesCount.filter(onlyUnique).join(',') }}</div>
+                    <div>Recipe Count: {{ recipesCount.filter(onlyUnique).reverse().join(',') }}</div>
                     <div class="position-relative hoverCursor">
                         <div class="row">
                             <div class="col text-start">Recipe Name</div>
