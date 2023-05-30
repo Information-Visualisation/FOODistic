@@ -54,6 +54,19 @@ export default {
                         position: 'top',
                         display: false
                     },
+                    tooltip: {
+                        callbacks: {
+                            footer: (context: any) => {
+                                return context[0].formattedValue + '% of daily value';
+                            },
+                            title: (context: any) => {
+                                return '';  // to remove default title
+                            },
+                            label: (context: any) => {
+                                return context.label;
+                            }
+                        }
+                    }
                 },
                 scales: {
                     y: {
@@ -100,8 +113,8 @@ export default {
             if (rows.length <= 0) {
                 this.noData = true;
             } else {
-                for(let i = 1; i < rows[0].nutritions.length; i++){
-                    this.data.datasets[0].data[i-1] = rows[0].nutritions[i]
+                for (let i = 1; i < rows[0].nutritions.length; i++) {
+                    this.data.datasets[0].data[i - 1] = rows[0].nutritions[i]
                 }
             }
         },
@@ -130,8 +143,8 @@ export default {
             <BarWithErrorBarChart :data="data" :options="options" />
         </div>
         <div class="collapse" id="collapseExample">
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
-            user activates the relevant trigger.
+            Here are the percentage of daily intake for the nutrients for this recipe.
+            These nutrient values are taken from the <a href="/about">Food.com dataset</a>.
         </div>
     </div>
 </template>

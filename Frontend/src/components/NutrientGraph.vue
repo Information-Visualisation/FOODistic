@@ -76,7 +76,6 @@ export default {
                                 return context[0].dataset.label+': '+context[0].raw.y.toFixed(2) + ' mg/100g';
                             },
                             afterFooter: (context: any) => {
-                                
                                 return 'Standard deviation: '+ context[0].raw.yMin.toFixed(2)+' - '+context[0].raw.yMax.toFixed(2)+' mg/100g';
                             },
                             title: (context: any) => {
