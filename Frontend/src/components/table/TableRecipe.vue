@@ -96,8 +96,8 @@ export default {
         getRecipeCount(): Array<number> {
             let recipeCount: Array<number> = new Array<number>(this.foodIds.length).fill(0);
             for (let i = 0; i < this.foodIds.length; i++) {
-                for(let j = 0; j < this.recipesCount.length; j++){
-                    if(this.recipesCount[j].foodid == this.foodIds[i] ){
+                for (let j = 0; j < this.recipesCount.length; j++) {
+                    if (this.recipesCount[j].foodid == this.foodIds[i]) {
                         recipeCount[i] = this.recipesCount[j].recipecount
                     }
                 }
@@ -109,21 +109,22 @@ export default {
 </script>
 
 <template>
-    <div style="min-height: 353px; width: 640px;">
-        <h3>Recipe List</h3>
+    <div style="min-height: 353px; width: 800px;">
+        <h3>Recipe Count List</h3>
         <div>
             <div v-if="isLoading" class="position-relative">
                 <SpinnerComponent class="position-absolute spinner" />
                 <Bar :data="data" :options="options" />
             </div>
-            <div v-else="!isLoading" class="position-relative">
-                <div v-if="recipesCount.length <= 0" class="position-absolute alert alert-warning noDataRecipe" role="alert">No recipes found
+            <div v-else="!isLoading" class="position-relative" >
+                <div v-if="recipesCount.length <= 0" class="position-absolute alert alert-warning noDataRecipe"
+                    role="alert">No recipes found
                 </div>
-                <Bar v-if="!isFiltering" :data="data" :options="options" />
+                <Bar v-if="!isFiltering" :data="data" :options="options" style="min-height: 353px; width: 800px;"/>
             </div>
             <div class="collapse" id="collapseExample">
-                Some placeholder content for the collapse component. This panel is hidden by default but revealed when the
-                user activates the relevant trigger.
+                This is the Recipe Count List. Here we can see the amount of recipes found for all the currently filtered foods. 
+                Hovering over a bar shows the exact amount of recipes shown for the food in question.
             </div>
         </div>
     </div>
@@ -139,7 +140,7 @@ export default {
     top: 120px;
     left: 250px
 }
+
 .scrollview {
     height: 289px;
-}
-</style>
+}</style>

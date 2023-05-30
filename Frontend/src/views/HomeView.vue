@@ -211,6 +211,7 @@ export default {
         </div>
         <div class="collapse" id="collapseExample">
           This is the search and filter widget for the Homeview. Here you can search for foods via search terms, filter in (sub)foodgroups and exclude allergies.
+          All the filters applied here will also be applied on every tab in the bottom table. (Food, Nutrition, Allergies, Recipes).
         </div>
       </div>
       <div class="">
