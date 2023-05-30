@@ -405,7 +405,7 @@ export default {
                     <div v-if="isLoading">
                         <SpinnerComponent class="mx-auto p-2" />
                     </div>
-                    <div>Recipe Count: {{ recipesCount.filter(onlyUnique).reverse().join(',') }}</div>
+                    <div>Recipe Count: {{ recipesCount.filter(onlyUnique).join(', ') }}</div>
                     <div class="position-relative hoverCursor">
                         <div class="row">
                             <div class="col text-start">Recipe Name</div>

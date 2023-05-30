@@ -318,7 +318,7 @@ export default {
             <div class="tab-pane fade rows" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
-                        <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" />
+                        <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" :isNutrient="true"/>
                     </thead>
                     <thead class="table-secondary">
                         <TableRowHead :columnNames="['Name'].concat(nutritionHeaders)" @sortByColumn="sortNutritions"/>

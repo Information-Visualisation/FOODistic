@@ -16,6 +16,10 @@ export default {
         },
         totaalFoods: {
             type: Number,
+        },
+        isNutrient: {
+            type: Boolean,
+            default: false,
         }
     },
     methods: {
@@ -40,7 +44,7 @@ export default {
 
 <template>
     <tr>
-    <th scope="col"></th> <!-- First one should be empty-->
+    <th scope="col"><div v-if="isNutrient" class="unit-indicator">mg/100g</div></th> <!-- First one should be empty-->
     <th scope="col" v-for="(percentage, index) in percentages">
         <div class="bar-wrapper">
             <p class="bar-percentage" :style="{color: getBarColor(index)}">
@@ -64,6 +68,12 @@ export default {
 
 .bar-percentage {
     text-align: center;
+    height: 20px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.unit-indicator {
     height: 20px;
     margin-bottom: 5px;
     font-weight: bold;
