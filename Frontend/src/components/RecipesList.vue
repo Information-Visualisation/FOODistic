@@ -423,9 +423,11 @@ export default {
         </div>
         <div class="collapse" id="collapseExample">
             This bubble chart shows a link between the recipes of this food, the cooking techniques and their nutrient values. 
-            The nutrient value is represented in a percentage % for a healthy day intake. One bubble will show the daily % if you were to cook the selected food with a certain cooking technique for all the recipes that are available.
+            The nutrient value is represented in a percentage for a healthy daily intake. One bubble will show the daily % if you were to cook the selected food with a certain cooking technique for all the recipes that are available.
             If you hover over a recipe you also can see the nutrient percentage daily intake. Clicking a recipe will make you go to the recipe view. 
             We have limited the amount of recipes shown to 300 per food because this would otherwise slow down the browser significantly.
+            You can switch between a cummulative or average view of the daily nutrient intake by clicking the average toggle. You can also select different nutrient values recorded for this recipe in the dropdown menu at the top right.
+            These nutrient values are taken from the <a href="/about">Food.com dataset</a>.
         </div>
     </div>
 </template>

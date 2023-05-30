@@ -259,6 +259,7 @@ export default {
             The axis are mg/100g. If there are multiple foods selected, they could be compared by hovering over the food at the top or by clicking on them in the legend.
             The error bars represent standard deviation of the different results from the entities and institutions that calculated different nutrient values for this food. 
             You could also click the button group to select the Star / Radar plot. This plot shows a visual juxtoposition of the selected foods.
+            These nutrient values are taken from the <a href="/about">FooDB dataset</a>.
         </div>
     </div>
 </template>

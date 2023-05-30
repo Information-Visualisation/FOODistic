@@ -122,10 +122,6 @@ export default {
                 </div>
                 <Bar v-if="!isFiltering" :data="data" :options="options" style="min-height: 353px; width: 800px;"/>
             </div>
-            <div class="collapse" id="collapseExample">
-                This is the Recipe Count List. Here we can see the amount of recipes found for all the currently filtered foods. 
-                Hovering over a bar shows the exact amount of recipes shown for the food in question.
-            </div>
         </div>
     </div>
 </template>

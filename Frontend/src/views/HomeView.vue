@@ -31,6 +31,7 @@ export default {
 
       foodName: this.$route.query.search !== undefined ? this.$route.query.search as string : "",
       allergies: this.$route.query.allergies !== undefined ? this.makeArray() : [],
+      includes: this.$route.query.includes !== undefined ? this.makeArray() : [],
       foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All Foodgroups",
       subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All Foodsubgroups",
       offset: this.$route.query.offset !== undefined ? parseInt(this.$route.query.offset as string) : 0,
@@ -55,11 +56,18 @@ export default {
         this.foodSubGroupitems = (await dbService.query(`SELECT DISTINCT food_subgroup FROM food WHERE food_group = '` + this.foodGroup + `' AND food_subgroup is NOT NULL`)).rows;
       }
     },
-    makeArray() {
-      if (typeof this.$route.query.allergies === 'string') {
-        return new Array(this.$route.query.allergies as string);
+    makeArray(isAllergies: boolean = true) {
+      if (isAllergies) {
+        if (typeof this.$route.query.allergies === 'string') {
+          return new Array(this.$route.query.allergies as string);
+        }
+        return this.$route.query.allergies as Array<string>;
+      } else {
+        if (typeof this.$route.query.includes === 'string') {
+          return new Array(this.$route.query.allergies as string);
+        }
+        return this.$route.query.includes as Array<string>;
       }
-      return this.$route.query.allergies as Array<string>;
     },
     loaded() {
       this.isLoading = false;
@@ -79,11 +87,13 @@ export default {
       this.loaded();
     },
     route() {
-      let options = { name: 'home', query: {} as { search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number, pageSize: number } };
+      let options = { name: 'home', query: {} as { search: string, allergies: string, includes: string, foodgroup: string, subfoodgroup: string, offset: number, pageSize: number } };
       if (this.foodName != '')
         options.query.search = this.foodName;
       if (this.allergies.length != 0)
         options.query.allergies = this.allergies;
+      if (this.includes.length != 0)
+        options.query.includes = this.includes;
       if (this.foodGroup != 'All Foodgroups')
         options.query.foodgroup = this.foodGroup;
       if (this.subFoodGroup != 'All Foodsubgroups')
@@ -189,29 +199,52 @@ export default {
               </ul>
             </div>
           </div>
-          <!-- Allergy Filter button -->
-          <div class="select-button btn-group">
-            <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown"
-              data-bs-auto-close="false" aria-expanded="false">
-              Exclude Allergies
-            </button>
-            <ul class="dropdown-menu">
-              <li class="dropdown-item" v-for="filteritem in filteritems">
-                <div class="form-check">
-                  <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
-                    :id="filteritem.allergy" name="alergies" v-model="allergies" @change="route"
-                    :checked="allergies.indexOf(filteritem.allergy) != -1" />
-                  <label class="form-check-label" :for="filteritem.allergy">
-                    {{ filteritem.allergy }}
-                  </label>
-                </div>
-              </li>
-            </ul>
+          <div>
+            <!-- Allergy Filter button -->
+            <div class="select-button btn-group">
+              <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown"
+                data-bs-auto-close="false" aria-expanded="false">
+                Exclude Allergies
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" v-for="filteritem in filteritems">
+                  <div class="form-check">
+                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
+                      :id="filteritem.allergy" name="alergies" v-model="allergies" @change="route"
+                      :checked="allergies.indexOf(filteritem.allergy) != -1" />
+                    <label class="form-check-label" :for="filteritem.allergy">
+                      {{ filteritem.allergy }}
+                    </label>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <!-- Allergy Selector button -->
+            <div class="select-button btn-group includes">
+              <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                data-bs-auto-close="false" aria-expanded="false">
+                Include Allergies
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" v-for="filteritem in filteritems">
+                  <div class="form-check">
+                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
+                      :id="filteritem.allergy" name="alergies" v-model="includes" @change="route"
+                      :checked="includes.indexOf(filteritem.allergy) != -1" />
+                    <label class="form-check-label" :for="filteritem.allergy">
+                      {{ filteritem.allergy }}
+                    </label>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="collapse" id="collapseExample">
-          This is the search and filter widget for the Homeview. Here you can search for foods via search terms, filter in (sub)foodgroups and exclude allergies.
-          All the filters applied here will also be applied on every tab in the bottom table. (Food, Nutrition, Allergies, Recipes).
+          This is the search and filter widget for the Homeview. Here you can search for foods via search terms, filter in
+          (sub)foodgroups and exclude allergies.
+          All the filters applied here will also be applied on every tab in the bottom table. (Food, Nutrition, Allergies,
+          Recipes).
         </div>
       </div>
       <div class="">
@@ -280,4 +313,9 @@ export default {
 
 .ItemPerPageButton {
   margin-right: 20px;
-}</style>
+}
+
+.includes {
+  margin-left: 10px;
+}
+</style>
