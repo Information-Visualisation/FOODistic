@@ -20,30 +20,18 @@ export default {
       <!-- <div class="container-fluid d-flex flex-row justify-content-center">
         <button type="button" class="btn btn-success" @click="$router.push({ name: 'home' })"> Home</button>
       </div> -->
-      <button type="button" class="btn btn-success" @click="$router.push({ name: 'about' })"> About</button>
+      <div>
+        <button type="button" class="btn btn-success" @click="$router.push({ name: 'about' })"> About</button>
+        <button class="btn btn-info help" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
+          aria-expanded="false" aria-controls="collapseExample">
+          Help <b>?</b>
+        </button>
+      </div>
     </div>
   </nav>
 
   <RouterView />
 </template>
-
-<!-- <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-
-    </div>
-  </header>
-
-  <RouterView />
-</template> -->
 
 <style scoped lang="scss">
 @import "../scss/custom.scss";
@@ -61,4 +49,9 @@ export default {
 .dropdown-menu {
   max-height: 280px;
   overflow-y: auto;
-}</style>
+}
+
+.help {
+  margin-left: 10px;
+}
+</style>

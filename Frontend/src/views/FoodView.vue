@@ -179,11 +179,11 @@ export default {
                 }).href" v-if="picked" type="button" class="btn btn-success mb-3" aria-label="Close">
                 Main ▶
             </a> -->
-            <br>
+            <!-- <br>
             <button class="btn btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
                 aria-expanded="false" aria-controls="collapseExample">
                 Help <b>?</b>
-            </button>
+            </button> -->
         </div>
     </div>
 </template>

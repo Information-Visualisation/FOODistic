@@ -310,12 +310,24 @@ export default {
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active no-rows" id="nav-food" role="tabpanel" aria-labelledby="nav-food-tab"
                 tabindex="0">
+                <div class="collapse" id="collapseExample">
+                    This is the foodpicker. Here you can find the foods that are relevant to you. You can go to the foodview by clicking a food of your chosing from this picker. 
+                    You can select more items per page to be shown via the 'per page' picker. 
+                    The homepage shows 24 foods when first opening the page. You can also go to the different pages via the pagination buttons at the bottom. 
+                    Do note that while searching, this pagination does not get reset. This means that f.e. when you are filtering for the word 'pineapple' and you are not on the first page, the search result will show 'no results found'. 
+                    This is because you are searching on the page that you have selected while there is only one pineapple food which will be shown on the first page. You can find the pineapple food, or any other food for that matter, by going to the first page.
+                </div>
                 <FoodPicker v-if="foodPickerData !== undefined" :name="foodPickerData?.name" :group="foodPickerData?.group" :subgroup="foodPickerData?.subgroup"
                     :offset="foodPickerData?.offset" :allergies="foodPickerData?.allergies" :pageSize="foodPickerData?.pageSize" @returnFooditems="receiveFooditems">
                 </FoodPicker>
             </div>
             <!-- Nutrients -->
             <div class="tab-pane fade rows" id="nav-nutrition" role="tabpanel" aria-labelledby="nav-nutrition-tab" tabindex="0">
+                <div class="collapse" id="collapseExample">
+                    This is the Nutrient/Nutrition Table. Here you can get a complete overview of the currently filtered foods. The unit are all shown in 100g/mg. 
+                    You can sort by a nutrient by clicking on the table header column. The arrow will indicate if you are ascending/descending the results. You can also go to the foodview of a food by clicking name of the food in the name column.
+                    Do note that the value NaN stands for 'No Available Number'. This means that there are no measurements available for this food.
+                </div>
                 <table v-if="tabIndex==1" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getNutrientPercentages()" :columnNames="nutritionHeaders" :isNutrient="true"/>
@@ -334,6 +346,12 @@ export default {
             </div>
             <!-- Allergies -->
             <div class="tab-pane fade rows" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab" tabindex="0">
+                <div class="collapse" id="collapseExample">
+                    This is the Allergy Table. Here you can get an overview of the allergies in the currently filtered food selection. 
+                    You can hover over a bar at the top to get a 'The amount the allergy is found on the page' / 'The amount of foods shown on this page' ratio.
+                    You can again sort the table via clicking the table header columns (See Nutrient/Nutrition Table for more info).
+
+                </div>
                 <table v-if="tabIndex==2" class="table table-hover">
                     <thead>
                         <TableGraph :percentages="getAllergyPercentages" :columnNames="getAllergyNames" :counts="getAllergyCount" :totaalFoods="foodItems.length"/>
@@ -382,5 +400,9 @@ export default {
  .no-rows{
     /* top right bottom left */
     border-width: 0px 1px 1px 1px;
+ }
+
+ .collapse {
+    margin: 10px;
  }
 </style>

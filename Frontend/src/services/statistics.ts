@@ -1,4 +1,4 @@
-import { mean as sMean, standardDeviation } from 'simple-statistics'
+import { mean as sMean, standardDeviation, variance } from 'simple-statistics'
 
 export function avg(length: number, values: number[]): number {
     let sum: number = 0;
@@ -15,4 +15,5 @@ export function mean(values: number[]) {
 
 export function std(values: number[]) {
     return standardDeviation(values);
+    //TODO: Why is this negative?
 }

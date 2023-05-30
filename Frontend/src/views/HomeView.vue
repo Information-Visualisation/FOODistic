@@ -79,7 +79,7 @@ export default {
       this.loaded();
     },
     route() {
-      let options = { name: 'home', query: {} as {search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number, pageSize: number} };
+      let options = { name: 'home', query: {} as { search: string, allergies: string, foodgroup: string, subfoodgroup: string, offset: number, pageSize: number } };
       if (this.foodName != '')
         options.query.search = this.foodName;
       if (this.allergies.length != 0)
@@ -208,6 +208,9 @@ export default {
               </li>
             </ul>
           </div>
+        </div>
+        <div class="collapse" id="collapseExample">
+          This is the search and filter widget for the Homeview. Here you can search for foods via search terms, filter in (sub)foodgroups and exclude allergies.
         </div>
       </div>
       <div class="">
