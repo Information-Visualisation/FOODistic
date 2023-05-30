@@ -19,8 +19,8 @@ export default {
       </a>
       <!-- <div class="container-fluid d-flex flex-row justify-content-center">
         <button type="button" class="btn btn-success" @click="$router.push({ name: 'home' })"> Home</button>
-        <button type="button" class="btn btn-success" @click="$router.push({ name: 'about' })"> About</button>
       </div> -->
+      <button type="button" class="btn btn-success" @click="$router.push({ name: 'about' })"> About</button>
     </div>
   </nav>
 
