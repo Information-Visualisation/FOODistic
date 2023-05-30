@@ -31,7 +31,7 @@ export default {
 
       foodName: this.$route.query.search !== undefined ? this.$route.query.search as string : "",
       allergies: this.$route.query.allergies !== undefined ? this.makeArray() : [],
-      includes: this.$route.query.includes !== undefined ? this.makeArray() : [],
+      includes: this.$route.query.includes !== undefined ? this.makeArray(false) : [],
       foodGroup: this.$route.query.foodgroup !== undefined ? this.$route.query.foodgroup as string : "All Foodgroups",
       subFoodGroup: this.$route.query.subfoodgroup !== undefined ? this.$route.query.subfoodgroup as string : "All Foodsubgroups",
       offset: this.$route.query.offset !== undefined ? parseInt(this.$route.query.offset as string) : 0,
@@ -207,13 +207,13 @@ export default {
                 Exclude Allergies
               </button>
               <ul class="dropdown-menu">
-                <li class="dropdown-item" v-for="filteritem in filteritems">
+                <li class="dropdown-item" v-for="exclude in filteritems">
                   <div class="form-check">
-                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
-                      :id="filteritem.allergy" name="alergies" v-model="allergies" @change="route"
-                      :checked="allergies.indexOf(filteritem.allergy) != -1" />
-                    <label class="form-check-label" :for="filteritem.allergy">
-                      {{ filteritem.allergy }}
+                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="exclude.allergy"
+                      :id="exclude.allergy+'exclude'" name="alergies" v-model="allergies" @change="route"
+                      :checked="allergies.indexOf(exclude.allergy) != -1" />
+                    <label class="form-check-label" :for="exclude.allergy+'exclude'">
+                      {{ exclude.allergy }}
                     </label>
                   </div>
                 </li>
@@ -226,13 +226,13 @@ export default {
                 Include Allergies
               </button>
               <ul class="dropdown-menu">
-                <li class="dropdown-item" v-for="filteritem in filteritems">
+                <li class="dropdown-item" v-for="include in filteritems">
                   <div class="form-check">
-                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="filteritem.allergy"
-                      :id="filteritem.allergy" name="alergies" v-model="includes" @change="route"
-                      :checked="includes.indexOf(filteritem.allergy) != -1" />
-                    <label class="form-check-label" :for="filteritem.allergy">
-                      {{ filteritem.allergy }}
+                    <input class="form-check-input dropdown-item-checkbox" type="checkbox" :value="include.allergy"
+                      :id="include.allergy+'include'" name="alergies" v-model="includes" @change="route"
+                      :checked="includes.indexOf(include.allergy) != -1" />
+                    <label class="form-check-label" :for="include.allergy+'include'">
+                      {{ include.allergy }}
                     </label>
                   </div>
                 </li>
@@ -249,7 +249,7 @@ export default {
       </div>
       <div class="">
         <FoodTable
-          :foodPickerData="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies, pageSize: pageSize }"
+          :foodPickerData="{ name: foodName, group: foodGroup, subgroup: subFoodGroup, offset: offset, allergies: allergies, includes: includes, pageSize: pageSize }"
           @returnTotalCount="receiveRowCount">
         </FoodTable>
         <!-- Pagination -->

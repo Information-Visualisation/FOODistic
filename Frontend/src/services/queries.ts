@@ -1,5 +1,6 @@
 import type { FoodRow } from './dbClasses';
-export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0, pageSize: number = 15): string {
+
+export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], includes: string[] = [], foodGroup: string = "", subFoodGroup: string = "", pageCount: number = 0, pageSize: number = 15): string {
 	if (foodGroup == "All Foodgroups") foodGroup = "";
 	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
 	return `SELECT * 
@@ -8,14 +9,15 @@ export function GET_FOOD_FOR_NAME(name: string = "", allergies: string[] = [], f
 		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
 		`+(foodGroup==""?"":(`AND food.food_group = '`+foodGroup+`'`))+`
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
-		`+orAllergies(allergies)+`
+		`+orNotAllergies(allergies)+`
+		`+orAllergies(includes)+`
 	)
 	ORDER BY food.naam
 	LIMIT `+pageSize+`
 	OFFSET `+pageSize*pageCount;
 }
 
-export function GET_FOODCOUNT_FOR_NAME(name: string = "", allergies: string[] = [], foodGroup: string = "", subFoodGroup: string = ""): string {
+export function GET_FOODCOUNT_FOR_NAME(name: string = "", allergies: string[] = [], includes: string[] = [], foodGroup: string = "", subFoodGroup: string = ""): string {
 	if (foodGroup == "All Foodgroups") foodGroup = "";
 	if (subFoodGroup == "All Foodsubgroups") subFoodGroup = "";
 	return `SELECT COUNT(*) as c
@@ -24,15 +26,29 @@ export function GET_FOODCOUNT_FOR_NAME(name: string = "", allergies: string[] = 
 		lower(food.naam) LIKE '%`+name.toLocaleLowerCase()+`%'
 		`+(foodGroup==""?"":(`AND food.food_group = '`+foodGroup+`'`))+`
 		`+(subFoodGroup==""?"":(`AND food.food_subgroup = '`+subFoodGroup)+`'`)+`
-		`+orAllergies(allergies)+`
+		`+orNotAllergies(allergies)+`
+		`+orAllergies(includes)+`
 	)`;
 }
 
-function orAllergies(allergies: string[]): string {
+function orNotAllergies(allergies: string[]): string {
 	if (allergies.length!=0) {
 		let queryString: string = `AND NOT (lower(food.naam) LIKE '%`+allergies[0].toLocaleLowerCase()+`%'`;
 		for (let i = 1; i < allergies.length; i++) {
 			queryString += `OR lower(food.naam) LIKE '%`+allergies[i].toLocaleLowerCase()+`%'`;
+		}
+		queryString += ')';
+		return queryString;
+	} else {
+		return '';
+	}
+}
+
+function orAllergies(includes: string[]): string {
+	if (includes.length!=0) {
+		let queryString: string = `AND (lower(food.naam) LIKE '%`+includes[0].toLocaleLowerCase()+`%'`;
+		for (let i = 1; i < includes.length; i++) {
+			queryString += `OR lower(food.naam) LIKE '%`+includes[i].toLocaleLowerCase()+`%'`;
 		}
 		queryString += ')';
 		return queryString;

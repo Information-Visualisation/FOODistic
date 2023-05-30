@@ -330,7 +330,7 @@ export default {
                 </div>
                 <FoodPicker v-if="foodPickerData !== undefined" :name="foodPickerData?.name" :group="foodPickerData?.group"
                     :subgroup="foodPickerData?.subgroup" :offset="foodPickerData?.offset"
-                    :allergies="foodPickerData?.allergies" :pageSize="foodPickerData?.pageSize"
+                    :allergies="foodPickerData?.allergies" :includes="foodPickerData?.includes" :pageSize="foodPickerData?.pageSize"
                     @returnFooditems="receiveFooditems">
                 </FoodPicker>
             </div>
